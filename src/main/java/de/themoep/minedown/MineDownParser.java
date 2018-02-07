@@ -86,28 +86,24 @@ public class MineDownParser {
                 if (code >= 'A' && code <= 'Z') {
                     code += 32;
                 }
-                ChatColor encoded = ChatColor.getByChar(code);
-    
-                if (encoded == null) {
-                    StringBuilder colorString = new StringBuilder();
-                    for (int j = i; j < message.length(); j++) {
-                        char c1 = message.charAt(j);
-                        if (c1 == c) {
-                            try {
-                                encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
-                            } catch (IllegalArgumentException e) {
-                                if (!lenient()) {
-                                    throw e;
-                                }
-                            }
-                            i = j + 1;
-                            break;
-                        }
-                        if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
-                            break;
-                        }
-                        colorString.append(c1);
+                ChatColor encoded = null;
+                StringBuilder colorString = new StringBuilder();
+                for (int j = i; j < message.length(); j++) {
+                    char c1 = message.charAt(j);
+                    if (c1 == c) {
+                        try {
+                            encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
+                            i = j;
+                        } catch (IllegalArgumentException ignored) {}
+                        break;
                     }
+                    if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
+                        break;
+                    }
+                    colorString.append(c1);
+                }
+                if (encoded == null) {
+                    encoded = ChatColor.getByChar(code);
                 }
                 
                 if (encoded != null) {
@@ -135,6 +131,8 @@ public class MineDownParser {
                         currentFormat = new HashSet<>();
                         currentFormat.add(encoded);
                     }
+                } else if (!lenient()) {
+                    throw new IllegalArgumentException("Found color char but not a valid color?");
                 }
                 continue;
                 
