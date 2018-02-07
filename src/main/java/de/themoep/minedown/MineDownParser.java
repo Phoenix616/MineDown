@@ -90,29 +90,54 @@ public class MineDownParser {
                     code += 32;
                 }
                 ChatColor encoded = ChatColor.getByChar(code);
-                if (encoded == ChatColor.RESET) {
-                    appendValue();
-                    if (prevColor != null) {
-                        builder.color(prevColor);
+    
+                if (encoded == null) {
+                    StringBuilder colorString = new StringBuilder();
+                    for (int j = i; j < message.length(); j++) {
+                        char c1 = message.charAt(j);
+                        if (c1 == c) {
+                            try {
+                                encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
+                            } catch (IllegalArgumentException e) {
+                                if (!lenient()) {
+                                    throw e;
+                                }
+                            }
+                            i = j + 1;
+                            break;
+                        }
+                        if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
+                            break;
+                        }
+                        colorString.append(c1);
                     }
-                    prevColor = null;
-                    Util.applyFormat(builder, prevFormat);
-                    prevFormat = new HashSet<>();
-                } else if (!isFormat(encoded)) {
-                    if (value.length() > 0) {
+                }
+                
+                if (encoded != null) {
+                    if (encoded == ChatColor.RESET) {
                         appendValue();
+                        if (prevColor != null) {
+                            builder.color(prevColor);
+                        }
+                        prevColor = null;
+                        Util.applyFormat(builder, prevFormat);
+                        prevFormat = new HashSet<>();
+                    } else if (!isFormat(encoded)) {
+                        if (value.length() > 0) {
+                            appendValue();
+                        }
+                        if (prevColor != null) {
+                            builder.color(prevColor);
+                        }
+                        prevColor = encoded;
+                    } else {
+                        if (value.length() > 0) {
+                            appendValue();
+                        }
+                        Util.applyFormat(builder, prevFormat);
+                        prevFormat = new HashSet<>();
+                        prevFormat.add(encoded);
                     }
-                    if (prevColor != null) {
-                        builder.color(prevColor);
-                    }
-                    prevColor = encoded;
-                } else {
-                    if (value.length() > 0) {
-                        appendValue();
-                    }
-                    Util.applyFormat(builder, prevFormat);
-                    prevFormat = new HashSet<>();
-                    prevFormat.add(encoded);
                 }
                 continue;
                 
