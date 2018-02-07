@@ -35,32 +35,29 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Getter
+@Setter
 public class MineDownParser {
     private ComponentBuilder builder = null;
 
     /**
      * Whether or not to translate legacy color codes (Default: true)
      */
-    @Getter
-    @Setter
     private boolean translateLegacyColors = true;
 
     /**
      * The character to use as a special color code. (Default: &)
      */
-    @Getter @Setter
     private char colorChar = '&';
 
     /**
      * Whether to accept malformed strings or not (Default: false)
      */
-    @Getter @Setter
     private boolean lenient = false;
 
     /**
      * Detect urls in strings and add events to them? (Default: true)
      */
-    @Getter @Setter
     private boolean urlDetection = true;
     
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
@@ -70,10 +67,10 @@ public class MineDownParser {
     public static final String HOVER_PREFIX = "hover=";
 
     private StringBuilder value = new StringBuilder();
-    private ChatColor prevColor = null;
-    private Set<ChatColor> prevFormat = new HashSet<>();
+    private ChatColor currentColor = null;
+    private Set<ChatColor> currentFormat = new HashSet<>();
 
-    public BaseComponent[] parse(String message) throws IllegalArgumentException {
+    public ComponentBuilder parse(String message) throws IllegalArgumentException {
         Matcher urlMatcher = urlDetection() ? URL_PATTERN.matcher(message) : null;
         for (int i = 0; i < message.length(); i++) {
             char c = message.charAt(i);
@@ -116,27 +113,27 @@ public class MineDownParser {
                 if (encoded != null) {
                     if (encoded == ChatColor.RESET) {
                         appendValue();
-                        if (prevColor != null) {
-                            builder.color(prevColor);
+                        if (currentColor != null) {
+                            builder.color(currentColor);
                         }
-                        prevColor = null;
-                        Util.applyFormat(builder, prevFormat);
-                        prevFormat = new HashSet<>();
+                        currentColor = null;
+                        Util.applyFormat(builder, currentFormat);
+                        currentFormat = new HashSet<>();
                     } else if (!isFormat(encoded)) {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        if (prevColor != null) {
-                            builder.color(prevColor);
+                        if (currentColor != null) {
+                            builder.color(currentColor);
                         }
-                        prevColor = encoded;
+                        currentColor = encoded;
                     } else {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        Util.applyFormat(builder, prevFormat);
-                        prevFormat = new HashSet<>();
-                        prevFormat.add(encoded);
+                        Util.applyFormat(builder, currentFormat);
+                        currentFormat = new HashSet<>();
+                        currentFormat.add(encoded);
                     }
                 }
                 continue;
@@ -168,10 +165,44 @@ public class MineDownParser {
                     appendValue();
                     builder.append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
                     i = endIndex + 1;
+                    continue;
+                }
+                
+            } else if ((c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)){
+                int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
+                // Found formatting
+                if (endIndex != -1) {
+                    Set<ChatColor> formats = new HashSet<>(currentFormat);
+                    switch (c) {
+                        case '~':
+                            formats.add(ChatColor.STRIKETHROUGH);
+                            break;
+                        case '_':
+                            formats.add(ChatColor.UNDERLINE);
+                            break;
+                        case '*':
+                            formats.add(ChatColor.BOLD);
+                            break;
+                        case '#':
+                            formats.add(ChatColor.ITALIC);
+                            break;
+                        case '?':
+                            formats.add(ChatColor.MAGIC);
+                            break;
+                    }
+                    ComponentBuilder subBuilder = copy().currentFormat(formats).parse(message.substring(i + 2, endIndex));
+                    appendValue();
+                    if (builder == null) {
+                        builder = new ComponentBuilder(subBuilder);
+                    } else {
+                        builder.append(subBuilder.create());
+                    }
+                    i = endIndex + 1;
+                    continue;
                 }
             }
-            
-            // URLs
+    
+            // URL
             if (urlDetection()) {
                 int urlEnd = message.indexOf(' ', i);
                 if (urlEnd == -1) {
@@ -193,7 +224,7 @@ public class MineDownParser {
         if (builder == null) {
             builder = new ComponentBuilder("");
         }
-        return builder.create();
+        return builder;
     }
 
     private void appendValue() {
@@ -207,8 +238,8 @@ public class MineDownParser {
             } else {
                 builder.append(value.toString(), retention);
             }
-            builder.color(prevColor);
-            Util.applyFormat(builder, prevFormat);
+            builder.color(currentColor);
+            Util.applyFormat(builder, currentFormat);
             if (URL_PATTERN.matcher(value).matches()) {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
                 builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open url").create()));
@@ -218,7 +249,7 @@ public class MineDownParser {
     }
 
     public BaseComponent[] parseEvent(String text, String definitions) {
-        BaseComponent[] components = new MineDownParser().copy(this).urlDetection(false).parse(text);
+        BaseComponent[] components = copy().urlDetection(false).parse(text).create();
         String[] defParts = definitions.split(" ");
         ChatColor color = null;
         Set<ChatColor> formats = new HashSet<>();
@@ -311,7 +342,7 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
-                hoverEvent = new HoverEvent(hoverAction, new MineDownParser().copy(this).urlDetection(false).parse(value.toString()));
+                hoverEvent = new HoverEvent(hoverAction, copy().urlDetection(false).parse(value.toString()).create());
             }
         }
         
@@ -357,12 +388,13 @@ public class MineDownParser {
         }
         return color;
     }
-
-    private MineDownParser copy(MineDownParser parser) {
-        lenient(parser.lenient());
-        translateLegacyColors(parser.translateLegacyColors());
-        colorChar(colorChar());
-        return this;
+    
+    private MineDownParser copy() {
+        MineDownParser copy = new MineDownParser();
+        copy.lenient(lenient());
+        copy.translateLegacyColors(translateLegacyColors());
+        copy.colorChar(colorChar());
+        return copy;
     }
 
     private static boolean isFormat(ChatColor color) {

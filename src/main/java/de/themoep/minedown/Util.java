@@ -40,7 +40,7 @@ public class Util {
             throw new IllegalArgumentException(message);
         }
     }
-
+    
     public static void applyFormat(BaseComponent component, Collection<ChatColor> formats) {
         for(ChatColor format : formats) {
             switch (format) {
@@ -101,5 +101,38 @@ public class Util {
                     builder.color(format);
             }
         }
+    }
+    
+    public static boolean isDouble(String string, int index) {
+        return index + 1 < string.length() && string.charAt(index) == string.charAt(index + 1);
+    }
+    
+    public static int countRepeating(String string, char c, int index) {
+        int i = 0;
+        while (index + i < string.length() && string.charAt(index + i) == c) {
+            i++;
+        }
+        return i;
+    }
+    
+    public static String getRepeatingChars(String string, int index) {
+        char c = string.charAt(index);
+        StringBuilder sb = new StringBuilder(String.valueOf(c));
+        for (int j = index; j < string.length(); j++) {
+            char cp = string.charAt(j);
+            if (cp != c) {
+                break;
+            }
+            sb.append(cp);
+        }
+        return sb.toString();
+    }
+    
+    public static int countSingle(String string, String search, int startIndex, int endIndex) {
+        int index = string.indexOf(search, startIndex);
+        if (index >= endIndex) {
+            return 0;
+        }
+        return 0;
     }
 }
