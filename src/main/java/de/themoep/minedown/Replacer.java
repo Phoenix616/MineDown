@@ -37,7 +37,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The replacer, 'duh
+ * This class offers the ability to replace placeholders with values in strings and components.
+ * It also lets you define which placeholders indicators (prefix and suffix) should be used.
+ * By default these are the % character.
  */
 @Getter
 @Setter
@@ -50,32 +52,39 @@ public class Replacer {
     /**
      * The placeholder indicator's prefix character
      */
-    private char placeholderPrefix;
+    private char placeholderPrefix = '%';
     
     /**
      * The placeholder indicator's suffix character
      */
-    private char placeholderSuffix;
-
+    private char placeholderSuffix = '%';
+    
     /**
-     * The replacer, 'duh
+     * Replace certain placeholders with values in string.
+     * This uses the % character as placeholder indicators (suffix and prefix)
+     * @param message       The string to replace in
+     * @param replacements  The replacements, nth element is the placeholder, n+1th the value
+     * @return              The string with all the placeholders replaced
      */
-    public Replacer() {
-        this.placeholderPrefix = '%';
-        this.placeholderSuffix = '%';
-    }
-
     public static String replace(String message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
-
+    
+    /**
+     * Replace certain placeholders with values in a component array.
+     * This uses the % character as placeholder indicators (suffix and prefix)
+     * @param message       The BaseComponent array to replace in
+     * @param replacements  The replacements, nth element is the placeholder, n+1th the value
+     * @return              A copy of the BaseComponent array with all the placeholders replaced
+     */
     public static BaseComponent[] replace(BaseComponent[] message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
 
     /**
      * Add an array with placeholders and values that should get replaced in the message
-     * @param replacements The replacements, nth element is the placeholder, n+1th the value
+     * @param replacements  The replacements, nth element is the placeholder, n+1th the value
+     * @return              The Replacer instance
      */
     public Replacer replace(String... replacements) {
         Util.validate(replacements.length % 2 == 0, "The replacement length has to be even, " +
@@ -89,7 +98,8 @@ public class Replacer {
 
     /**
      * Add a map with placeholders and values that should get replaced in the message
-     * @param replacements The replacements mapped placeholder to value
+     * @param replacements  The replacements mapped placeholder to value
+     * @return              The Replacer instance
      */
     public Replacer replace(Map<String, String> replacements) {
         replacements().putAll(replacements);
@@ -98,19 +108,29 @@ public class Replacer {
 
     /**
      * Set the placeholder indicator for both prefix and suffix
-     * @param placeholderIndicator The character to use as a placeholder indicator
-     * @return The Replacer instance
+     * @param placeholderIndicator  The character to use as a placeholder indicator
+     * @return                      The Replacer instance
      */
     public Replacer placeholderIndicator(char placeholderIndicator) {
         placeholderPrefix(placeholderIndicator);
         placeholderSuffix(placeholderIndicator);
         return this;
     }
-
+    
+    /**
+     * Replace the placeholders in a component array
+     * @param components    The BaseComponent array to replace in
+     * @return              A copy of the array with the placeholders replaced
+     */
     public BaseComponent[] replaceIn(BaseComponent[] components) {
         return replaceIn(Arrays.asList(components));
     }
-
+    
+    /**
+     * Replace the placeholders in a component list
+     * @param components    The BaseComponent list to replace in
+     * @return              A copy of the array with the placeholders replaced
+     */
     public BaseComponent[] replaceIn(List<BaseComponent> components) {
         BaseComponent[] returnArray = new BaseComponent[components.size()];
         for (int i = 0; i < components.size(); i++) {
@@ -143,11 +163,16 @@ public class Replacer {
         }
         return returnArray;
     }
-
-    public String replaceIn(String message) {
+    
+    /**
+     * Replace the placeholders in a string
+     * @param string    The String list to replace in
+     * @return          The string with the placeholders replaced
+     */
+    public String replaceIn(String string) {
         for (Map.Entry<String, String> replacement : replacements.entrySet()) {
-            message = message.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
+            string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
         }
-        return message;
+        return string;
     }
 }

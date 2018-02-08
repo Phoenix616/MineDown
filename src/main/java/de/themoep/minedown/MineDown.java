@@ -24,16 +24,53 @@ package de.themoep.minedown;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 import java.util.Map;
 
 /**
- * MineDown - A MarkDown inspired markup for Minecraft chat components
+ * <h1>MineDown</h1>
+ * A MarkDown inspired markup for Minecraft chat components
  * <p>
- * TODO:
- * PeL: Write stuff here
- * CeL: Seriously, this should contain information about how the syntax works and stuff
+ * This lets you convert string messages into chat components by using a custom mark up syntax
+ * which is loosely based on MarkDown while still supporting legacy formatting codes.
+ *
+ * <h2>Inline Formatting</h2>
+ * <table>
+ * <tr> Color legacy  <td></td><td> &6Text     </td><td> -> {@link ChatColor} codes </td></tr>
+ * <tr> Color         <td></td><td> &gold&Text </td><td> -> {@link ChatColor} codes </td</tr>
+ * <tr> Bold          <td></td><td> **Text**   </td></tr>
+ * <tr> Italic        <td></td><td> ##Text##   </td></tr>
+ * <tr> Underlined    <td></td><td> __Text__   </td></tr>
+ * <tr> Strikethrough <td></td><td> ~~Text~~   </td></tr>
+ * <tr> Obfuscated    <td></td><td> ??Text??   </td></tr>
+ * </table>
+ *
+ * <h2>Events</h2>
+ * You can define click and hover events with the commonly used MarkDown link syntax.
+ *
+ * <h3>Simple Syntax</h3>
+ * <table>
+ * <tr> General syntax                 <td></td><td> [Text](text-color text-formatting... link hover text) </td></tr>
+ * <tr> Simple Link                    <td></td><td> [Text](https://example.com)                           </td></tr>
+ * <tr> Link + Hover                   <td></td><td> [Text](https://example.com Hover Text)                </td></tr>
+ * <tr> Text formatting + Link + Hover <td></td><td> [Text](blue underline https://example.com Hover Text) </td></tr>
+ * </table>
+ *
+ * <h3>Advanced Syntax</h3>
+ * <table>
+ * <tr> General syntax <td></td><td> [Text](action=value)                 </td><td> -> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
+ * <tr> Link           <td></td><td> [Text](open_url=https://example.com) </td></tr>
+ * <tr> Color          <td></td><td> [Text](color=red)                    </td></tr>
+ * <tr> Formatting     <td></td><td> [Text](format=underline,bold)        </td></tr>
+ * <tr> Hover          <td></td><td> [Text](hover=Hover Text)             </td></tr>
+ * <tr> Command        <td></td><td> [Text](run_command=/command string)  </td></tr>
+ * </table>
+ * All advanced settings can be chained/included in a event definition.
+ * You can't however add multiple different colors or click and hover actions!
  */
 @Getter(AccessLevel.PROTECTED)
 public class MineDown {
@@ -72,7 +109,7 @@ public class MineDown {
     
     /**
      * Parse and convert the message to the component
-     * @return
+     * @return The parsed component message
      */
     public BaseComponent[] toComponent() {
         if (baseComponents() == null) {
@@ -90,7 +127,8 @@ public class MineDown {
     
     /**
      * Add an array with placeholders and values that should get replaced in the message
-     * @param replacements The replacements, nth element is the placeholder, n+1th the value
+     * @param replacements  The replacements, nth element is the placeholder, n+1th the value
+     * @return              The MineDown instance
      */
     public MineDown replace(String... replacements) {
         reset();
@@ -100,7 +138,8 @@ public class MineDown {
     
     /**
      * Add a map with placeholders and values that should get replaced in the message
-     * @param replacements The replacements mapped placeholder to value
+     * @param replacements  The replacements mapped placeholder to value
+     * @return              The MineDown instance
      */
     public MineDown replace(Map<String, String> replacements) {
         reset();
@@ -110,8 +149,8 @@ public class MineDown {
     
     /**
      * Set the placeholder indicator for both prefix and suffix
-     * @param placeholderIndicator The character to use as a placeholder indicator
-     * @return The MineDown instance
+     * @param placeholderIndicator  The character to use as a placeholder indicator
+     * @return                      The MineDown instance
      */
     public MineDown placeholderIndicator(char placeholderIndicator) {
         placeholderPrefix(placeholderIndicator);
@@ -121,8 +160,8 @@ public class MineDown {
     
     /**
      * Set the placeholder indicator's prefix character
-     * @param placeholderPrefix The character to use as the placeholder indicator's prefix
-     * @return The MineDown instance
+     * @param placeholderPrefix     The character to use as the placeholder indicator's prefix
+     * @return                      The MineDown instance
      */
     public MineDown placeholderPrefix(char placeholderPrefix) {
         reset();
@@ -140,8 +179,8 @@ public class MineDown {
     
     /**
      * Set the placeholder indicator's suffix character
-     * @param placeholderSuffix The character to use as the placeholder indicator's suffix
-     * @return The MineDown instance
+     * @param placeholderSuffix     The character to use as the placeholder indicator's suffix
+     * @return                      The MineDown instance
      */
     public MineDown placeholderSuffix(char placeholderSuffix) {
         reset();
@@ -160,7 +199,7 @@ public class MineDown {
     /**
      * Enable or disable the translation of legacy color codes
      * @param translateLegacyColors Whether or not to translate legacy color codes (Default: true)
-     * @return The MineDown instance
+     * @return                      The MineDown instance
      */
     public MineDown translateLegacyColors(boolean translateLegacyColors) {
         reset();
@@ -171,7 +210,7 @@ public class MineDown {
     /**
      * Set a special character to replace color codes by if translating legacy colors is enabled.
      * @param colorChar The character to use as a special color code. (Default: &)
-     * @return The MineDown instance
+    * @return           The MineDown instance
      */
     public MineDown colorChar(char colorChar) {
         reset();

@@ -70,7 +70,13 @@ public class MineDownParser {
     private Set<ChatColor> format = new HashSet<>();
     private ClickEvent clickEvent = null;
     private HoverEvent hoverEvent = null;
-
+    
+    /**
+     * Create a ComponentBuilder by parsing a {@link MineDown} message
+     * @param message   The message to parse
+     * @return          The parsed ComponentBuilder
+     * @throws IllegalArgumentException Thrown when a parsing error occurs and {@link #lenient()} is set to false
+     */
     public ComponentBuilder parse(String message) throws IllegalArgumentException {
         Matcher urlMatcher = urlDetection() ? URL_PATTERN.matcher(message) : null;
         for (int i = 0; i < message.length(); i++) {
@@ -116,7 +122,7 @@ public class MineDownParser {
                         color = null;
                         Util.applyFormat(builder, format);
                         format = new HashSet<>();
-                    } else if (!isFormat(encoded)) {
+                    } else if (!Util.isFormat(encoded)) {
                         if (value.length() > 0) {
                             appendValue();
                         }
@@ -255,7 +261,13 @@ public class MineDownParser {
             value = new StringBuilder();
         }
     }
-
+    
+    /**
+     * Parse a {@link MineDown} event string
+     * @param text          The display text
+     * @param definitions   The event definition string
+     * @return              The parsed ComponentBuilder for this string
+     */
     public ComponentBuilder parseEvent(String text, String definitions) {
         String[] defParts = definitions.split(" ");
         ChatColor color = null;
@@ -269,7 +281,7 @@ public class MineDownParser {
             String definition = defParts[i];
             ChatColor parsed = parseColor(definition, "", true);
             if (parsed != null) {
-                if (isFormat(parsed)) {
+                if (Util.isFormat(parsed)) {
                     formats.add(parsed);
                 } else {
                     color = parsed;
@@ -280,7 +292,7 @@ public class MineDownParser {
             
             if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
                 color = parseColor(definition, COLOR_PREFIX, lenient());
-                if (!lenient() && isFormat(color)) {
+                if (!lenient() && Util.isFormat(color)) {
                     throw new IllegalArgumentException(color + " is a format and not a color!");
                 }
                 formatEnd = i;
@@ -290,7 +302,7 @@ public class MineDownParser {
             if (definition.toLowerCase().startsWith(FORMAT_PREFIX)) {
                 for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
                     ChatColor format = parseColor(formatStr, "", lenient());
-                    if (!lenient() && !isFormat(format)) {
+                    if (!lenient() && !Util.isFormat(format)) {
                         throw new IllegalArgumentException(formats + " is a color and not a format!");
                     }
                     formats.add(format);
@@ -349,7 +361,7 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
-                hoverEvent = new HoverEvent(hoverAction, copy().urlDetection(false).parse(value.toString()).create());
+                hoverEvent = new HoverEvent(hoverAction, copy().clickEvent(null).hoverEvent(null).urlDetection(false).parse(value.toString()).create());
             }
         }
         
@@ -368,7 +380,14 @@ public class MineDownParser {
                 .hoverEvent(hoverEvent)
                 .parse(text);
     }
-
+    
+    /**
+     * Parse a color definition
+     * @param colorString   The string to parse
+     * @param prefix        The color prefix e.g. &
+     * @param lenient       Whether or not to accept malformed strings
+     * @return              The parsed color or <tt>null</tt> if lenient is true and no color was found
+     */
     public static ChatColor parseColor(String colorString, String prefix, boolean lenient) {
         ChatColor color = null;
         if (prefix.length() + 1 == colorString.length()) {
@@ -388,15 +407,18 @@ public class MineDownParser {
         return color;
     }
     
-    private MineDownParser copy() {
+    /**
+     * Copy all the parser's setting to a new instance
+     * @return The new parser instance with all settings copied
+     */
+    public MineDownParser copy() {
         MineDownParser copy = new MineDownParser();
-        copy.lenient(lenient());
-        copy.translateLegacyColors(translateLegacyColors());
-        copy.colorChar(colorChar());
+        copy.lenient(lenient);
+        copy.translateLegacyColors(translateLegacyColors);
+        copy.colorChar(colorChar);
+        copy.clickEvent(clickEvent);
+        copy.hoverEvent(hoverEvent);
         return copy;
     }
-
-    private static boolean isFormat(ChatColor color) {
-        return color.ordinal() >= 16;
-    }
+    
 }

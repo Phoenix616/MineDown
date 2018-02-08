@@ -41,6 +41,11 @@ public class Util {
         }
     }
     
+    /**
+     * Apply a collection of colors/formats to a component
+     * @param component The BaseComponent
+     * @param formats   The collection of ChatColor formats to apply
+     */
     public static void applyFormat(BaseComponent component, Collection<ChatColor> formats) {
         for(ChatColor format : formats) {
             switch (format) {
@@ -71,7 +76,12 @@ public class Util {
             }
         }
     }
-
+    
+    /**
+     * Apply a collection of colors/formats to a component builder
+     * @param builder   The ComponentBuilder
+     * @param formats   The collection of ChatColor formats to apply
+     */
     public static void applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
         for(ChatColor format : formats) {
             switch (format) {
@@ -103,36 +113,30 @@ public class Util {
         }
     }
     
+    /**
+     * Check whether or not a character at a certain index of a string repeats itself
+     * @param string    The string to check
+     * @param index     The index at which to check the character
+     * @return          Whether or not the character at that index repeated itself
+     */
     public static boolean isDouble(String string, int index) {
         return index + 1 < string.length() && string.charAt(index) == string.charAt(index + 1);
     }
     
-    public static int countRepeating(String string, char c, int index) {
-        int i = 0;
-        while (index + i < string.length() && string.charAt(index + i) == c) {
-            i++;
+    /**
+     * Check whether a certain ChatColor is formatting or not
+     * @param format    The ChatColor to check
+     * @return          <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
+     */
+    static boolean isFormat(ChatColor format) {
+        switch (format) {
+            case BOLD:
+            case ITALIC:
+            case UNDERLINE:
+            case STRIKETHROUGH:
+            case MAGIC:
+                return true;
         }
-        return i;
-    }
-    
-    public static String getRepeatingChars(String string, int index) {
-        char c = string.charAt(index);
-        StringBuilder sb = new StringBuilder(String.valueOf(c));
-        for (int j = index; j < string.length(); j++) {
-            char cp = string.charAt(j);
-            if (cp != c) {
-                break;
-            }
-            sb.append(cp);
-        }
-        return sb.toString();
-    }
-    
-    public static int countSingle(String string, String search, int startIndex, int endIndex) {
-        int index = string.indexOf(search, startIndex);
-        if (index >= endIndex) {
-            return 0;
-        }
-        return 0;
+        return false;
     }
 }
