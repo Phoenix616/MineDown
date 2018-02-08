@@ -29,7 +29,10 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -278,7 +281,14 @@ public class MineDownParser {
      * @return              The parsed ComponentBuilder for this string
      */
     public ComponentBuilder parseEvent(String text, String definitions) {
-        String[] defParts = definitions.split(" ");
+        List<String> defParts = new ArrayList<>();
+        if (definitions.startsWith(" ")) {
+            defParts.add("");
+        }
+        Collections.addAll(defParts, definitions.split(" "));
+        if (definitions.endsWith(" ")) {
+            defParts.add("");
+        }
         ChatColor color = null;
         Set<ChatColor> formats = new HashSet<>();
         ClickEvent clickEvent = null;
@@ -286,8 +296,8 @@ public class MineDownParser {
         
         int formatEnd = -1;
         
-        for (int i = 0; i < defParts.length; i++) {
-            String definition = defParts[i];
+        for (int i = 0; i < defParts.size(); i++) {
+            String definition = defParts.get(i);
             ChatColor parsed = parseColor(definition, "", true);
             if (parsed != null) {
                 if (Util.isFormat(parsed)) {
@@ -351,17 +361,17 @@ public class MineDownParser {
                 value.append(definition);
             }
             
-            for (i = i + 1; i < defParts.length; i++) {
-                if (!hasBracket && defParts[i].indexOf('=') != -1) {
+            for (i = i + 1; i < defParts.size(); i++) {
+                if (!hasBracket && defParts.get(i).indexOf('=') != -1) {
                     i--;
                     break;
                 }
                 value.append(" ");
-                if (hasBracket && defParts[i].endsWith("}")) {
-                    value.append(defParts[i].substring(0, defParts[i].length() - 1));
+                if (hasBracket && defParts.get(i).endsWith("}")) {
+                    value.append(defParts.get(i).substring(0, defParts.get(i).length() - 1));
                     break;
                 }
-                value.append(defParts[i]);
+                value.append(defParts.get(i));
             }
 
             if (clickAction != null) {
