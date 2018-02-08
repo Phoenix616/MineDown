@@ -25,7 +25,6 @@ package de.themoep.minedown;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -67,8 +66,10 @@ public class MineDownParser {
     public static final String HOVER_PREFIX = "hover=";
 
     private StringBuilder value = new StringBuilder();
-    private ChatColor currentColor = null;
-    private Set<ChatColor> currentFormat = new HashSet<>();
+    private ChatColor color = null;
+    private Set<ChatColor> format = new HashSet<>();
+    private ClickEvent clickEvent = null;
+    private HoverEvent hoverEvent = null;
 
     public ComponentBuilder parse(String message) throws IllegalArgumentException {
         Matcher urlMatcher = urlDetection() ? URL_PATTERN.matcher(message) : null;
@@ -109,27 +110,27 @@ public class MineDownParser {
                 if (encoded != null) {
                     if (encoded == ChatColor.RESET) {
                         appendValue();
-                        if (currentColor != null) {
-                            builder.color(currentColor);
+                        if (color != null) {
+                            builder.color(color);
                         }
-                        currentColor = null;
-                        Util.applyFormat(builder, currentFormat);
-                        currentFormat = new HashSet<>();
+                        color = null;
+                        Util.applyFormat(builder, format);
+                        format = new HashSet<>();
                     } else if (!isFormat(encoded)) {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        if (currentColor != null) {
-                            builder.color(currentColor);
+                        if (color != null) {
+                            builder.color(color);
                         }
-                        currentColor = encoded;
+                        color = encoded;
                     } else {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        Util.applyFormat(builder, currentFormat);
-                        currentFormat = new HashSet<>();
-                        currentFormat.add(encoded);
+                        Util.applyFormat(builder, format);
+                        format = new HashSet<>();
+                        format.add(encoded);
                     }
                 } else if (!lenient()) {
                     throw new IllegalArgumentException("Found color char but not a valid color?");
@@ -161,7 +162,7 @@ public class MineDownParser {
                 }
                 if (index > i && endIndex > index) {
                     appendValue();
-                    builder.append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
+                    append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
                     i = endIndex + 1;
                     continue;
                 }
@@ -170,7 +171,7 @@ public class MineDownParser {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
                 // Found formatting
                 if (endIndex != -1) {
-                    Set<ChatColor> formats = new HashSet<>(currentFormat);
+                    Set<ChatColor> formats = new HashSet<>(format);
                     switch (c) {
                         case '~':
                             formats.add(ChatColor.STRIKETHROUGH);
@@ -188,13 +189,8 @@ public class MineDownParser {
                             formats.add(ChatColor.MAGIC);
                             break;
                     }
-                    ComponentBuilder subBuilder = copy().currentFormat(formats).parse(message.substring(i + 2, endIndex));
                     appendValue();
-                    if (builder == null) {
-                        builder = new ComponentBuilder(subBuilder);
-                    } else {
-                        builder.append(subBuilder.create());
-                    }
+                    append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
                     i = endIndex + 1;
                     continue;
                 }
@@ -224,7 +220,15 @@ public class MineDownParser {
         }
         return builder;
     }
-
+    
+    private void append(ComponentBuilder builder) {
+        if (this.builder == null) {
+            this.builder = new ComponentBuilder(builder);
+        } else {
+            this.builder.append(builder.create());
+        }
+    }
+    
     private void appendValue() {
         appendValue(ComponentBuilder.FormatRetention.NONE);
     }
@@ -236,18 +240,23 @@ public class MineDownParser {
             } else {
                 builder.append(value.toString(), retention);
             }
-            builder.color(currentColor);
-            Util.applyFormat(builder, currentFormat);
+            builder.color(color);
+            Util.applyFormat(builder, format);
             if (URL_PATTERN.matcher(value).matches()) {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
                 builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open url").create()));
+            }
+            if (clickEvent != null) {
+                builder.event(clickEvent);
+            }
+            if (hoverEvent != null) {
+                builder.event(hoverEvent);
             }
             value = new StringBuilder();
         }
     }
 
-    public BaseComponent[] parseEvent(String text, String definitions) {
-        BaseComponent[] components = copy().urlDetection(false).parse(text).create();
+    public ComponentBuilder parseEvent(String text, String definitions) {
         String[] defParts = definitions.split(" ");
         ChatColor color = null;
         Set<ChatColor> formats = new HashSet<>();
@@ -347,25 +356,17 @@ public class MineDownParser {
         if (clickEvent != null && hoverEvent == null) {
             hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder(clickEvent.getAction().toString().toLowerCase().replace('_', ' ')).color(ChatColor.BLUE)
-                            .append(clickEvent.getValue()).color(ChatColor.WHITE)
+                            .append(" " + clickEvent.getValue()).color(ChatColor.WHITE)
                             .create());
         }
         
-        for (BaseComponent component : components) {
-            if (color != null) {
-                component.setColor(color);
-            }
-            if (formats != null) {
-                Util.applyFormat(component, formats);
-            }
-            if (clickEvent != null) {
-                component.setClickEvent(clickEvent);
-            }
-            if (hoverEvent != null) {
-                component.setHoverEvent(hoverEvent);
-            }
-        }
-        return components;
+        return copy()
+                .urlDetection(false)
+                .color(color)
+                .format(formats)
+                .clickEvent(clickEvent)
+                .hoverEvent(hoverEvent)
+                .parse(text);
     }
 
     public static ChatColor parseColor(String colorString, String prefix, boolean lenient) {
