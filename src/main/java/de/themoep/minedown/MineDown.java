@@ -56,6 +56,7 @@ import java.util.Map;
  * <caption><strong> Simple Syntax </strong></caption>
  * <tr><td> General syntax                 </td><td><tt> [Text](text-color text-formatting... link hover text) </tt></td></tr>
  * <tr><td> Simple Link                    </td><td><tt> [Text](https://example.com)                           </tt></td></tr>
+ * <tr><td> Simple Command                 </td><td><tt> [Text](/command to run)                               </tt></td></tr>
  * <tr><td> Link + Hover                   </td><td><tt> [Text](https://example.com Hover Text)                </tt></td></tr>
  * <tr><td> Text formatting + Link + Hover </td><td><tt> [Text](blue underline https://example.com Hover Text) </tt></td></tr>
  * </table>

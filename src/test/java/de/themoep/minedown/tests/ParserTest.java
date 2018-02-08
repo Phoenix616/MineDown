@@ -15,6 +15,7 @@ public class ParserTest {
     public void testParsing() {
         Assertions.assertAll(
                 () -> parse("##&eTest## [&blue&b__this__](https://example.com **Hover ??text??**) ~~string~~!"),
+                () -> parse("##&eTest## [__this__](blue /example command hover=**Hover ??text??**) ~~string~~!"),
                 () -> parse("&bTest [this](color=green format=bold,italic https://example.com Hover text) string!"),
                 () -> parse("&bTest [this](color=green format=bold,italic suggest_command=/example command hover=Hover text) string!"),
                 () -> parse("&bTest [this](6 bold italic https://example.com) &as&bt&cr&di&en&5g&7!"),

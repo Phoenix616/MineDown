@@ -316,7 +316,7 @@ public class MineDownParser {
                 continue;
             }
 
-            ClickEvent.Action clickAction = null;
+            ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.RUN_COMMAND : null;
             HoverEvent.Action hoverAction = null;
             if (definition.toLowerCase().startsWith(HOVER_PREFIX)) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
@@ -329,7 +329,7 @@ public class MineDownParser {
                 clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase());
             } catch (IllegalArgumentException ignored) {}
             
-            boolean hasBracket = parts.length > 1 && parts[1].startsWith("{") && clickAction != null || hoverAction != null;
+            boolean hasBracket = parts.length > 1 && parts[1].startsWith("{") && (clickAction != null || hoverAction != null);
             
             StringBuilder value = new StringBuilder();
             if (parts.length > 1 && clickAction != null || hoverAction != null) {
