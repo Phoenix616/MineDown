@@ -45,7 +45,7 @@ public class MineDownParser {
     private boolean translateLegacyColors = true;
 
     /**
-     * The character to use as a special color code. (Default: &)
+     * The character to use as a special color code. (Default: ampersand &amp;)
      */
     private char colorChar = '&';
 
@@ -75,7 +75,7 @@ public class MineDownParser {
      * Create a ComponentBuilder by parsing a {@link MineDown} message
      * @param message   The message to parse
      * @return          The parsed ComponentBuilder
-     * @throws IllegalArgumentException Thrown when a parsing error occurs and {@link #lenient()} is set to false
+     * @throws IllegalArgumentException Thrown when a parsing error occurs and lenient is set to false
      */
     public ComponentBuilder parse(String message) throws IllegalArgumentException {
         Matcher urlMatcher = urlDetection() ? URL_PATTERN.matcher(message) : null;
@@ -384,7 +384,7 @@ public class MineDownParser {
     /**
      * Parse a color definition
      * @param colorString   The string to parse
-     * @param prefix        The color prefix e.g. &
+     * @param prefix        The color prefix e.g. ampersand (&amp;)
      * @param lenient       Whether or not to accept malformed strings
      * @return              The parsed color or <tt>null</tt> if lenient is true and no color was found
      */

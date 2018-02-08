@@ -38,37 +38,38 @@ import java.util.Map;
  * This lets you convert string messages into chat components by using a custom mark up syntax
  * which is loosely based on MarkDown while still supporting legacy formatting codes.
  *
- * <h2>Inline Formatting</h2>
  * <table>
- * <tr> Color legacy  <td></td><td> &6Text     </td><td> -> {@link ChatColor} codes </td></tr>
- * <tr> Color         <td></td><td> &gold&Text </td><td> -> {@link ChatColor} codes </td</tr>
- * <tr> Bold          <td></td><td> **Text**   </td></tr>
- * <tr> Italic        <td></td><td> ##Text##   </td></tr>
- * <tr> Underlined    <td></td><td> __Text__   </td></tr>
- * <tr> Strikethrough <td></td><td> ~~Text~~   </td></tr>
- * <tr> Obfuscated    <td></td><td> ??Text??   </td></tr>
+ * <caption><strong> Inline Formatting </strong></caption>
+ * <tr><td> Color legacy  </td><td><tt> &amp;6Text         </tt></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text </tt></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> Bold          </td><td><tt> **Text**           </tt></td></tr>
+ * <tr><td> Italic        </td><td><tt> ##Text##           </tt></td></tr>
+ * <tr><td> Underlined    </td><td><tt> __Text__           </tt></td></tr>
+ * <tr><td> Strikethrough </td><td><tt> ~~Text~~           </tt></td></tr>
+ * <tr><td> Obfuscated    </td><td><tt> ??Text??           </tt></td></tr>
  * </table>
  *
  * <h2>Events</h2>
  * You can define click and hover events with the commonly used MarkDown link syntax.
- *
- * <h3>Simple Syntax</h3>
+ * <p>
  * <table>
- * <tr> General syntax                 <td></td><td> [Text](text-color text-formatting... link hover text) </td></tr>
- * <tr> Simple Link                    <td></td><td> [Text](https://example.com)                           </td></tr>
- * <tr> Link + Hover                   <td></td><td> [Text](https://example.com Hover Text)                </td></tr>
- * <tr> Text formatting + Link + Hover <td></td><td> [Text](blue underline https://example.com Hover Text) </td></tr>
+ * <caption><strong> Simple Syntax </strong></caption>
+ * <tr><td> General syntax                 </td><td><tt> [Text](text-color text-formatting... link hover text) </tt></td></tr>
+ * <tr><td> Simple Link                    </td><td><tt> [Text](https://example.com)                           </tt></td></tr>
+ * <tr><td> Link + Hover                   </td><td><tt> [Text](https://example.com Hover Text)                </tt></td></tr>
+ * <tr><td> Text formatting + Link + Hover </td><td><tt> [Text](blue underline https://example.com Hover Text) </tt></td></tr>
  * </table>
- *
- * <h3>Advanced Syntax</h3>
+ * <p>
  * <table>
- * <tr> General syntax <td></td><td> [Text](action=value)                 </td><td> -> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
- * <tr> Link           <td></td><td> [Text](open_url=https://example.com) </td></tr>
- * <tr> Color          <td></td><td> [Text](color=red)                    </td></tr>
- * <tr> Formatting     <td></td><td> [Text](format=underline,bold)        </td></tr>
- * <tr> Hover          <td></td><td> [Text](hover=Hover Text)             </td></tr>
- * <tr> Command        <td></td><td> [Text](run_command=/command string)  </td></tr>
+ * <caption><strong> Advanced Syntax </strong></caption>
+ * <tr><td> General syntax </td><td><tt> [Text](action=value)                 </tt></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
+ * <tr><td> Link           </td><td><tt> [Text](open_url=https://example.com) </tt></td></tr>
+ * <tr><td> Color          </td><td><tt> [Text](color=red)                    </tt></td></tr>
+ * <tr><td> Formatting     </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
+ * <tr><td> Hover          </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
+ * <tr><td> Command        </td><td><tt> [Text](run_command=/command string)  </tt></td></tr>
  * </table>
+ * <p>
  * All advanced settings can be chained/included in a event definition.
  * You can't however add multiple different colors or click and hover actions!
  */
@@ -209,7 +210,7 @@ public class MineDown {
     
     /**
      * Set a special character to replace color codes by if translating legacy colors is enabled.
-     * @param colorChar The character to use as a special color code. (Default: &)
+     * @param colorChar The character to use as a special color code. (Default: ampersand &amp;)
     * @return           The MineDown instance
      */
     public MineDown colorChar(char colorChar) {
