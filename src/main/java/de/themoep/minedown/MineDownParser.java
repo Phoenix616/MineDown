@@ -175,7 +175,7 @@ public class MineDownParser {
                 if (index > i && endIndex > index) {
                     appendValue();
                     append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
-                    i = endIndex + 1;
+                    i = endIndex;
                     continue;
                 }
                 
