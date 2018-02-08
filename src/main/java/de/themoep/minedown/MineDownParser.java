@@ -79,15 +79,28 @@ public class MineDownParser {
      */
     public ComponentBuilder parse(String message) throws IllegalArgumentException {
         Matcher urlMatcher = urlDetection() ? URL_PATTERN.matcher(message) : null;
+        boolean escaped = false;
         for (int i = 0; i < message.length(); i++) {
             char c = message.charAt(i);
-            
+    
+            boolean isEscape = c == '\\' && i + 1 < message.length();
+            boolean isColorCode = translateLegacyColors && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar);
+            boolean isEvent = c == '[';
+            boolean isFormatting = (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i);
+    
+            if (escaped) {
+                escaped = false;
+                if (!isEscape && !isColorCode && !isEvent && !isFormatting) {
+                    value.append('\\');
+                }
+                
             // Escaping
-            if (c == '\\' && i + 1 < message.length()) {
-                i++;
+            } else if (isEscape) {
+                escaped = true;
+                continue;
                 
             // Legacy color codes
-            } else if (translateLegacyColors() && i + 1 < message.length() && c == ChatColor.COLOR_CHAR || c == colorChar()) {
+            } else if (isColorCode) {
                 i++;
                 char code = message.charAt(i);
                 if (code >= 'A' && code <= 'Z') {
@@ -116,9 +129,6 @@ public class MineDownParser {
                 if (encoded != null) {
                     if (encoded == ChatColor.RESET) {
                         appendValue();
-                        if (color != null) {
-                            builder.color(color);
-                        }
                         color = null;
                         Util.applyFormat(builder, format);
                         format = new HashSet<>();
@@ -126,25 +136,21 @@ public class MineDownParser {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        if (color != null) {
-                            builder.color(color);
-                        }
                         color = encoded;
                     } else {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        Util.applyFormat(builder, format);
                         format = new HashSet<>();
                         format.add(encoded);
                     }
                 } else if (!lenient()) {
-                    throw new IllegalArgumentException("Found color char but not a valid color?");
+                    throw new IllegalArgumentException("Found color char but not a valid color? (" + code + "/" + colorString.toString() + ")");
                 }
                 continue;
                 
             // Events
-            } else if (c == '[') {
+            } else if (isEvent) {
                 int index = -1;
                 int endIndex = -1;
                 Event:
@@ -173,7 +179,7 @@ public class MineDownParser {
                     continue;
                 }
                 
-            } else if ((c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)){
+            } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
                 // Found formatting
                 if (endIndex != -1) {
@@ -219,6 +225,9 @@ public class MineDownParser {
             
             // It's normal text, just append the character
             value.append(message.charAt(i));
+        }
+        if (escaped) {
+            value.append('\\');
         }
         appendValue();
         if (builder == null) {
