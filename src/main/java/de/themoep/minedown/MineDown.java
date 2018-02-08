@@ -73,11 +73,12 @@ import java.util.Map;
  * All advanced settings can be chained/included in a event definition.
  * You can't however add multiple different colors or click and hover actions!
  */
-@Getter(AccessLevel.PROTECTED)
+@Getter
 public class MineDown {
     private final String message;
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();
+    @Getter(AccessLevel.PROTECTED)
     private BaseComponent[] baseComponents = null;
     
     /**
