@@ -105,9 +105,8 @@ public class MineDown {
      * @param components    The components to convert
      * @return              The components represented as a MineDown string
      */
-    public static String toString(BaseComponent[] components) {
-        // TODO: Implement
-        return "";
+    public static String stringify(BaseComponent[] components) {
+        return new MineDownStringifier().stringify(components);
     }
     
     /**
@@ -221,4 +220,45 @@ public class MineDown {
         return this;
     }
     
+    /**
+     * Get the string that represents the format in MineDown
+     * @param format    The format
+     * @return          The MineDown string or an empty one if it's not a format
+     */
+    public static String getFormatString(ChatColor format) {
+        switch (format) {
+            case BOLD:
+                return "**";
+            case ITALIC:
+                return "##";
+            case UNDERLINE:
+                return "__";
+            case STRIKETHROUGH:
+                return "~~";
+            case MAGIC:
+                return "??";
+        }
+        return "";
+    }
+    
+    /**
+     * Get the ChatColor format from a MineDown string
+     * @param c The character
+     * @return  The ChatColor of that format or <tt>null</tt> it none was found
+     */
+    public static ChatColor getFormatFromChar(char c) {
+        switch (c) {
+            case '~':
+                return ChatColor.STRIKETHROUGH;
+            case '_':
+                return ChatColor.UNDERLINE;
+            case '*':
+                return ChatColor.BOLD;
+            case '#':
+                return ChatColor.ITALIC;
+            case '?':
+                return ChatColor.MAGIC;
+        }
+        return null;
+    }
 }

@@ -27,6 +27,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Util {
     /**
@@ -128,7 +130,7 @@ public class Util {
      * @param format    The ChatColor to check
      * @return          <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
      */
-    static boolean isFormat(ChatColor format) {
+    public static boolean isFormat(ChatColor format) {
         switch (format) {
             case BOLD:
             case ITALIC:
@@ -138,5 +140,31 @@ public class Util {
                 return true;
         }
         return false;
+    }
+    
+    /**
+     * Get a set of ChatColor formats all formats that a component includes
+     * @param component     The component to get the formats from
+     * @param ignoreParent  Whether or not to include the parent's format
+     * @return              A set of all the format ChatColors that the component includes
+     */
+    public static Set<ChatColor> getFormats(BaseComponent component, boolean ignoreParent) {
+        Set<ChatColor> formats = new LinkedHashSet<>();
+        if ((!ignoreParent && component.isBold()) || (component.isBoldRaw() != null && component.isBoldRaw())) {
+            formats.add(ChatColor.BOLD);
+        }
+        if ((!ignoreParent && component.isItalic()) || (component.isItalicRaw() != null && component.isItalicRaw())) {
+            formats.add(ChatColor.ITALIC);
+        }
+        if ((!ignoreParent && component.isUnderlined()) || (component.isUnderlinedRaw() != null && component.isUnderlinedRaw())) {
+            formats.add(ChatColor.UNDERLINE);
+        }
+        if ((!ignoreParent && component.isStrikethrough()) || (component.isStrikethroughRaw() != null && component.isStrikethroughRaw())) {
+            formats.add(ChatColor.STRIKETHROUGH);
+        }
+        if ((!ignoreParent && component.isObfuscated()) || (component.isObfuscatedRaw() != null && component.isObfuscatedRaw())) {
+            formats.add(ChatColor.MAGIC);
+        }
+        return formats;
     }
 }

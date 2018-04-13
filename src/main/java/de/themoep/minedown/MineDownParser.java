@@ -187,23 +187,7 @@ public class MineDownParser {
                 // Found formatting
                 if (endIndex != -1) {
                     Set<ChatColor> formats = new HashSet<>(format);
-                    switch (c) {
-                        case '~':
-                            formats.add(ChatColor.STRIKETHROUGH);
-                            break;
-                        case '_':
-                            formats.add(ChatColor.UNDERLINE);
-                            break;
-                        case '*':
-                            formats.add(ChatColor.BOLD);
-                            break;
-                        case '#':
-                            formats.add(ChatColor.ITALIC);
-                            break;
-                        case '?':
-                            formats.add(ChatColor.MAGIC);
-                            break;
-                    }
+                    formats.add(MineDown.getFormatFromChar(c));
                     appendValue();
                     append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
                     i = endIndex + 1;
