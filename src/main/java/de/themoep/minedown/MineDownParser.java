@@ -147,8 +147,8 @@ public class MineDownParser {
                         format = new HashSet<>();
                         format.add(encoded);
                     }
-                } else if (!lenient()) {
-                    throw new IllegalArgumentException("Found color char but not a valid color? (" + code + "/" + colorString.toString() + ")");
+                } else {
+                    value.append(c).append(code);
                 }
                 continue;
                 
@@ -352,7 +352,7 @@ public class MineDownParser {
                 }
                 value.append(" ");
                 if (hasBracket && defParts.get(i).endsWith("}")) {
-                    value.append(defParts.get(i).substring(0, defParts.get(i).length() - 1));
+                    value.append(defParts.get(i), 0, defParts.get(i).length() - 1);
                     break;
                 }
                 value.append(defParts.get(i));
