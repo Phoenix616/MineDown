@@ -25,10 +25,12 @@ package de.themoep.minedown;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -227,7 +229,30 @@ public class MineDownParser {
         if (this.builder == null) {
             this.builder = new ComponentBuilder(builder);
         } else {
-            this.builder.append(builder.create());
+            BaseComponent[] components = builder.create();
+            try {
+                this.builder.append(components);
+            } catch (NoSuchMethodError e) {
+                // Older versions didn't have ComponentBuilder#append(BaseComponent[])
+                // Recreating it with reflections. That might be slower but they should just update anyways...
+                if (components.length > 0) {
+                    try {
+                        Field fCurrent = this.builder.getClass().getDeclaredField("current");
+                        fCurrent.setAccessible(true);
+                        BaseComponent previous = (BaseComponent) fCurrent.get(this.builder);
+                        Field fParts = this.builder.getClass().getDeclaredField("parts");
+                        fParts.setAccessible(true);
+                        List<BaseComponent> parts = (List<BaseComponent>) fParts.get(this.builder);
+    
+                        for (BaseComponent component : components) {
+                            parts.add(previous);
+                            fCurrent.set(this.builder, component.duplicate());
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
         }
     }
     
