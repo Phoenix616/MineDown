@@ -20,6 +20,10 @@ public class ParserTest {
                 () -> parse("&bTest [this](color=green format=bold,italic https://example.com Hover & text) string!"),
                 () -> parse("&bTest [this](color=green format=bold,italic suggest_command=/example command hover=Hover text) string!"),
                 () -> parse("&bTest [this](6 bold italic https://example.com) &as&bt&cr&di&en&5g&7!"),
+                () -> parse("&bTest [[this]](https://example.com)!"),
+                () -> parse("&bTest [**[this]**](https://example.com)!"),
+                () -> parse("&lbold &oitalic &0not bold or italic but black!"),
+                () -> parse("&cRed &land bold!"),
                 () -> parse("&bTest &chttps://example.com &rstring!"),
                 () -> parse("&bTest &chttps://example.com/test?t=2&d002=da0s#d2q &rstring!")
         );

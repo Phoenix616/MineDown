@@ -142,11 +142,11 @@ public class MineDownParser {
                             appendValue();
                         }
                         color = encoded;
+                        format = new HashSet<>();
                     } else {
                         if (value.length() > 0) {
                             appendValue();
                         }
-                        format = new HashSet<>();
                         format.add(encoded);
                     }
                 } else {
