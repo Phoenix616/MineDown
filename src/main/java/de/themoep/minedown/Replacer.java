@@ -102,7 +102,9 @@ public class Replacer {
      * @return              The Replacer instance
      */
     public Replacer replace(Map<String, String> replacements) {
-        replacements().putAll(replacements);
+        if (replacements != null) {
+            replacements().putAll(replacements);
+        }
         return this;
     }
 
