@@ -159,7 +159,9 @@ public class Replacer {
                         replaceIn(component.getHoverEvent().getValue())
                 ));
             }
-            component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
+            if (component.getExtra() != null) {
+                component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
+            }
         
             returnArray[i] = component;
         }
