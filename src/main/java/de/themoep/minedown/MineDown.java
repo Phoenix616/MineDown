@@ -197,15 +197,75 @@ public class MineDown {
     public char placeholderSuffix() {
         return replacer().placeholderSuffix();
     }
-    
+
     /**
      * Enable or disable the translation of legacy color codes
      * @param translateLegacyColors Whether or not to translate legacy color codes (Default: true)
      * @return                      The MineDown instance
+     * @deprecated Use {@link #enable(MineDownParser.Option)} and {@link #disable(MineDownParser.Option)}
      */
+    @Deprecated
     public MineDown translateLegacyColors(boolean translateLegacyColors) {
         reset();
         parser().translateLegacyColors(translateLegacyColors);
+        return this;
+    }
+
+    /**
+     * Detect urls in strings and add events to them? (Default: true)
+     * @param enabled   Whether or not to detect URLs and add events to them
+     * @return          The MineDown instance
+     */
+    public MineDown urlDetection(boolean enabled) {
+        reset();
+        parser().urlDetection(enabled);
+        return this;
+    }
+
+    /**
+     * Enable an option. Unfilter it if you filtered it before.
+     * @param option    The option to enable
+     * @return          The MineDown instance
+     */
+    public MineDown enable(MineDownParser.Option option) {
+        reset();
+        parser().enable(option);
+        return this;
+    }
+
+    /**
+     * Disable an option. Disabling an option will stop the parser from replacing
+     * this option's chars in the string. Use {@link #filter(MineDownParser.Option)} to completely
+     * remove the characters used by this option from the message instead.
+     * @param option    The option to disable
+     * @return          The MineDown instance
+     */
+    public MineDown disable(MineDownParser.Option option) {
+        reset();
+        parser().disable(option);
+        return this;
+    }
+
+    /**
+     * Filter an option. This completely removes the characters of this option from
+     * the string ignoring whether the option is enabled or not.
+     * @param option    The option to add to the filter
+     * @return          The MineDown instance
+     */
+    public MineDown filter(MineDownParser.Option option) {
+        reset();
+        parser().filter(option);
+        return this;
+    }
+
+    /**
+     * Unfilter an option. Does not enable it!
+     * @param option    The option to remove from the filter
+     * @return          The MineDown instance
+     */
+    public MineDown unfilter(MineDownParser.Option option) {
+        reset();
+        parser().unfilter(option);
         return this;
     }
     

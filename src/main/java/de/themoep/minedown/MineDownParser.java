@@ -33,6 +33,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,14 +46,23 @@ public class MineDownParser {
     private ComponentBuilder builder = null;
 
     /**
-     * Whether or not to translate legacy color codes (Default: true)
-     */
-    private boolean translateLegacyColors = true;
-
-    /**
      * The character to use as a special color code. (Default: ampersand &amp;)
      */
     private char colorChar = '&';
+
+    /**
+     * All enabled options
+     */
+    private Set<Option> enabledOptions = EnumSet.of(
+            Option.LEGACY_COLORS,
+            Option.SIMPLE_FORMATTING,
+            Option.ADVANCED_FORMATTING
+    );
+
+    /**
+     * All filters
+     */
+    private Set<Option> filteredOptions = EnumSet.noneOf(Option.class);
 
     /**
      * Whether to accept malformed strings or not (Default: false)
@@ -63,7 +73,7 @@ public class MineDownParser {
      * Detect urls in strings and add events to them? (Default: true)
      */
     private boolean urlDetection = true;
-    
+
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
     
     public static final String COLOR_PREFIX = "color=";
@@ -89,9 +99,12 @@ public class MineDownParser {
             char c = message.charAt(i);
     
             boolean isEscape = c == '\\' && i + 1 < message.length();
-            boolean isColorCode = translateLegacyColors && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar);
-            boolean isEvent = c == '[';
-            boolean isFormatting = (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i);
+            boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
+                    && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+            boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
+                    && c == '[';
+            boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
+                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i);
     
             if (escaped) {
                 escaped = false;
@@ -132,22 +145,24 @@ public class MineDownParser {
                 }
                 
                 if (encoded != null) {
-                    if (encoded == ChatColor.RESET) {
-                        appendValue();
-                        color = null;
-                        Util.applyFormat(builder, format);
-                        format = new HashSet<>();
-                    } else if (!Util.isFormat(encoded)) {
-                        if (value.length() > 0) {
+                    if (!isFiltered(Option.LEGACY_COLORS)) {
+                        if (encoded == ChatColor.RESET) {
                             appendValue();
+                            color = null;
+                            Util.applyFormat(builder, format);
+                            format = new HashSet<>();
+                        } else if (!Util.isFormat(encoded)) {
+                            if (value.length() > 0) {
+                                appendValue();
+                            }
+                            color = encoded;
+                            format = new HashSet<>();
+                        } else {
+                            if (value.length() > 0) {
+                                appendValue();
+                            }
+                            format.add(encoded);
                         }
-                        color = encoded;
-                        format = new HashSet<>();
-                    } else {
-                        if (value.length() > 0) {
-                            appendValue();
-                        }
-                        format.add(encoded);
                     }
                 } else {
                     value.append(c).append(code);
@@ -179,7 +194,11 @@ public class MineDownParser {
                 }
                 if (index > i && endIndex > index) {
                     appendValue();
-                    append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
+                    if (!isFiltered(Option.ADVANCED_FORMATTING)) {
+                        append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
+                    } else {
+                        append(copy().parse(message.substring(i + 1, index)));
+                    }
                     i = endIndex;
                     continue;
                 }
@@ -189,7 +208,9 @@ public class MineDownParser {
                 // Found formatting
                 if (endIndex != -1) {
                     Set<ChatColor> formats = new HashSet<>(format);
-                    formats.add(MineDown.getFormatFromChar(c));
+                    if (!isFiltered(Option.SIMPLE_FORMATTING)) {
+                        formats.add(MineDown.getFormatFromChar(c));
+                    }
                     appendValue();
                     append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
                     i = endIndex + 1;
@@ -198,7 +219,7 @@ public class MineDownParser {
             }
     
             // URL
-            if (urlDetection()) {
+            if (urlDetection() && urlMatcher != null) {
                 int urlEnd = message.indexOf(' ', i);
                 if (urlEnd == -1) {
                     urlEnd = message.length();
@@ -224,12 +245,22 @@ public class MineDownParser {
         }
         return builder;
     }
-    
+
     private void append(ComponentBuilder builder) {
+        append(builder.create());
+    }
+
+    private void append(BaseComponent[] components) {
         if (this.builder == null) {
-            this.builder = new ComponentBuilder(builder);
+            if (components.length > 0) {
+                this.builder = new ComponentBuilder(components[0]);
+                for (int i = 1; i < components.length; i++) {
+                    builder.append(components[i]);
+                }
+            } else {
+                this.builder = new ComponentBuilder("");
+            }
         } else {
-            BaseComponent[] components = builder.create();
             try {
                 this.builder.append(components);
             } catch (NoSuchMethodError e) {
@@ -269,7 +300,7 @@ public class MineDownParser {
             }
             builder.color(color);
             Util.applyFormat(builder, format);
-            if (URL_PATTERN.matcher(value).matches()) {
+            if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
                 builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open url").create()));
             }
@@ -399,7 +430,7 @@ public class MineDownParser {
                             .append(" " + clickEvent.getValue()).color(ChatColor.WHITE)
                             .create());
         }
-        
+
         return copy()
                 .urlDetection(false)
                 .color(color)
@@ -441,12 +472,109 @@ public class MineDownParser {
      */
     public MineDownParser copy() {
         MineDownParser copy = new MineDownParser();
-        copy.lenient(lenient);
-        copy.translateLegacyColors(translateLegacyColors);
-        copy.colorChar(colorChar);
-        copy.clickEvent(clickEvent);
-        copy.hoverEvent(hoverEvent);
+        copy.lenient(lenient());
+        copy.enabledOptions(enabledOptions());
+        copy.filteredOptions(filteredOptions());
+        copy.colorChar(colorChar());
+        copy.clickEvent(clickEvent());
+        copy.hoverEvent(hoverEvent());
         return copy;
     }
-    
+
+    /**
+     * Whether or not to translate legacy color codes (Default: true)
+     * @return      Whether or not to translate legacy color codes (Default: true)
+     * @deprecated  Use {@link #isEnabled(Option)} instead
+     */
+    @Deprecated
+    public boolean translateLegacyColors() {
+        return isEnabled(Option.LEGACY_COLORS);
+    }
+
+    /**
+     * Whether or not to translate legacy color codes
+     * @return      The parser
+     * @deprecated  Use {@link #enable(Option)} and {@link #disable(Option)} instead
+     */
+    @Deprecated
+    public MineDownParser translateLegacyColors(boolean enabled) {
+        return enabled ? enable(Option.LEGACY_COLORS) : disable(Option.LEGACY_COLORS);
+    }
+
+    /**
+     * Check whether or not an option is enabled
+     * @param option    The option to check for
+     * @return          <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     */
+    public boolean isEnabled(Option option) {
+        return enabledOptions().contains(option);
+    }
+
+    /**
+     * Enable an option.
+     * @param option    The option to enable
+     * @return          The parser instace
+     */
+    public MineDownParser enable(Option option) {
+        enabledOptions().add(option);
+        return this;
+    }
+
+    /**
+     * Disable an option. Disabling an option will stop the parser from replacing
+     * this option's chars in the string. Use {@link #filter(Option)} to completely
+     * remove the characters used by this option from the message instead.
+     * @param option    The option to disable
+     * @return          The parser instace
+     */
+    public MineDownParser disable(Option option) {
+        enabledOptions().remove(option);
+        return this;
+    }
+
+    /**
+     * Check whether or not an option is filtered
+     * @param option    The option to check for
+     * @return          <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     */
+    public boolean isFiltered(Option option) {
+        return filteredOptions().contains(option);
+    }
+
+    /**
+     * Filter an option. This enables the parsing of an option and completely
+     * removes the characters of this option from the string.
+     * @param option    The option to add to the filter
+     * @return          The parser instance
+     */
+    public MineDownParser filter(Option option) {
+        filteredOptions().add(option);
+        enabledOptions().add(option);
+        return this;
+    }
+
+    /**
+     * Unfilter an option. Does not enable it!
+     * @param option    The option to remove from the filter
+     * @return          The parser instance
+     */
+    public MineDownParser unfilter(Option option) {
+        filteredOptions().remove(option);
+        return this;
+    }
+
+    public enum Option {
+        /**
+         * Translate simple, in-line MineDown formatting in strings? (Default: true)
+         */
+        SIMPLE_FORMATTING,
+        /**
+         * Translate advanced MineDown formatting (e.g. events) in strings? (Default: true)
+         */
+        ADVANCED_FORMATTING,
+        /**
+         * Whether or not to translate legacy color codes (Default: true)
+         */
+        LEGACY_COLORS
+    }
 }

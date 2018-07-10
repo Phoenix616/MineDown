@@ -26,6 +26,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -47,8 +48,9 @@ public class Util {
      * Apply a collection of colors/formats to a component
      * @param component The BaseComponent
      * @param formats   The collection of ChatColor formats to apply
+     * @return          The component that was modified
      */
-    public static void applyFormat(BaseComponent component, Collection<ChatColor> formats) {
+    public static BaseComponent applyFormat(BaseComponent component, Collection<ChatColor> formats) {
         for(ChatColor format : formats) {
             switch (format) {
                 case BOLD:
@@ -77,14 +79,21 @@ public class Util {
                     component.setColor(format);
             }
         }
+        if (component.getExtra() != null) {
+            for (BaseComponent extra : component.getExtra()) {
+                applyFormat(extra, formats);
+            }
+        }
+        return component;
     }
     
     /**
      * Apply a collection of colors/formats to a component builder
      * @param builder   The ComponentBuilder
      * @param formats   The collection of ChatColor formats to apply
+     * @return          The component builder that was modified
      */
-    public static void applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
+    public static ComponentBuilder applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
         for(ChatColor format : formats) {
             switch (format) {
                 case BOLD:
@@ -108,11 +117,12 @@ public class Util {
                     builder.underlined(false);
                     builder.strikethrough(false);
                     builder.obfuscated(false);
-                    format = ChatColor.WHITE;
+                    format = null;
                 default:
                     builder.color(format);
             }
         }
+        return builder;
     }
     
     /**
