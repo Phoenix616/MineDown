@@ -309,7 +309,7 @@ public class MineDownParser {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
                 if (urlHoverText() != null && !urlHoverText().isEmpty()) {
                     builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder(Replacer.replaceIn(urlHoverText(), "url", value.toString())).create()
+                            new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
                     ));
                 }
             }
