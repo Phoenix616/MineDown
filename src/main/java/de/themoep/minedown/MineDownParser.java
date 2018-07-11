@@ -75,7 +75,7 @@ public class MineDownParser {
     private boolean urlDetection = true;
 
     /**
-     * The text to display when hovering over an URL
+     * The text to display when hovering over an URL. Has a %url% placeholder.
      */
     private String urlHoverText = "Click to open url";
 
@@ -308,7 +308,9 @@ public class MineDownParser {
             if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
                 if (urlHoverText() != null && !urlHoverText().isEmpty()) {
-                    builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(urlHoverText()).create()));
+                    builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            new ComponentBuilder(Replacer.replaceIn(urlHoverText(), "url", value.toString())).create()
+                    ));
                 }
             }
             if (clickEvent != null) {

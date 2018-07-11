@@ -66,7 +66,7 @@ public class Replacer {
      * @param replacements  The replacements, nth element is the placeholder, n+1th the value
      * @return              The string with all the placeholders replaced
      */
-    public static String replace(String message, String... replacements) {
+    public static String replaceIn(String message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
     
@@ -77,7 +77,7 @@ public class Replacer {
      * @param replacements  The replacements, nth element is the placeholder, n+1th the value
      * @return              A copy of the BaseComponent array with all the placeholders replaced
      */
-    public static BaseComponent[] replace(BaseComponent[] message, String... replacements) {
+    public static BaseComponent[] replaceIn(BaseComponent[] message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
 
@@ -124,7 +124,7 @@ public class Replacer {
      * @param components    The BaseComponent array to replace in
      * @return              A copy of the array with the placeholders replaced
      */
-    public BaseComponent[] replaceIn(BaseComponent[] components) {
+    public BaseComponent[] replaceIn(BaseComponent... components) {
         return replaceIn(Arrays.asList(components));
     }
     
@@ -174,7 +174,7 @@ public class Replacer {
      * @return          The string with the placeholders replaced
      */
     public String replaceIn(String string) {
-        for (Map.Entry<String, String> replacement : replacements.entrySet()) {
+        for (Map.Entry<String, String> replacement : replacements().entrySet()) {
             string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
         }
         return string;
