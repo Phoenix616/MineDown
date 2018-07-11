@@ -223,6 +223,17 @@ public class MineDown {
     }
 
     /**
+     * The text to display when hovering over an URL
+     * @param text  The text to display when hovering over an URL
+     * @return      The MineDown instance
+     */
+    public MineDown urlHoverText(String text) {
+        reset();
+        parser().urlHoverText(text);
+        return this;
+    }
+
+    /**
      * Enable an option. Unfilter it if you filtered it before.
      * @param option    The option to enable
      * @return          The MineDown instance

@@ -74,8 +74,13 @@ public class MineDownParser {
      */
     private boolean urlDetection = true;
 
+    /**
+     * The text to display when hovering over an URL
+     */
+    private String urlHoverText = "Click to open url";
+
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
-    
+
     public static final String COLOR_PREFIX = "color=";
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
@@ -85,7 +90,7 @@ public class MineDownParser {
     private Set<ChatColor> format = new HashSet<>();
     private ClickEvent clickEvent = null;
     private HoverEvent hoverEvent = null;
-    
+
     /**
      * Create a ComponentBuilder by parsing a {@link MineDown} message
      * @param message   The message to parse
@@ -302,7 +307,9 @@ public class MineDownParser {
             Util.applyFormat(builder, format);
             if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
                 builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
-                builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open url").create()));
+                if (urlHoverText() != null && !urlHoverText().isEmpty()) {
+                    builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(urlHoverText()).create()));
+                }
             }
             if (clickEvent != null) {
                 builder.event(clickEvent);
