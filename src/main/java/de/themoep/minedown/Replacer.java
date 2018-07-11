@@ -207,20 +207,23 @@ public class Replacer {
                         if (textComponent.getText().contains(placeHolder)) {
                             int index;
                             while ((index = textComponent.getText().indexOf(placeHolder)) > -1) {
+                                TextComponent startComponent = new TextComponent(textComponent);
                                 if (index > 0) {
-                                    TextComponent startComponent = new TextComponent(textComponent);
                                     startComponent.setText(textComponent.getText().substring(0, index));
-                                    newReplacedComponents.add(startComponent);
-                                }
-
-                                newReplacedComponents.addAll(Arrays.asList(replacement.getValue()));
-
-                                if (textComponent.getText().length() > index + placeHolder.length()) {
-                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length() + 1));
-                                    if (!textComponent.getText().isEmpty()) {
-                                        newReplacedComponents.add(textComponent);
-                                    }
                                 } else {
+                                    startComponent.setText("");
+                                }
+                                startComponent.setExtra(Arrays.asList(replacement.getValue()));
+                                newReplacedComponents.add(startComponent);
+
+                                if (index + placeHolder.length() + 1 < textComponent.getText().length()) {
+                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length() + 1));
+                                } else {
+                                    textComponent.setText("");
+                                }
+                                newReplacedComponents.add(textComponent);
+
+                                if (textComponent.getText().isEmpty()) {
                                     break;
                                 }
                             }
