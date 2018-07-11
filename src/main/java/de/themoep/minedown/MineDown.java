@@ -115,7 +115,7 @@ public class MineDown {
      */
     public BaseComponent[] toComponent() {
         if (baseComponents() == null) {
-            baseComponents = new MineDownParser().parse(replacer().replaceIn(message())).create();
+            baseComponents = replacer().replaceIn(new MineDownParser().parse(message()).create());
         }
         return baseComponents();
     }
@@ -146,6 +146,18 @@ public class MineDown {
     public MineDown replace(Map<String, String> replacements) {
         reset();
         replacer().replace(replacements);
+        return this;
+    }
+
+    /**
+     * Add a placeholder to component mapping that should get replaced in the message
+     * @param placeholder   The placeholder to replace
+     * @param replacement   The replacement components
+     * @return              The Replacer instance
+     */
+    public MineDown replace(String placeholder, BaseComponent... replacement) {
+        reset();
+        replacer().replace(placeholder,replacement);
         return this;
     }
     

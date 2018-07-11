@@ -31,6 +31,7 @@ import net.md_5.bungee.api.chat.KeybindComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,20 +46,25 @@ import java.util.Map;
 @Setter
 public class Replacer {
     /**
-     * The map of placeholders with their values
+     * The map of placeholders with their string replacements
      */
     private final Map<String, String> replacements = new LinkedHashMap<>();
-    
+
+    /**
+     * The map of placeholders with their component array replacements
+     */
+    private final Map<String, BaseComponent[]> componentReplacements = new LinkedHashMap<>();
+
     /**
      * The placeholder indicator's prefix character
      */
     private char placeholderPrefix = '%';
-    
+
     /**
      * The placeholder indicator's suffix character
      */
     private char placeholderSuffix = '%';
-    
+
     /**
      * Replace certain placeholders with values in string.
      * This uses the % character as placeholder indicators (suffix and prefix)
@@ -79,6 +85,18 @@ public class Replacer {
      */
     public static BaseComponent[] replaceIn(BaseComponent[] message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
+    }
+
+    /**
+     * Replace a certain placeholder with a component array in a component array.
+     * This uses the % character as placeholder indicators (suffix and prefix)
+     * @param message       The BaseComponent array to replace in
+     * @param placeholder   The placeholder to replace
+     * @param replacement   The replacement components
+     * @return              A copy of the BaseComponent array with all the placeholders replaced
+     */
+    public static BaseComponent[] replaceIn(BaseComponent[] message, String placeholder, BaseComponent... replacement) {
+        return new Replacer().replace(placeholder, replacement).replaceIn(message);
     }
 
     /**
@@ -109,6 +127,17 @@ public class Replacer {
     }
 
     /**
+     * Add a placeholder to component mapping that should get replaced in the message
+     * @param placeholder   The placeholder to replace
+     * @param replacement   The replacement components
+     * @return              The Replacer instance
+     */
+    public Replacer replace(String placeholder, BaseComponent... replacement) {
+        componentReplacements.put(placeholder, replacement);
+        return this;
+    }
+
+    /**
      * Set the placeholder indicator for both prefix and suffix
      * @param placeholderIndicator  The character to use as a placeholder indicator
      * @return                      The Replacer instance
@@ -134,7 +163,8 @@ public class Replacer {
      * @return              A copy of the array with the placeholders replaced
      */
     public BaseComponent[] replaceIn(List<BaseComponent> components) {
-        BaseComponent[] returnArray = new BaseComponent[components.size()];
+        List<BaseComponent> returnList = new ArrayList<>();
+        // String replacements:
         for (int i = 0; i < components.size(); i++) {
             BaseComponent component = components.get(i).duplicate();
             if (component instanceof KeybindComponent) {
@@ -162,14 +192,54 @@ public class Replacer {
             if (component.getExtra() != null) {
                 component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
             }
-        
-            returnArray[i] = component;
+
+            // Component replacements
+            List<BaseComponent> replacedComponents = new ArrayList<>();
+            replacedComponents.add(component);
+
+            for (Map.Entry<String, BaseComponent[]> replacement : componentReplacements().entrySet()) {
+                List<BaseComponent> newReplacedComponents = new ArrayList<>();
+
+                for (BaseComponent replaceComponent : replacedComponents) {
+                    if (replaceComponent instanceof TextComponent) {
+                        TextComponent textComponent = (TextComponent) replaceComponent;
+                        String placeHolder = placeholderPrefix() + replacement.getKey() + placeholderSuffix();
+                        if (textComponent.getText().contains(placeHolder)) {
+                            int index;
+                            while ((index = textComponent.getText().indexOf(placeHolder)) > -1) {
+                                if (index > 0) {
+                                    TextComponent startComponent = new TextComponent(textComponent);
+                                    startComponent.setText(textComponent.getText().substring(0, index));
+                                    newReplacedComponents.add(startComponent);
+                                }
+
+                                newReplacedComponents.addAll(Arrays.asList(replacement.getValue()));
+
+                                if (textComponent.getText().length() > index + placeHolder.length()) {
+                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length() + 1));
+                                    if (!textComponent.getText().isEmpty()) {
+                                        newReplacedComponents.add(textComponent);
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+                    // Nothing was replaced, just add it
+                    newReplacedComponents.add(replaceComponent);
+                }
+                replacedComponents = newReplacedComponents;
+            }
+            returnList.addAll(replacedComponents);
         }
-        return returnArray;
+        return returnList.toArray(new BaseComponent[0]);
     }
     
     /**
-     * Replace the placeholders in a string
+     * Replace the placeholders in a string. Does not replace component replacements!
      * @param string    The String list to replace in
      * @return          The string with the placeholders replaced
      */
