@@ -115,7 +115,7 @@ public class MineDown {
      */
     public BaseComponent[] toComponent() {
         if (baseComponents() == null) {
-            baseComponents = replacer().replaceIn(new MineDownParser().parse(message()).create());
+            baseComponents = replacer().replaceIn(parser().parse(message()).create());
         }
         return baseComponents();
     }
