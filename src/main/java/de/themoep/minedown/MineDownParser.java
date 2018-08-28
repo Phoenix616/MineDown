@@ -306,7 +306,11 @@ public class MineDownParser {
             builder.color(color);
             Util.applyFormat(builder, format);
             if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
-                builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, value.toString()));
+                String v = value.toString();
+                if (!v.startsWith("http://") && !v.startsWith("https://")) {
+                    v = "http://" + v;
+                }
+                builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, v));
                 if (urlHoverText() != null && !urlHoverText().isEmpty()) {
                     builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                             new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
@@ -380,6 +384,9 @@ public class MineDownParser {
             }
             
             if (i == formatEnd + 1 && URL_PATTERN.matcher(definition).matches()) {
+                if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
+                    definition = "http://" + definition;
+                }
                 clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, definition);
                 continue;
             }
@@ -424,7 +431,11 @@ public class MineDownParser {
             }
 
             if (clickAction != null) {
-                clickEvent = new ClickEvent(clickAction, value.toString());
+                String v = value.toString();
+                if (clickAction == ClickEvent.Action.OPEN_URL && !v.startsWith("http://") && !v.startsWith("https://")) {
+                    v = "http://" + v;
+                }
+                clickEvent = new ClickEvent(clickAction, v);
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }

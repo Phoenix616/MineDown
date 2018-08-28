@@ -1,6 +1,7 @@
 package de.themoep.minedown.tests;
 
 import de.themoep.minedown.MineDown;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,17 @@ public class ParserTest {
     
     private void parse(String mineDownString, String... replacements) {
         System.out.print(mineDownString + "\n" + ComponentSerializer.toString(MineDown.parse(mineDownString, replacements)) + "\n");
+    }
+
+    private void parse(String mineDownString, String placeholder, BaseComponent[] replacement) {
+        System.out.print(mineDownString + "\n" + ComponentSerializer.toString(new MineDown(mineDownString).replace(placeholder, replacement).toComponent()) + "\n");
+    }
+
+    private void parse(String mineDownString, String placeholder1, BaseComponent[] replacement1, String placeholder2, BaseComponent[] replacement2) {
+        System.out.print(mineDownString + "\n" + ComponentSerializer.toString(new MineDown(mineDownString)
+                .replace(placeholder1, replacement1)
+                .replace(placeholder2, replacement2)
+                .toComponent()) + "\n");
     }
     
     @Test
@@ -24,7 +36,8 @@ public class ParserTest {
                 () -> parse("&bTest [**[this]**](https://example.com)!"),
                 () -> parse("&lbold &oitalic &0not bold or italic but black!"),
                 () -> parse("&cRed &land bold!"),
-                () -> parse("&bTest &chttps://example.com &rstring!"),
+                () -> parse("&bTest \n&cexample.com &rstring!"),
+                () -> parse("&bTest \n&chttps://example.com &rstring!"),
                 () -> parse("&bTest &chttps://example.com/test?t=2&d002=da0s#d2q &rstring!")
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));
@@ -37,6 +50,19 @@ public class ParserTest {
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "**value**"),
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "&5value"),
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "[value](https://example.com)")
+        );
+    }
+
+    @Test
+    public void testComponentReplacing() {
+        Assertions.assertAll(
+                () -> parse("&6Test No placeholder =D", "placeholder", new MineDown("value").toComponent()),
+                () -> parse("&6Test __%placeholder%__&r =D", "placeholder", new MineDown("**value**").toComponent()),
+                () -> parse("&6Test __%placeholder%__&r %placeholder% =D", "placeholder", new MineDown("&5value").toComponent()),
+                () -> parse("&6Test __%placeholder1%__&r %placeholder2%=D",
+                        "placeholder1", new MineDown("[replacement1](https://example.com)").toComponent(),
+                        "placeholder2", new MineDown("[replacement2](https://example.com)").toComponent()
+                )
         );
     }
 }
