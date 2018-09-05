@@ -46,7 +46,7 @@ All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
 
 ## How to use it
-The librarie's main API access is through the [MineDown.class](https://github.com/Phoenix616/MineDown/blob/master/src/main/java/de/themoep/minedown/MineDown.java) and its parse methods.
+The library's main API access is through the [MineDown.class](https://github.com/Phoenix616/MineDown/blob/master/src/main/java/de/themoep/minedown/MineDown.java) and its parse methods.
 
 E.g. you can use it like this in your Spigot plugin:
 ```java
