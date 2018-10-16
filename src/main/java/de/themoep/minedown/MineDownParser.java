@@ -491,14 +491,22 @@ public class MineDownParser {
      * @return The new parser instance with all settings copied
      */
     public MineDownParser copy() {
-        MineDownParser copy = new MineDownParser();
-        copy.lenient(lenient());
-        copy.enabledOptions(enabledOptions());
-        copy.filteredOptions(filteredOptions());
-        copy.colorChar(colorChar());
-        copy.clickEvent(clickEvent());
-        copy.hoverEvent(hoverEvent());
-        return copy;
+        return new MineDownParser().copy(this);
+    }
+
+    /**
+     * Copy all the parser's settings from another parser
+     * @param from  The parser to copy from
+     * @return      This parser's instance
+     */
+    public MineDownParser copy(MineDownParser from) {
+        lenient(from.lenient());
+        enabledOptions(from.enabledOptions());
+        filteredOptions(from.filteredOptions());
+        colorChar(from.colorChar());
+        clickEvent(from.clickEvent());
+        hoverEvent(from.hoverEvent());
+        return this;
     }
 
     /**

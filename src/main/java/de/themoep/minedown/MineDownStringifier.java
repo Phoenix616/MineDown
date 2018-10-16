@@ -63,7 +63,7 @@ public class MineDownStringifier {
     private boolean formattingInEventDefinition = false;
     
     /**
-     * Whether or not to put formatting in event definitions (Default: false)
+     * Whether or not to put colors in event definitions (Default: false)
      */
     private boolean colorInEventDefinition = false;
 
@@ -97,10 +97,10 @@ public class MineDownStringifier {
             }
             if (component.getClickEvent() != null || component.getHoverEvent() != null) {
                 sb.append('[');
-                if (!formattingInEventDefinition) {
+                if (!formattingInEventDefinition()) {
                     appendFormat(sb, component);
                 }
-                if (!colorInEventDefinition) {
+                if (!colorInEventDefinition()) {
                     appendColor(sb, component.getColor());
                 }
             } else if (component.getColorRaw() != null) {
@@ -119,20 +119,20 @@ public class MineDownStringifier {
             if (component.getClickEvent() != clickEvent || component.getHoverEvent() != hoverEvent) {
                 clickEvent = component.getClickEvent();
                 hoverEvent = component.getHoverEvent();
-                if (!formattingInEventDefinition) {
+                if (!formattingInEventDefinition()) {
                     appendFormatSuffix(sb, component);
                 }
                 sb.append("](");
                 List<String> definitions = new ArrayList<>();
-                if (colorInEventDefinition) {
+                if (colorInEventDefinition()) {
                     StringBuilder sbi = new StringBuilder();
-                    if (!preferSimpleEvents) {
+                    if (!preferSimpleEvents()) {
                         sbi.append(COLOR_PREFIX);
                     }
                     sbi.append(component.getColor().getName().toLowerCase());
                     definitions.add(sbi.toString());
                 }
-                if (formattingInEventDefinition) {
+                if (formattingInEventDefinition()) {
                     StringBuilder sbi = new StringBuilder();
                     if (!preferSimpleEvents) {
                         sbi.append(FORMAT_PREFIX);
@@ -141,7 +141,7 @@ public class MineDownStringifier {
                     definitions.add(sbi.toString());
                 }
                 if (component.getClickEvent() != null) {
-                    if (preferSimpleEvents && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
+                    if (preferSimpleEvents() && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
                         definitions.add(component.getClickEvent().getValue());
                     } else {
                         definitions.add(component.getClickEvent().getAction().toString().toLowerCase() + "=" + component.getClickEvent().getValue());
@@ -149,7 +149,7 @@ public class MineDownStringifier {
                 }
                 if (component.getHoverEvent() != null) {
                     StringBuilder sbi = new StringBuilder();
-                    if (preferSimpleEvents) {
+                    if (preferSimpleEvents()) {
                         if (component.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT &&
                                 (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
                             sbi.append("hover=");
@@ -180,10 +180,10 @@ public class MineDownStringifier {
     private void appendColor(StringBuilder sb, ChatColor color) {
         if (this.color != color) {
             this.color = color;
-            if (useLegacyColors) {
-                sb.append(colorChar).append(color.toString().substring(1));
+            if (useLegacyColors()) {
+                sb.append(colorChar()).append(color.toString().substring(1));
             } else {
-                sb.append(colorChar).append(color.getName()).append(colorChar);
+                sb.append(colorChar()).append(color.getName()).append(colorChar());
             }
         }
     }
@@ -191,8 +191,8 @@ public class MineDownStringifier {
     private void appendFormat(StringBuilder sb, BaseComponent component) {
         Set<ChatColor> formats = Util.getFormats(component, true);
         if (!formats.containsAll(this.formats)) {
-            if (useLegacyFormatting) {
-                sb.append(colorChar).append(ChatColor.RESET.toString().charAt(1));
+            if (useLegacyFormatting()) {
+                sb.append(colorChar()).append(ChatColor.RESET.toString().charAt(1));
             } else {
                 Deque<ChatColor> formatDeque = new ArrayDeque<>(this.formats);
                 while (!formatDeque.isEmpty()) {
@@ -206,8 +206,8 @@ public class MineDownStringifier {
             formats.removeAll(this.formats);
         }
         for (ChatColor format : formats) {
-            if (useLegacyFormatting) {
-                sb.append(colorChar).append(format.toString().charAt(1));
+            if (useLegacyFormatting()) {
+                sb.append(colorChar()).append(format.toString().charAt(1));
             } else {
                 sb.append(MineDown.getFormatString(format));
             }
@@ -217,7 +217,7 @@ public class MineDownStringifier {
     }
     
     private void appendFormatSuffix(StringBuilder sb, BaseComponent component) {
-        if (!useLegacyFormatting) {
+        if (!useLegacyFormatting()) {
             Set<ChatColor> formats = Util.getFormats(component, true);
             for (ChatColor format : formats) {
                 sb.append(MineDown.getFormatString(format));
@@ -231,10 +231,22 @@ public class MineDownStringifier {
      * @return The new parser instance with all settings copied
      */
     public MineDownStringifier copy() {
+        return new MineDownStringifier().copy(this);
+    }
+
+    /**
+     * Copy all the parser's settings from another parser
+     * @param from  The stringifier to copy from
+     * @return      This stringifier's instance
+     */
+    public MineDownStringifier copy(MineDownStringifier from) {
         MineDownStringifier copy = new MineDownStringifier();
-        copy.useLegacyColors(useLegacyColors);
-        copy.useLegacyFormatting(useLegacyFormatting);
-        copy.colorChar(colorChar);
+        useLegacyColors(from.useLegacyColors());
+        useLegacyFormatting(from.useLegacyFormatting());
+        preferSimpleEvents(from.preferSimpleEvents());
+        formattingInEventDefinition(from.formattingInEventDefinition());
+        colorInEventDefinition(from.colorInEventDefinition());
+        colorChar(from.colorChar());
         return copy;
     }
     

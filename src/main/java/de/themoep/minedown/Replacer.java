@@ -119,9 +119,18 @@ public class Replacer {
      * @param replacements  The replacements mapped placeholder to value
      * @return              The Replacer instance
      */
-    public Replacer replace(Map<String, String> replacements) {
-        if (replacements != null) {
-            replacements().putAll(replacements);
+    public Replacer replace(Map<String, ?> replacements) {
+        if (replacements != null && !replacements.isEmpty()) {
+            Object any = replacements.values().stream().findAny().orElse(null);
+            if (any instanceof String) {
+                replacements().putAll((Map<String, String>) replacements);
+            } else if (any != null && any.getClass().isArray() && BaseComponent.class.isAssignableFrom(any.getClass().getComponentType())) {
+                componentReplacements().putAll((Map<String, BaseComponent[]>)replacements);
+            } else {
+                for (Map.Entry<String, ?> entry : replacements.entrySet()) {
+                    replacements().put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            }
         }
         return this;
     }
@@ -133,7 +142,7 @@ public class Replacer {
      * @return              The Replacer instance
      */
     public Replacer replace(String placeholder, BaseComponent... replacement) {
-        componentReplacements.put(placeholder, replacement);
+        componentReplacements().put(placeholder, replacement);
         return this;
     }
 
@@ -251,5 +260,28 @@ public class Replacer {
             string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
         }
         return string;
+    }
+
+    /**
+     * Create a copy of this Replacer
+     * @return A copy of this Replacer
+     */
+    public Replacer copy() {
+        return new Replacer().copy(this);
+    }
+
+    /**
+     * Copy all the values of another Replacer
+     * @param from  The replacer to copy
+     * @return      The Replacer instance
+     */
+    public Replacer copy(Replacer from) {
+        replacements().clear();
+        replacements().putAll(from.replacements());
+        componentReplacements().clear();
+        componentReplacements().putAll(from.componentReplacements());
+        placeholderPrefix(from.placeholderPrefix());
+        placeholderSuffix(from.placeholderSuffix());
+        return this;
     }
 }

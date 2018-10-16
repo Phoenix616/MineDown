@@ -302,7 +302,26 @@ public class MineDown {
         parser().colorChar(colorChar);
         return this;
     }
-    
+
+    /**
+     * Copy all MineDown settings to a new instance
+     * @return The new MineDown instance with all settings copied
+     */
+    public MineDown copy() {
+        return new MineDown(message()).copy(this);
+    }
+
+    /**
+     * Copy all MineDown settings from another one
+     * @param from  The MineDown to copy from
+     * @return      This MineDown instance
+     */
+    public MineDown copy(MineDown from) {
+        replacer().copy(from.replacer());
+        parser().copy(from.parser());
+        return this;
+    }
+
     /**
      * Get the string that represents the format in MineDown
      * @param format    The format
