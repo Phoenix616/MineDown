@@ -225,8 +225,8 @@ public class Replacer {
                                 startComponent.setExtra(Arrays.asList(replacement.getValue()));
                                 newReplacedComponents.add(startComponent);
 
-                                if (index + placeHolder.length() + 1 < textComponent.getText().length()) {
-                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length() + 1));
+                                if (index + placeHolder.length() < textComponent.getText().length()) {
+                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length()));
                                 } else {
                                     textComponent.setText("");
                                 }
