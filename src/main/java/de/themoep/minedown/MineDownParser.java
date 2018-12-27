@@ -591,6 +591,32 @@ public class MineDownParser {
         return this;
     }
 
+    /**
+     * Escape formatting in the string depending on this parser's options. This will escape backslashes too!
+     * @param string    The string to escape
+     * @return          The string with all formatting of this parser escaped
+     */
+    public String escape(String string) {
+        StringBuilder value = new StringBuilder();
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+
+            boolean isEscape = c == '\\';
+            boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
+                    && i + 1 < string.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+            boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
+                    && c == '[';
+            boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
+                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(string, i);
+
+            if (isEscape || isColorCode || isEvent || isFormatting) {
+                value.append('\\');
+            }
+            value.append(c);
+        }
+        return value.toString();
+    }
+
     public enum Option {
         /**
          * Translate simple, in-line MineDown formatting in strings? (Default: true)

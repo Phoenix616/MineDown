@@ -363,4 +363,13 @@ public class MineDown {
         }
         return null;
     }
+
+    /**
+     * Escape all MineDown formatting in a string. This will escape backslashes too!
+     * @param string    The string to escape in
+     * @return          The string with formatting escaped
+     */
+    public static String escape(String string) {
+        return new MineDown(string).parser().escape(string);
+    }
 }
