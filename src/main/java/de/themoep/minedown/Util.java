@@ -211,7 +211,7 @@ public class Util {
      * Check if a character at a certain index is escaped
      * @param string    The string to check
      * @param index     The index of the character in the string to check
-     * @return          Whether or not the character is escaped (uneven number of backslashes in front of char -> escaped)
+     * @return          Whether or not the character is escaped (uneven number of backslashes in front of char mains it is escaped)
      * @exception       IndexOutOfBoundsException if the {@code index} argument is not less than the length of this string.
      */
     public static boolean isEscaped(String string, int index) {
