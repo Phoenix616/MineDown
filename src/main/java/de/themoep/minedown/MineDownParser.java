@@ -106,16 +106,23 @@ public class MineDownParser {
             boolean isEscape = c == '\\' && i + 1 < message.length();
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
                     && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
-            boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
-                    && c == '[';
+            boolean isEvent = false;
+            if (isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
+                int nextEventClose = Util.indexOfNotEscaped(message, ']', i + 1);
+                if (nextEventClose != -1 && nextEventClose + 2 < message.length() && message.charAt(nextEventClose + 1) == '(') {
+                    int nextDefClose = Util.indexOfNotEscaped(message, ')', i + 2);
+                    int nextEventOpen = Util.indexOfNotEscaped(message, '[', i + 2);
+                    if (nextDefClose != -1 && (nextEventOpen == -1 || (nextDefClose < nextEventOpen && nextEventClose < nextEventOpen))) {
+                        isEvent = true;
+                    }
+                }
+            }
             boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
-                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i);
+                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)
+                    && message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2) != -1;
     
             if (escaped) {
                 escaped = false;
-                if (!isEscape && !isColorCode && !isEvent && !isFormatting) {
-                    value.append('\\');
-                }
                 
             // Escaping
             } else if (isEscape) {
@@ -176,51 +183,28 @@ public class MineDownParser {
                 
             // Events
             } else if (isEvent) {
-                int index = -1;
-                int endIndex = -1;
-                Event:
-                for (int j = i + 1; j + 1 < message.length(); j++) {
-                    index = message.indexOf(']', j);
-                    if (index == -1) {
-                        break;
-                    } else if (index + 2 < message.length()
-                            && message.charAt(index - 1) != '\\'
-                            && message.charAt(index + 1) == '(') {
-                        for (int k = index + 1; k < message.length(); k++) {
-                            endIndex = message.indexOf(')', k);
-                            if (endIndex == -1) {
-                                break;
-                            } else if (message.charAt(endIndex - 1) != '\\') {
-                                break Event;
-                            }
-                        }
-                    }
-                    index = -1;
+                int index = Util.indexOfNotEscaped(message, ']', i + 1);
+                int endIndex = Util.indexOfNotEscaped(message, ')', index + 2);
+                appendValue();
+                if (!isFiltered(Option.ADVANCED_FORMATTING)) {
+                    append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
+                } else {
+                    append(copy().parse(message.substring(i + 1, index)));
                 }
-                if (index > i && endIndex > index) {
-                    appendValue();
-                    if (!isFiltered(Option.ADVANCED_FORMATTING)) {
-                        append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
-                    } else {
-                        append(copy().parse(message.substring(i + 1, index)));
-                    }
-                    i = endIndex;
-                    continue;
-                }
-                
+                i = endIndex;
+                continue;
+
+            // Simple formatting
             } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
-                // Found formatting
-                if (endIndex != -1) {
-                    Set<ChatColor> formats = new HashSet<>(format);
-                    if (!isFiltered(Option.SIMPLE_FORMATTING)) {
-                        formats.add(MineDown.getFormatFromChar(c));
-                    }
-                    appendValue();
-                    append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
-                    i = endIndex + 1;
-                    continue;
+                Set<ChatColor> formats = new HashSet<>(format);
+                if (!isFiltered(Option.SIMPLE_FORMATTING)) {
+                    formats.add(MineDown.getFormatFromChar(c));
                 }
+                appendValue();
+                append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
+                i = endIndex + 1;
+                continue;
             }
     
             // URL

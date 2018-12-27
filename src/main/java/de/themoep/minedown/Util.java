@@ -26,7 +26,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -176,5 +175,53 @@ public class Util {
             formats.add(ChatColor.MAGIC);
         }
         return formats;
+    }
+
+    /**
+     * Get the index of the first occurrences of a not escaped character
+     * @param string    The string to search
+     * @param c         The character to search for
+     * @return          The first unescaped index or -1 if not found
+     */
+    public static int indexOfNotEscaped(String string, char c) {
+        return indexOfNotEscaped(string, c, 0);
+    }
+
+    /**
+     * Get the index of the first occurrences of a not escaped character
+     * @param string        The string to search
+     * @param c             The character to search for
+     * @param fromIndex     Start searching from that index
+     * @return              The first unescaped index or {@code -1} if not found
+     */
+    public static int indexOfNotEscaped(String string, char c, int fromIndex) {
+        for (int i = fromIndex; i < string.length(); i++) {
+            int index = string.indexOf(c, i);
+            if (index == -1) {
+                return -1;
+            }
+            if (!isEscaped(string, index)) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Check if a character at a certain index is escaped
+     * @param string    The string to check
+     * @param index     The index of the character in the string to check
+     * @return          Whether or not the character is escaped (uneven number of backslashes in front of char -> escaped)
+     * @exception       IndexOutOfBoundsException if the {@code index} argument is not less than the length of this string.
+     */
+    public static boolean isEscaped(String string, int index) {
+        if (index - 1 > string.length()) {
+            return false;
+        }
+        int e = 0;
+        while (index > e && string.charAt(index - e - 1) == '\\') {
+            e++;
+        }
+        return e % 2 != 0;
     }
 }
