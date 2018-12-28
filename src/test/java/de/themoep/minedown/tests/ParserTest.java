@@ -31,7 +31,7 @@ public class ParserTest {
                 () -> parse("[TestLink](https://example.com) [Testcommand](/command test  )"),
                 () -> parse("&bTest [this](color=green format=bold,italic https://example.com Hover & text) string!"),
                 () -> parse("&bTest [this](color=green format=bold,italic suggest_command=/example command hover=Hover text) string!"),
-                () -> parse("&bTest [this](6 bold italic https://example.com) &as&bt&cr&di&en&5g&7!"),
+                () -> parse("&b[Test] [this](6 bold italic https://example.com) &as&bt&cr&di&en&5g&7!"),
                 () -> parse("&bTest [[this]](https://example.com)!"),
                 () -> parse("&bTest [**[this]**](https://example.com)!"),
                 () -> parse("&lbold &oitalic &0not bold or italic but black!"),

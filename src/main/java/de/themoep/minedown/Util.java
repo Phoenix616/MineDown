@@ -180,23 +180,23 @@ public class Util {
     /**
      * Get the index of the first occurrences of a not escaped character
      * @param string    The string to search
-     * @param c         The character to search for
+     * @param chars     The characters to search for
      * @return          The first unescaped index or -1 if not found
      */
-    public static int indexOfNotEscaped(String string, char c) {
-        return indexOfNotEscaped(string, c, 0);
+    public static int indexOfNotEscaped(String string,  String chars) {
+        return indexOfNotEscaped(string, chars, 0);
     }
 
     /**
      * Get the index of the first occurrences of a not escaped character
      * @param string        The string to search
-     * @param c             The character to search for
+     * @param chars         The characters to search for
      * @param fromIndex     Start searching from that index
      * @return              The first unescaped index or {@code -1} if not found
      */
-    public static int indexOfNotEscaped(String string, char c, int fromIndex) {
+    public static int indexOfNotEscaped(String string, String chars, int fromIndex) {
         for (int i = fromIndex; i < string.length(); i++) {
-            int index = string.indexOf(c, i);
+            int index = string.indexOf(chars, i);
             if (index == -1) {
                 return -1;
             }

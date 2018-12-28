@@ -108,12 +108,23 @@ public class MineDownParser {
                     && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
             boolean isEvent = false;
             if (isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
-                int nextEventClose = Util.indexOfNotEscaped(message, ']', i + 1);
-                if (nextEventClose != -1 && nextEventClose + 2 < message.length() && message.charAt(nextEventClose + 1) == '(') {
-                    int nextDefClose = Util.indexOfNotEscaped(message, ')', i + 2);
-                    int nextEventOpen = Util.indexOfNotEscaped(message, '[', i + 2);
-                    if (nextDefClose != -1 && (nextEventOpen == -1 || (nextDefClose < nextEventOpen && nextEventClose < nextEventOpen))) {
+                int nextEventClose = Util.indexOfNotEscaped(message, "](", i + 1);
+                if (nextEventClose != -1 && nextEventClose + 2 < message.length()) {
+                    int nextDefClose = Util.indexOfNotEscaped(message, ")", i + 2);
+                    if (nextDefClose != -1) {
+                        int depth = 1;
                         isEvent = true;
+                        for (int j = i + 1; j < nextEventClose; j++) {
+                            if (message.charAt(j) == '[') {
+                                depth++;
+                            } else if (message.charAt(j) == ']') {
+                                depth--;
+                            }
+                            if (depth == 0) {
+                                isEvent = false;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -183,8 +194,8 @@ public class MineDownParser {
                 
             // Events
             } else if (isEvent) {
-                int index = Util.indexOfNotEscaped(message, ']', i + 1);
-                int endIndex = Util.indexOfNotEscaped(message, ')', index + 2);
+                int index = Util.indexOfNotEscaped(message, "](", i + 1);
+                int endIndex = Util.indexOfNotEscaped(message, ")", index + 2);
                 appendValue();
                 if (!isFiltered(Option.ADVANCED_FORMATTING)) {
                     append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
