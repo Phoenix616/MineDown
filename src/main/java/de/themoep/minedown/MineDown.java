@@ -166,7 +166,7 @@ public class MineDown {
      * @param placeholderIndicator  The character to use as a placeholder indicator
      * @return                      The MineDown instance
      */
-    public MineDown placeholderIndicator(char placeholderIndicator) {
+    public MineDown placeholderIndicator(String placeholderIndicator) {
         placeholderPrefix(placeholderIndicator);
         placeholderSuffix(placeholderIndicator);
         return this;
@@ -177,7 +177,7 @@ public class MineDown {
      * @param placeholderPrefix     The character to use as the placeholder indicator's prefix
      * @return                      The MineDown instance
      */
-    public MineDown placeholderPrefix(char placeholderPrefix) {
+    public MineDown placeholderPrefix(String placeholderPrefix) {
         reset();
         replacer().placeholderPrefix(placeholderPrefix);
         return this;
@@ -187,7 +187,7 @@ public class MineDown {
      * Get the placeholder indicator's prefix character
      * @return The placeholder indicator's prefix character
      */
-    public char placeholderPrefix() {
+    public String placeholderPrefix() {
         return replacer().placeholderPrefix();
     }
     
@@ -196,7 +196,7 @@ public class MineDown {
      * @param placeholderSuffix     The character to use as the placeholder indicator's suffix
      * @return                      The MineDown instance
      */
-    public MineDown placeholderSuffix(char placeholderSuffix) {
+    public MineDown placeholderSuffix(String placeholderSuffix) {
         reset();
         replacer().placeholderSuffix(placeholderSuffix);
         return this;
@@ -206,7 +206,7 @@ public class MineDown {
      * Get the placeholder indicator's suffix character
      * @return The placeholder indicator's suffix character
      */
-    public char placeholderSuffix() {
+    public String placeholderSuffix() {
         return replacer().placeholderSuffix();
     }
 

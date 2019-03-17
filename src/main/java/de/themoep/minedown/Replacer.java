@@ -58,12 +58,12 @@ public class Replacer {
     /**
      * The placeholder indicator's prefix character
      */
-    private char placeholderPrefix = '%';
+    private String placeholderPrefix = "%";
 
     /**
      * The placeholder indicator's suffix character
      */
-    private char placeholderSuffix = '%';
+    private String placeholderSuffix = "%";
 
     /**
      * Replace certain placeholders with values in string.
@@ -151,7 +151,7 @@ public class Replacer {
      * @param placeholderIndicator  The character to use as a placeholder indicator
      * @return                      The Replacer instance
      */
-    public Replacer placeholderIndicator(char placeholderIndicator) {
+    public Replacer placeholderIndicator(String placeholderIndicator) {
         placeholderPrefix(placeholderIndicator);
         placeholderSuffix(placeholderIndicator);
         return this;
