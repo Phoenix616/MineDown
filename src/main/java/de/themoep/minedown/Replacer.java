@@ -66,6 +66,11 @@ public class Replacer {
     private String placeholderSuffix = "%";
 
     /**
+     * Replace the placeholder no matter what the case if it is
+     */
+    private boolean ignorePlaceholderCase = true;
+
+    /**
      * Replace certain placeholders with values in string.
      * This uses the % character as placeholder indicators (suffix and prefix)
      * @param message       The string to replace in
@@ -212,10 +217,13 @@ public class Replacer {
                 for (BaseComponent replaceComponent : replacedComponents) {
                     if (replaceComponent instanceof TextComponent) {
                         TextComponent textComponent = (TextComponent) replaceComponent;
-                        String placeHolder = placeholderPrefix() + replacement.getKey() + placeholderSuffix();
-                        if (textComponent.getText().contains(placeHolder)) {
+                        String placeHolder = placeholderPrefix()
+                                + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
+                                + placeholderSuffix();
+                        String text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
+                        if (text.contains(placeHolder)) {
                             int index;
-                            while ((index = textComponent.getText().indexOf(placeHolder)) > -1) {
+                            while ((index = text.indexOf(placeHolder)) > -1) {
                                 TextComponent startComponent = new TextComponent(textComponent);
                                 if (index > 0) {
                                     startComponent.setText(textComponent.getText().substring(0, index));
@@ -257,7 +265,19 @@ public class Replacer {
      */
     public String replaceIn(String string) {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
-            string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
+            if (ignorePlaceholderCase()) {
+                String placeholder = placeholderPrefix()
+                        + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
+                        + placeholderSuffix();
+                int nextStart = 0;
+                int startIndex;
+                while (nextStart < string.length() && (startIndex = string.toLowerCase().indexOf(placeholder, nextStart)) > -1) {
+                    nextStart = startIndex + replacement.getValue().length();
+                    string = string.substring(0, startIndex) + replacement.getValue() + string.substring(startIndex + placeholder.length());
+                }
+            } else {
+                string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
+            }
         }
         return string;
     }

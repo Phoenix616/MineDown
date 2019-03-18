@@ -25,6 +25,7 @@ public class ParserTest {
     
     @Test
     public void testParsing() {
+        System.out.println("testParsing");
         Assertions.assertAll(
                 () -> parse("##&eTest## [&blue&b__this__](https://example.com **Hover ??text??**) ~~string~~!"),
                 () -> parse("##&eTest## [__this \\&6 \\that__](blue /example command hover=**Hover ??text??**) ~~string~~!"),
@@ -45,22 +46,24 @@ public class ParserTest {
     
     @Test
     public void testReplacing() {
+        System.out.println("testReplacing");
         Assertions.assertAll(
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "value"),
-                () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "**value**"),
-                () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "&5value"),
+                () -> parse("&6Test __%PlaceHolder%__&r =D", "placeholder", "**value**"),
+                () -> parse("&6Test __%placeholder%__&r =D", "PlaceHolder", "&5value"),
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", "[value](https://example.com)")
         );
     }
 
     @Test
     public void testComponentReplacing() {
+        System.out.println("testComponentReplacing");
         Assertions.assertAll(
                 () -> parse("&6Test No placeholder =D", "placeholder", new MineDown("value").toComponent()),
                 () -> parse("&6Test __%placeholder%__&r =D", "placeholder", new MineDown("**value**").toComponent()),
-                () -> parse("&6Test __%placeholder%__&r %placeholder% =D", "placeholder", new MineDown("&5value").toComponent()),
+                () -> parse("&6Test __%PlaceHolder%__&r %placeholder% =D", "placeholder", new MineDown("&5value").toComponent()),
                 () -> parse("&6Test __%placeholder1%__&r %placeholder2%=D",
-                        "placeholder1", new MineDown("[replacement1](https://example.com)").toComponent(),
+                        "PlaceHolder1", new MineDown("[replacement1](https://example.com)").toComponent(),
                         "placeholder2", new MineDown("[replacement2](https://example.com)").toComponent()
                 )
         );

@@ -211,6 +211,25 @@ public class MineDown {
     }
 
     /**
+     * Set whether or not the case of the placeholder should be ignored when replacing
+     * @param ignorePlaceholderCase Whether or not to ignore the case of the placeholders
+     * @return                      The MineDown instance
+     */
+    public MineDown ignorePlaceholderCase(boolean ignorePlaceholderCase) {
+        reset();
+        replacer().ignorePlaceholderCase(ignorePlaceholderCase);
+        return this;
+    }
+
+    /**
+     * Get whether or not the case of the placeholder should be ignored when replacing
+     * @return Whether or not to ignore the case of the placeholders
+     */
+    public boolean ignorePlaceholderCase() {
+        return replacer().ignorePlaceholderCase();
+    }
+
+    /**
      * Enable or disable the translation of legacy color codes
      * @param translateLegacyColors Whether or not to translate legacy color codes (Default: true)
      * @return                      The MineDown instance
