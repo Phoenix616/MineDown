@@ -238,9 +238,10 @@ public class Replacer {
                                 } else {
                                     textComponent.setText("");
                                 }
+                                text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
                                 newReplacedComponents.add(textComponent);
 
-                                if (textComponent.getText().isEmpty()) {
+                                if (text.isEmpty()) {
                                     break;
                                 }
                             }
