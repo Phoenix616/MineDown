@@ -102,7 +102,7 @@ public class MineDownParser {
         boolean escaped = false;
         for (int i = 0; i < message.length(); i++) {
             char c = message.charAt(i);
-    
+
             boolean isEscape = c == '\\' && i + 1 < message.length();
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
                     && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
@@ -114,8 +114,13 @@ public class MineDownParser {
                     if (nextDefClose != -1) {
                         int depth = 1;
                         isEvent = true;
+                        boolean innerEscaped = false;
                         for (int j = i + 1; j < nextEventClose; j++) {
-                            if (message.charAt(j) == '[') {
+                            if (innerEscaped) {
+                                innerEscaped = false;
+                            } else if (message.charAt(j) == '\\') {
+                                innerEscaped = true;
+                            } else if (message.charAt(j) == '[') {
                                 depth++;
                             } else if (message.charAt(j) == ']') {
                                 depth--;
