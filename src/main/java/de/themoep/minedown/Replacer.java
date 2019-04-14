@@ -266,6 +266,7 @@ public class Replacer {
      */
     public String replaceIn(String string) {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
+            String replValue = replacement.getValue() != null ? replacement.getValue() : "null";
             if (ignorePlaceholderCase()) {
                 String placeholder = placeholderPrefix()
                         + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
@@ -273,11 +274,11 @@ public class Replacer {
                 int nextStart = 0;
                 int startIndex;
                 while (nextStart < string.length() && (startIndex = string.toLowerCase().indexOf(placeholder, nextStart)) > -1) {
-                    nextStart = startIndex + replacement.getValue().length();
-                    string = string.substring(0, startIndex) + replacement.getValue() + string.substring(startIndex + placeholder.length());
+                    nextStart = startIndex + replValue.length();
+                    string = string.substring(0, startIndex) + replValue + string.substring(startIndex + placeholder.length());
                 }
             } else {
-                string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replacement.getValue());
+                string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replValue);
             }
         }
         return string;
