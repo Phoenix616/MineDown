@@ -43,7 +43,6 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 public class MineDownParser {
-    private ComponentBuilder builder = null;
 
     /**
      * The character to use as a special color code. (Default: ampersand &amp;)
@@ -85,11 +84,16 @@ public class MineDownParser {
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
 
-    private StringBuilder value = new StringBuilder();
-    private ChatColor color = null;
-    private Set<ChatColor> format = new HashSet<>();
-    private ClickEvent clickEvent = null;
-    private HoverEvent hoverEvent = null;
+    private ComponentBuilder builder;
+    private StringBuilder value;
+    private ChatColor color;
+    private Set<ChatColor> format;
+    private ClickEvent clickEvent;
+    private HoverEvent hoverEvent;
+
+    public MineDownParser() {
+        reset();
+    }
 
     /**
      * Create a ComponentBuilder by parsing a {@link MineDown} message
@@ -205,7 +209,7 @@ public class MineDownParser {
                 if (!isFiltered(Option.ADVANCED_FORMATTING)) {
                     append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
                 } else {
-                    append(copy().parse(message.substring(i + 1, index)));
+                    append(copy(true).parse(message.substring(i + 1, index)));
                 }
                 i = endIndex;
                 continue;
@@ -218,7 +222,7 @@ public class MineDownParser {
                     formats.add(MineDown.getFormatFromChar(c));
                 }
                 appendValue();
-                append(copy().format(formats).parse(message.substring(i + 2, endIndex)));
+                append(copy(true).format(formats).parse(message.substring(i + 2, endIndex)));
                 i = endIndex + 1;
                 continue;
             }
@@ -440,7 +444,7 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
-                hoverEvent = new HoverEvent(hoverAction, copy().clickEvent(null).hoverEvent(null).urlDetection(false).parse(value.toString()).create());
+                hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(value.toString()).create());
             }
         }
         
@@ -491,21 +495,60 @@ public class MineDownParser {
      * @return The new parser instance with all settings copied
      */
     public MineDownParser copy() {
-        return new MineDownParser().copy(this);
+        return copy(false);
     }
 
     /**
-     * Copy all the parser's settings from another parser
+     * Copy all the parser's setting to a new instance
+     * @param formatting    Should the formatting be copied too?
+     * @return              The new parser instance with all settings copied
+     */
+    public MineDownParser copy(boolean formatting) {
+        return new MineDownParser().copy(this, formatting);
+    }
+
+    /**
+     * Copy all the parser's settings from another parser.
      * @param from  The parser to copy from
      * @return      This parser's instance
      */
     public MineDownParser copy(MineDownParser from) {
+        return copy(from, false);
+    }
+
+    /**
+     * Copy all the parser's settings from another parser.
+     * @param from          The parser to copy from
+     * @param formatting    Should the formatting be copied too?
+     * @return              This parser's instance
+     */
+    public MineDownParser copy(MineDownParser from, boolean formatting) {
         lenient(from.lenient());
+        urlDetection(from.urlDetection());
+        urlHoverText(from.urlHoverText());
         enabledOptions(from.enabledOptions());
         filteredOptions(from.filteredOptions());
         colorChar(from.colorChar());
-        clickEvent(from.clickEvent());
-        hoverEvent(from.hoverEvent());
+        if (formatting) {
+            format(from.format());
+            color(from.color());
+            clickEvent(from.clickEvent());
+            hoverEvent(from.hoverEvent());
+        }
+        return this;
+    }
+
+    /**
+     * Reset the parser state to the start
+     * @return The parser's instance
+     */
+    public MineDownParser reset() {
+        builder = null;
+        value = new StringBuilder();
+        color = null;
+        format = new HashSet<>();
+        clickEvent = null;
+        hoverEvent = null;
         return this;
     }
 
