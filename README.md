@@ -1,9 +1,9 @@
 # Minedown
 A library that adds the ability to use a MarkDown inspired markup to write Minecraft chat components!
 
-It lets you convert string messages into chat components by using a custom mark up syntax
-which is loosely based on MarkDown while still supporting legacy formatting codes. It also
-includes a way to directly replace placeholders in the messages.
+It provides a custom mark up syntax which is loosely based on MarkDown that adds the ability to use the full power of 
+component messages with the same simplicity as legacy formatting codes. (Which it can still support!)
+It also includes a way to directly replace placeholders in the messages, both string based and component based ones!
 
 This requires BungeeCord's chat API so it will only work on **Spigot** or **BungeeCord**!
 
@@ -46,7 +46,7 @@ All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
 
 ## How to use it
-The library's main API access is through the [MineDown.class](https://github.com/Phoenix616/MineDown/blob/master/src/main/java/de/themoep/minedown/MineDown.java) and its parse methods.
+The library's main API access is through the [MineDown.class](https://docs.minebench.de/minedown/de/themoep/minedown/MineDown.html) and its parse methods.
 
 E.g. you can use it like this in your Spigot plugin:
 ```java
@@ -80,7 +80,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
