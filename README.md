@@ -5,7 +5,7 @@ It provides a custom mark up syntax which is loosely based on MarkDown that adds
 component messages with the same simplicity as legacy formatting codes. (Which it can still support!)
 It also includes a way to directly replace placeholders in the messages, both string based and component based ones!
 
-This requires BungeeCord's chat API so it will only work on **Spigot** or **BungeeCord**!
+This requires BungeeCord's chat API so it will only work on **Spigot** or **BungeeCord**! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple implementation.
 
 ## Syntax
 
@@ -60,11 +60,11 @@ player.spigot().sendMessage(MineDown.parse(rawMessage, replacements));
 Take a look at the [MineDown JavaDocs](https://docs.minebench.de/minedown/) for more
 detailed info on the library and the included classes.
 
-## Include it into your plugin
+### Include it into your plugin
 You can easily include this library into your plugin by using maven.
 Make sure to relocate it into your plugin's package!
 
-### Repository
+#### Repository
 ```xml
 <repositories>
     <repository>
@@ -74,7 +74,7 @@ Make sure to relocate it into your plugin's package!
 </repositories>
 ```
 
-### Artifact
+#### Artifact
 ```xml
 <dependencies>
     <dependency>
@@ -86,7 +86,7 @@ Make sure to relocate it into your plugin's package!
 </dependencies>
 ```
 
-### Relocation
+#### Relocation
 ```xml
 <build>
     <plugins>
@@ -113,6 +113,11 @@ Make sure to relocate it into your plugin's package!
     </plugins>
 </build>
 ```
+
+### Alternative to shading
+
+Alternatively you can also directly depend on my [MineDownPlugin](https://github.com/Phoenix616/MineDownPlugin/) 
+instead of shading in this library! MineDownPlugin includes a non-relocated version of this library.
 
 ## License
 MineDown is licensed under the MIT open source license:
