@@ -22,8 +22,6 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -74,12 +72,10 @@ import java.util.Map;
  * All advanced settings can be chained/included in a event definition.
  * You can't however add multiple different colors or click and hover actions!
  */
-@Getter
 public class MineDown {
-    private final String message;
+    private String message;
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();
-    @Getter(AccessLevel.PROTECTED)
     private BaseComponent[] baseComponents = null;
     
     /**
@@ -320,6 +316,45 @@ public class MineDown {
         reset();
         parser().colorChar(colorChar);
         return this;
+    }
+
+    /**
+     * Get the set message that is to be parsed
+     * @return The to be parsed message
+     */
+    public String message() {
+        return this.message;
+    }
+
+    /**
+     * Set the message that is to be parsed
+     * @param message The message to be parsed
+     * @return The MineDown instance
+     */
+    public MineDown message(String message) {
+        this.message = message;
+        reset();
+        return this;
+    }
+
+    /**
+     * Get the replacer instance that is currently used
+     * @return The currently used replacer instance
+     */
+    public Replacer replacer() {
+        return this.replacer;
+    }
+
+    /**
+     * Get the parser instance that is currently used
+     * @return The currently used parser instance
+     */
+    public MineDownParser parser() {
+        return this.parser;
+    }
+
+    protected BaseComponent[] baseComponents() {
+        return this.baseComponents;
     }
 
     /**

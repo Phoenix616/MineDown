@@ -22,8 +22,6 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import lombok.Getter;
-import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -40,8 +38,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Getter
-@Setter
 public class MineDownParser {
 
     /**
@@ -97,8 +93,8 @@ public class MineDownParser {
 
     /**
      * Create a ComponentBuilder by parsing a {@link MineDown} message
-     * @param message   The message to parse
-     * @return          The parsed ComponentBuilder
+     * @param message The message to parse
+     * @return The parsed ComponentBuilder
      * @throws IllegalArgumentException Thrown when a parsing error occurs and lenient is set to false
      */
     public ComponentBuilder parse(String message) throws IllegalArgumentException {
@@ -140,16 +136,16 @@ public class MineDownParser {
             boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
                     && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)
                     && message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2) != -1;
-    
+
             if (escaped) {
                 escaped = false;
-                
-            // Escaping
+
+                // Escaping
             } else if (isEscape) {
                 escaped = true;
                 continue;
-                
-            // Legacy color codes
+
+                // Legacy color codes
             } else if (isColorCode) {
                 i++;
                 char code = message.charAt(i);
@@ -164,7 +160,8 @@ public class MineDownParser {
                         try {
                             encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
                             i = j;
-                        } catch (IllegalArgumentException ignored) {}
+                        } catch (IllegalArgumentException ignored) {
+                        }
                         break;
                     }
                     if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
@@ -175,7 +172,7 @@ public class MineDownParser {
                 if (encoded == null) {
                     encoded = ChatColor.getByChar(code);
                 }
-                
+
                 if (encoded != null) {
                     if (!isFiltered(Option.LEGACY_COLORS)) {
                         if (encoded == ChatColor.RESET) {
@@ -200,8 +197,8 @@ public class MineDownParser {
                     value.append(c).append(code);
                 }
                 continue;
-                
-            // Events
+
+                // Events
             } else if (isEvent) {
                 int index = Util.indexOfNotEscaped(message, "](", i + 1);
                 int endIndex = Util.indexOfNotEscaped(message, ")", index + 2);
@@ -214,7 +211,7 @@ public class MineDownParser {
                 i = endIndex;
                 continue;
 
-            // Simple formatting
+                // Simple formatting
             } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
                 Set<ChatColor> formats = new HashSet<>(format);
@@ -226,7 +223,7 @@ public class MineDownParser {
                 i = endIndex + 1;
                 continue;
             }
-    
+
             // URL
             if (urlDetection() && urlMatcher != null) {
                 int urlEnd = message.indexOf(' ', i);
@@ -241,7 +238,7 @@ public class MineDownParser {
                     continue;
                 }
             }
-            
+
             // It's normal text, just append the character
             value.append(message.charAt(i));
         }
@@ -283,7 +280,7 @@ public class MineDownParser {
                         Field fParts = this.builder.getClass().getDeclaredField("parts");
                         fParts.setAccessible(true);
                         List<BaseComponent> parts = (List<BaseComponent>) fParts.get(this.builder);
-    
+
                         for (BaseComponent component : components) {
                             parts.add(previous);
                             fCurrent.set(this.builder, component.duplicate());
@@ -295,7 +292,7 @@ public class MineDownParser {
             }
         }
     }
-    
+
     private void appendValue() {
         appendValue(ComponentBuilder.FormatRetention.NONE);
     }
@@ -330,12 +327,12 @@ public class MineDownParser {
             value = new StringBuilder();
         }
     }
-    
+
     /**
      * Parse a {@link MineDown} event string
-     * @param text          The display text
-     * @param definitions   The event definition string
-     * @return              The parsed ComponentBuilder for this string
+     * @param text        The display text
+     * @param definitions The event definition string
+     * @return The parsed ComponentBuilder for this string
      */
     public ComponentBuilder parseEvent(String text, String definitions) {
         List<String> defParts = new ArrayList<>();
@@ -350,9 +347,9 @@ public class MineDownParser {
         Set<ChatColor> formats = new HashSet<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
-        
+
         int formatEnd = -1;
-        
+
         for (int i = 0; i < defParts.size(); i++) {
             String definition = defParts.get(i);
             ChatColor parsed = parseColor(definition, "", true);
@@ -365,7 +362,7 @@ public class MineDownParser {
                 formatEnd = i;
                 continue;
             }
-            
+
             if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
                 color = parseColor(definition, COLOR_PREFIX, lenient());
                 if (!lenient() && Util.isFormat(color)) {
@@ -374,7 +371,7 @@ public class MineDownParser {
                 formatEnd = i;
                 continue;
             }
-            
+
             if (definition.toLowerCase().startsWith(FORMAT_PREFIX)) {
                 for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
                     ChatColor format = parseColor(formatStr, "", lenient());
@@ -386,7 +383,7 @@ public class MineDownParser {
                 formatEnd = i;
                 continue;
             }
-            
+
             if (i == formatEnd + 1 && URL_PATTERN.matcher(definition).matches()) {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
@@ -403,13 +400,15 @@ public class MineDownParser {
             String[] parts = definition.split("=", 2);
             try {
                 hoverAction = HoverEvent.Action.valueOf(parts[0].toUpperCase());
-            } catch (IllegalArgumentException ignored) {}
+            } catch (IllegalArgumentException ignored) {
+            }
             try {
                 clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase());
-            } catch (IllegalArgumentException ignored) {}
-            
+            } catch (IllegalArgumentException ignored) {
+            }
+
             boolean hasBracket = parts.length > 1 && parts[1].startsWith("{") && (clickAction != null || hoverAction != null);
-            
+
             StringBuilder value = new StringBuilder();
             if (parts.length > 1 && clickAction != null || hoverAction != null) {
                 if (hasBracket) {
@@ -420,7 +419,7 @@ public class MineDownParser {
             } else {
                 value.append(definition);
             }
-            
+
             for (i = i + 1; i < defParts.size(); i++) {
                 if (!hasBracket && defParts.get(i).indexOf('=') != -1) {
                     i--;
@@ -447,7 +446,7 @@ public class MineDownParser {
                 hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(value.toString()).create());
             }
         }
-        
+
         if (clickEvent != null && hoverEvent == null) {
             hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder(clickEvent.getAction().toString().toLowerCase().replace('_', ' ')).color(ChatColor.BLUE)
@@ -463,13 +462,67 @@ public class MineDownParser {
                 .hoverEvent(hoverEvent)
                 .parse(text);
     }
-    
+
+    protected ComponentBuilder builder() {
+        return this.builder;
+    }
+
+    protected MineDownParser builder(ComponentBuilder builder) {
+        this.builder = builder;
+        return this;
+    }
+
+    protected MineDownParser value(StringBuilder value) {
+        this.value = value;
+        return this;
+    }
+
+    protected StringBuilder value() {
+        return this.value;
+    }
+
+    protected MineDownParser color(ChatColor color) {
+        this.color = color;
+        return this;
+    }
+
+    protected ChatColor color() {
+        return this.color;
+    }
+
+    protected MineDownParser format(Set<ChatColor> format) {
+        this.format = format;
+        return this;
+    }
+
+    protected Set<ChatColor> format() {
+        return this.format;
+    }
+
+    protected MineDownParser clickEvent(ClickEvent clickEvent) {
+        this.clickEvent = clickEvent;
+        return this;
+    }
+
+    protected ClickEvent clickEvent() {
+        return this.clickEvent;
+    }
+
+    protected MineDownParser hoverEvent(HoverEvent hoverEvent) {
+        this.hoverEvent = hoverEvent;
+        return this;
+    }
+
+    protected HoverEvent hoverEvent() {
+        return this.hoverEvent;
+    }
+
     /**
      * Parse a color definition
-     * @param colorString   The string to parse
-     * @param prefix        The color prefix e.g. ampersand (&amp;)
-     * @param lenient       Whether or not to accept malformed strings
-     * @return              The parsed color or <tt>null</tt> if lenient is true and no color was found
+     * @param colorString The string to parse
+     * @param prefix      The color prefix e.g. ampersand (&amp;)
+     * @param lenient     Whether or not to accept malformed strings
+     * @return The parsed color or <tt>null</tt> if lenient is true and no color was found
      */
     public static ChatColor parseColor(String colorString, String prefix, boolean lenient) {
         ChatColor color = null;
@@ -489,7 +542,7 @@ public class MineDownParser {
         }
         return color;
     }
-    
+
     /**
      * Copy all the parser's setting to a new instance
      * @return The new parser instance with all settings copied
@@ -500,8 +553,8 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's setting to a new instance
-     * @param formatting    Should the formatting be copied too?
-     * @return              The new parser instance with all settings copied
+     * @param formatting Should the formatting be copied too?
+     * @return The new parser instance with all settings copied
      */
     public MineDownParser copy(boolean formatting) {
         return new MineDownParser().copy(this, formatting);
@@ -509,8 +562,8 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
-     * @param from  The parser to copy from
-     * @return      This parser's instance
+     * @param from The parser to copy from
+     * @return This parser's instance
      */
     public MineDownParser copy(MineDownParser from) {
         return copy(from, false);
@@ -518,9 +571,9 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
-     * @param from          The parser to copy from
-     * @param formatting    Should the formatting be copied too?
-     * @return              This parser's instance
+     * @param from       The parser to copy from
+     * @param formatting Should the formatting be copied too?
+     * @return This parser's instance
      */
     public MineDownParser copy(MineDownParser from, boolean formatting) {
         lenient(from.lenient());
@@ -554,8 +607,8 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes (Default: true)
-     * @return      Whether or not to translate legacy color codes (Default: true)
-     * @deprecated  Use {@link #isEnabled(Option)} instead
+     * @return Whether or not to translate legacy color codes (Default: true)
+     * @deprecated Use {@link #isEnabled(Option)} instead
      */
     @Deprecated
     public boolean translateLegacyColors() {
@@ -564,8 +617,8 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes
-     * @return      The parser
-     * @deprecated  Use {@link #enable(Option)} and {@link #disable(Option)} instead
+     * @return The parser
+     * @deprecated Use {@link #enable(Option)} and {@link #disable(Option)} instead
      */
     @Deprecated
     public MineDownParser translateLegacyColors(boolean enabled) {
@@ -574,8 +627,8 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is enabled
-     * @param option    The option to check for
-     * @return          <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     * @param option The option to check for
+     * @return <tt>true</tt> if it's enabled; <tt>false</tt> if not
      */
     public boolean isEnabled(Option option) {
         return enabledOptions().contains(option);
@@ -583,8 +636,8 @@ public class MineDownParser {
 
     /**
      * Enable an option.
-     * @param option    The option to enable
-     * @return          The parser instace
+     * @param option The option to enable
+     * @return The parser instace
      */
     public MineDownParser enable(Option option) {
         enabledOptions().add(option);
@@ -595,8 +648,8 @@ public class MineDownParser {
      * Disable an option. Disabling an option will stop the parser from replacing
      * this option's chars in the string. Use {@link #filter(Option)} to completely
      * remove the characters used by this option from the message instead.
-     * @param option    The option to disable
-     * @return          The parser instace
+     * @param option The option to disable
+     * @return The parser instace
      */
     public MineDownParser disable(Option option) {
         enabledOptions().remove(option);
@@ -605,8 +658,8 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is filtered
-     * @param option    The option to check for
-     * @return          <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     * @param option The option to check for
+     * @return <tt>true</tt> if it's enabled; <tt>false</tt> if not
      */
     public boolean isFiltered(Option option) {
         return filteredOptions().contains(option);
@@ -615,8 +668,8 @@ public class MineDownParser {
     /**
      * Filter an option. This enables the parsing of an option and completely
      * removes the characters of this option from the string.
-     * @param option    The option to add to the filter
-     * @return          The parser instance
+     * @param option The option to add to the filter
+     * @return The parser instance
      */
     public MineDownParser filter(Option option) {
         filteredOptions().add(option);
@@ -626,8 +679,8 @@ public class MineDownParser {
 
     /**
      * Unfilter an option. Does not enable it!
-     * @param option    The option to remove from the filter
-     * @return          The parser instance
+     * @param option The option to remove from the filter
+     * @return The parser instance
      */
     public MineDownParser unfilter(Option option) {
         filteredOptions().remove(option);
@@ -636,8 +689,8 @@ public class MineDownParser {
 
     /**
      * Escape formatting in the string depending on this parser's options. This will escape backslashes too!
-     * @param string    The string to escape
-     * @return          The string with all formatting of this parser escaped
+     * @param string The string to escape
+     * @return The string with all formatting of this parser escaped
      */
     public String escape(String string) {
         StringBuilder value = new StringBuilder();
@@ -674,4 +727,113 @@ public class MineDownParser {
          */
         LEGACY_COLORS
     }
+
+    /**
+     * Get The character to use as a special color code.
+     * @return The color character (Default: ampersand &amp;)
+     */
+    public char colorChar() {
+        return this.colorChar;
+    }
+
+    /**
+     * Set the character to use as a special color code.
+     * @param colorChar The color char (Default: ampersand &amp;)
+     * @return The MineDownParser instance
+     */
+    public MineDownParser colorChar(char colorChar) {
+        this.colorChar = colorChar;
+        return this;
+    }
+
+    /**
+     * Get all enabled options that will be used when parsing
+     * @return a modifiable set of options
+     */
+    public Set<Option> enabledOptions() {
+        return this.enabledOptions;
+    }
+
+    /**
+     * Set all enabled options that will be used when parsing at once, replaces any existing options
+     * @param enabledOptions The enabled options
+     * @return The MineDownParser instance
+     */
+    public MineDownParser enabledOptions(Set<Option> enabledOptions) {
+        this.enabledOptions = enabledOptions;
+        return this;
+    }
+
+    /**
+     * Get all filtered options that will be parsed and then removed from the string
+     * @return a modifiable set of options
+     */
+    public Set<Option> filteredOptions() {
+        return this.filteredOptions;
+    }
+
+    /**
+     * Set all filtered options that will be parsed and then removed from the string at once,
+     * replaces any existing options
+     * @param filteredOptions The filtered options
+     * @return The MineDownParser instance
+     */
+    public MineDownParser filteredOptions(Set<Option> filteredOptions) {
+        this.filteredOptions = filteredOptions;
+        return this;
+    }
+
+    /**
+     * Get whether to accept malformed strings or not
+     * @return whether or not the accept malformed strings (Default: false)
+     */
+    public boolean lenient() {
+        return this.lenient;
+    }
+
+    /**
+     * Set whether to accept malformed strings or not
+     * @param lenient Set whether or not to accept malformed string (Default: false)
+     * @return The MineDownParser instance
+     */
+    public MineDownParser lenient(boolean lenient) {
+        this.lenient = lenient;
+        return this;
+    }
+
+    /**
+     * Get whether or not urls in strings are detected and get events added to them?
+     * @return whether or not urls are detected (Default: true)
+     */
+    public boolean urlDetection() {
+        return this.urlDetection;
+    }
+
+    /**
+     * Set whether or not to detect urls in strings and add events to them?
+     * @param urlDetection Whether or not to detect urls in strings  (Default: true)
+     * @return The MineDownParser instance
+     */
+    public MineDownParser urlDetection(boolean urlDetection) {
+        this.urlDetection = urlDetection;
+        return this;
+    }
+
+    /**
+     * Get the text to display when hovering over an URL. Has a %url% placeholder.
+     */
+    public String urlHoverText() {
+        return this.urlHoverText;
+    }
+
+    /**
+     * Set the text to display when hovering over an URL. Has a %url% placeholder.
+     * @param urlHoverText The url over text
+     * @return The MineDownParser instance
+     */
+    public MineDownParser urlHoverText(String urlHoverText) {
+        this.urlHoverText = urlHoverText;
+        return this;
+    }
+
 }

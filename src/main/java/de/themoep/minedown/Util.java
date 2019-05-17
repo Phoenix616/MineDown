@@ -33,8 +33,8 @@ import java.util.Set;
 public class Util {
     /**
      * Utility method to throw an IllegalArgumentException if the value is false
-     * @param value     The value to validate
-     * @param message   The message for the exception
+     * @param value   The value to validate
+     * @param message The message for the exception
      * @throws IllegalArgumentException Thrown if the value is false
      */
     public static void validate(boolean value, String message) throws IllegalArgumentException {
@@ -42,15 +42,15 @@ public class Util {
             throw new IllegalArgumentException(message);
         }
     }
-    
+
     /**
      * Apply a collection of colors/formats to a component
      * @param component The BaseComponent
      * @param formats   The collection of ChatColor formats to apply
-     * @return          The component that was modified
+     * @return The component that was modified
      */
     public static BaseComponent applyFormat(BaseComponent component, Collection<ChatColor> formats) {
-        for(ChatColor format : formats) {
+        for (ChatColor format : formats) {
             switch (format) {
                 case BOLD:
                     component.setBold(true);
@@ -85,15 +85,15 @@ public class Util {
         }
         return component;
     }
-    
+
     /**
      * Apply a collection of colors/formats to a component builder
-     * @param builder   The ComponentBuilder
-     * @param formats   The collection of ChatColor formats to apply
-     * @return          The component builder that was modified
+     * @param builder The ComponentBuilder
+     * @param formats The collection of ChatColor formats to apply
+     * @return The component builder that was modified
      */
     public static ComponentBuilder applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
-        for(ChatColor format : formats) {
+        for (ChatColor format : formats) {
             switch (format) {
                 case BOLD:
                     builder.bold(true);
@@ -123,21 +123,21 @@ public class Util {
         }
         return builder;
     }
-    
+
     /**
      * Check whether or not a character at a certain index of a string repeats itself
-     * @param string    The string to check
-     * @param index     The index at which to check the character
-     * @return          Whether or not the character at that index repeated itself
+     * @param string The string to check
+     * @param index  The index at which to check the character
+     * @return Whether or not the character at that index repeated itself
      */
     public static boolean isDouble(String string, int index) {
         return index + 1 < string.length() && string.charAt(index) == string.charAt(index + 1);
     }
-    
+
     /**
      * Check whether a certain ChatColor is formatting or not
-     * @param format    The ChatColor to check
-     * @return          <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
+     * @param format The ChatColor to check
+     * @return <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
      */
     public static boolean isFormat(ChatColor format) {
         switch (format) {
@@ -150,12 +150,12 @@ public class Util {
         }
         return false;
     }
-    
+
     /**
      * Get a set of ChatColor formats all formats that a component includes
-     * @param component     The component to get the formats from
-     * @param ignoreParent  Whether or not to include the parent's format
-     * @return              A set of all the format ChatColors that the component includes
+     * @param component    The component to get the formats from
+     * @param ignoreParent Whether or not to include the parent's format
+     * @return A set of all the format ChatColors that the component includes
      */
     public static Set<ChatColor> getFormats(BaseComponent component, boolean ignoreParent) {
         Set<ChatColor> formats = new LinkedHashSet<>();
@@ -179,20 +179,20 @@ public class Util {
 
     /**
      * Get the index of the first occurrences of a not escaped character
-     * @param string    The string to search
-     * @param chars     The characters to search for
-     * @return          The first unescaped index or -1 if not found
+     * @param string The string to search
+     * @param chars  The characters to search for
+     * @return The first unescaped index or -1 if not found
      */
-    public static int indexOfNotEscaped(String string,  String chars) {
+    public static int indexOfNotEscaped(String string, String chars) {
         return indexOfNotEscaped(string, chars, 0);
     }
 
     /**
      * Get the index of the first occurrences of a not escaped character
-     * @param string        The string to search
-     * @param chars         The characters to search for
-     * @param fromIndex     Start searching from that index
-     * @return              The first unescaped index or {@code -1} if not found
+     * @param string    The string to search
+     * @param chars     The characters to search for
+     * @param fromIndex Start searching from that index
+     * @return The first unescaped index or {@code -1} if not found
      */
     public static int indexOfNotEscaped(String string, String chars, int fromIndex) {
         for (int i = fromIndex; i < string.length(); i++) {
@@ -209,10 +209,10 @@ public class Util {
 
     /**
      * Check if a character at a certain index is escaped
-     * @param string    The string to check
-     * @param index     The index of the character in the string to check
-     * @return          Whether or not the character is escaped (uneven number of backslashes in front of char mains it is escaped)
-     * @exception       IndexOutOfBoundsException if the {@code index} argument is not less than the length of this string.
+     * @param string The string to check
+     * @param index  The index of the character in the string to check
+     * @return Whether or not the character is escaped (uneven number of backslashes in front of char mains it is escaped)
+     * @throws IndexOutOfBoundsException if the {@code index} argument is not less than the length of this string.
      */
     public static boolean isEscaped(String string, int index) {
         if (index - 1 > string.length()) {

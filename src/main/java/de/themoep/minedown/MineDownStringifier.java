@@ -22,8 +22,6 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import lombok.Getter;
-import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -38,30 +36,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class MineDownStringifier {
 
     /**
      * Whether or not to use legacy color codes (Default: true)
      */
     private boolean useLegacyColors = true;
-    
+
     /**
      * Whether or not to translate legacy formatting codes over Minedown ones (Default: false)
      */
     private boolean useLegacyFormatting = false;
-    
+
     /**
      * Whether or not to use simple event definitions or specific ones (Default: true)
      */
     private boolean preferSimpleEvents = true;
-    
+
     /**
      * Whether or not to put formatting in event definitions (Default: false)
      */
     private boolean formattingInEventDefinition = false;
-    
+
     /**
      * Whether or not to put colors in event definitions (Default: false)
      */
@@ -71,22 +67,22 @@ public class MineDownStringifier {
      * The character to use as a special color code. (Default: ampersand &amp;)
      */
     private char colorChar = '&';
-    
+
     public static final String COLOR_PREFIX = "color=";
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
 
     private StringBuilder value = new StringBuilder();
-    
+
     private ChatColor color = null;
     private ClickEvent clickEvent = null;
     private HoverEvent hoverEvent = null;
     private Set<ChatColor> formats = new LinkedHashSet<>();
-    
+
     /**
      * Create a {@link MineDown} string from a component message
-     * @param components    The components to generate a MineDown string from
-     * @return              The MineDown string
+     * @param components The components to generate a MineDown string from
+     * @return The MineDown string
      */
     public String stringify(BaseComponent[] components) {
         StringBuilder sb = new StringBuilder();
@@ -109,13 +105,13 @@ public class MineDownStringifier {
             } else {
                 appendFormat(sb, component);
             }
-            
+
             appendText(sb, component);
-            
+
             if (component.getExtra() != null && !component.getExtra().isEmpty()) {
                 sb.append(copy().stringify(component.getExtra().toArray(new BaseComponent[0])));
             }
-            
+
             if (component.getClickEvent() != clickEvent || component.getHoverEvent() != hoverEvent) {
                 clickEvent = component.getClickEvent();
                 hoverEvent = component.getHoverEvent();
@@ -168,7 +164,7 @@ public class MineDownStringifier {
         }
         return sb.toString();
     }
-    
+
     private void appendText(StringBuilder sb, BaseComponent component) {
         if (component instanceof TextComponent) {
             sb.append(((TextComponent) component).getText());
@@ -176,7 +172,7 @@ public class MineDownStringifier {
             throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
         }
     }
-    
+
     private void appendColor(StringBuilder sb, ChatColor color) {
         if (this.color != color) {
             this.color = color;
@@ -187,7 +183,7 @@ public class MineDownStringifier {
             }
         }
     }
-    
+
     private void appendFormat(StringBuilder sb, BaseComponent component) {
         Set<ChatColor> formats = Util.getFormats(component, true);
         if (!formats.containsAll(this.formats)) {
@@ -215,7 +211,7 @@ public class MineDownStringifier {
         this.formats.clear();
         this.formats.addAll(formats);
     }
-    
+
     private void appendFormatSuffix(StringBuilder sb, BaseComponent component) {
         if (!useLegacyFormatting()) {
             Set<ChatColor> formats = Util.getFormats(component, true);
@@ -225,7 +221,7 @@ public class MineDownStringifier {
             this.formats.removeAll(formats);
         }
     }
-    
+
     /**
      * Copy all the parser's setting to a new instance
      * @return The new parser instance with all settings copied
@@ -236,8 +232,8 @@ public class MineDownStringifier {
 
     /**
      * Copy all the parser's settings from another parser
-     * @param from  The stringifier to copy from
-     * @return      This stringifier's instance
+     * @param from The stringifier to copy from
+     * @return This stringifier's instance
      */
     public MineDownStringifier copy(MineDownStringifier from) {
         MineDownStringifier copy = new MineDownStringifier();
@@ -249,5 +245,113 @@ public class MineDownStringifier {
         colorChar(from.colorChar());
         return copy;
     }
-    
+
+    /**
+     * Get whether or not to use legacy color codes
+     * @return whether or not to use legacy color codes when possible (Default: true)
+     */
+    public boolean useLegacyColors() {
+        return this.useLegacyColors;
+    }
+
+    /**
+     * Set whether or not to use legacy color codes
+     * @param useLegacyColors Whether or not to use legacy colors (Default: true)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier useLegacyColors(boolean useLegacyColors) {
+        this.useLegacyColors = useLegacyColors;
+        return this;
+    }
+
+    /**
+     * Get whether or not to translate legacy formatting codes over MineDown ones
+     * @return whether or not to use legacy formatting codes (Default: false)
+     */
+    public boolean useLegacyFormatting() {
+        return this.useLegacyFormatting;
+    }
+
+    /**
+     * Set whether or not to translate legacy formatting codes over MineDown ones
+     * @param useLegacyFormatting Whether or not to translate legacy formatting codes (Default: false)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier useLegacyFormatting(boolean useLegacyFormatting) {
+        this.useLegacyFormatting = useLegacyFormatting;
+        return this;
+    }
+
+    /**
+     * Get whether or not to use simple event definitions or specific ones (Default: true)
+     * @return whether or not to use simple events
+     */
+    public boolean preferSimpleEvents() {
+        return this.preferSimpleEvents;
+    }
+
+    /**
+     * Set whether or not to use simple event definitions or specific ones
+     * @param preferSimpleEvents Whether or not to prefer simple events (Default: true)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier preferSimpleEvents(boolean preferSimpleEvents) {
+        this.preferSimpleEvents = preferSimpleEvents;
+        return this;
+    }
+
+    /**
+     * Get whether or not to put colors in event definitions or use inline color definitions
+     * @return whether or not to put colors in event definitions (Default: false)
+     */
+    public boolean colorInEventDefinition() {
+        return this.colorInEventDefinition;
+    }
+
+    /**
+     * Set whether or not to put colors in event definitions or use inline color definitions
+     * @param colorInEventDefinition Whether or not to put colors in event definitions (Default: false)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier colorInEventDefinition(boolean colorInEventDefinition) {
+        this.colorInEventDefinition = colorInEventDefinition;
+        return this;
+    }
+
+    /**
+     * Get whether or not to put formatting in event definitions or use inline formatting definitions
+     * @return whether or not to put formatting in event definitions (Default: false)
+     */
+    public boolean formattingInEventDefinition() {
+        return this.formattingInEventDefinition;
+    }
+
+    /**
+     * Set whether or not to put formatting in event definitions or use inline formatting definitions
+     * @param formattingInEventDefinition Whether or not to put formatting in event definitions (Default: false)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier formattingInEventDefinition(boolean formattingInEventDefinition) {
+        this.formattingInEventDefinition = formattingInEventDefinition;
+        return this;
+    }
+
+    /**
+     * Get the character to use as a special color code. (Default: ampersand &amp;)
+     * @return the color character
+     */
+    public char colorChar() {
+        return this.colorChar;
+    }
+
+    /**
+     * Set the character to use as a special color code.
+     * @param colorChar The character to be used as the color char (for legacy and MineDown colors, default: ampersand &amp;)
+     * @return The MineDownStringifier instance
+     */
+    public MineDownStringifier colorChar(char colorChar) {
+        this.colorChar = colorChar;
+        return this;
+    }
+
 }
