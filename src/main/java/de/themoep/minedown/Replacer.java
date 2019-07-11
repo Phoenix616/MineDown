@@ -31,9 +31,12 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class offers the ability to replace placeholders with values in strings and components.
@@ -41,6 +44,12 @@ import java.util.Map;
  * By default these are the % character.
  */
 public class Replacer {
+
+    /**
+     * A cache of compiled replacement patterns
+     */
+    private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+
     /**
      * The map of placeholders with their string replacements
      */
@@ -217,9 +226,9 @@ public class Replacer {
                                 + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
                                 + placeholderSuffix();
                         String text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
-                        if (text.contains(placeHolder)) {
-                            int index;
-                            while ((index = text.indexOf(placeHolder)) > -1) {
+                        int index = text.indexOf(placeHolder);
+                        if (index > -1) {
+                            do {
                                 TextComponent startComponent = new TextComponent(textComponent);
                                 if (index > 0) {
                                     startComponent.setText(textComponent.getText().substring(0, index));
@@ -236,11 +245,7 @@ public class Replacer {
                                 }
                                 text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
                                 newReplacedComponents.add(textComponent);
-
-                                if (text.isEmpty()) {
-                                    break;
-                                }
-                            }
+                            } while (!text.isEmpty() && (index = text.indexOf(placeHolder)) > -1);
                             continue;
                         }
                     }
@@ -274,7 +279,12 @@ public class Replacer {
                     string = string.substring(0, startIndex) + replValue + string.substring(startIndex + placeholder.length());
                 }
             } else {
-                string = string.replace(placeholderPrefix() + replacement.getKey() + placeholderSuffix(), replValue);
+                String placeholder = placeholderPrefix() + replacement.getKey() + placeholderSuffix();
+                Pattern pattern = PATTERN_CACHE.get(placeholder);
+                if (pattern == null) {
+                    PATTERN_CACHE.put(placeholder, pattern = Pattern.compile(placeholder, Pattern.LITERAL));
+                }
+                string = pattern.matcher(string).replaceAll(Matcher.quoteReplacement(replValue));
             }
         }
         return string;
