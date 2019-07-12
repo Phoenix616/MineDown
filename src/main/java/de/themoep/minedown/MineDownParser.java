@@ -74,6 +74,13 @@ public class MineDownParser {
      */
     private String urlHoverText = "Click to open url";
 
+    /**
+     * The max width the hover text should have.
+     * Minecraft itself will wrap after 60 characters.
+     * Won't apply if the text already includes new lines.
+     */
+    private int hoverTextWidth = 60;
+
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
 
     public static final String COLOR_PREFIX = "color=";
@@ -443,7 +450,10 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
-                hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(value.toString()).create());
+                String valueStr = value.toString();
+                hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(
+                        hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
+                ).create());
             }
         }
 
@@ -579,6 +589,7 @@ public class MineDownParser {
         lenient(from.lenient());
         urlDetection(from.urlDetection());
         urlHoverText(from.urlHoverText());
+        hoverTextWidth(from.hoverTextWidth());
         enabledOptions(from.enabledOptions());
         filteredOptions(from.filteredOptions());
         colorChar(from.colorChar());
@@ -828,11 +839,32 @@ public class MineDownParser {
 
     /**
      * Set the text to display when hovering over an URL. Has a %url% placeholder.
-     * @param urlHoverText The url over text
+     * @param urlHoverText The url hover text
      * @return The MineDownParser instance
      */
     public MineDownParser urlHoverText(String urlHoverText) {
         this.urlHoverText = urlHoverText;
+        return this;
+    }
+
+    /**
+     * Get the max width the hover text should have.
+     * Minecraft itself will wrap after 60 characters.
+     * Won't apply if the text already includes new lines.
+     */
+    public int hoverTextWidth() {
+        return this.hoverTextWidth;
+    }
+
+    /**
+     * Set the max width the hover text should have.
+     * Minecraft itself will wrap after 60 characters.
+     * Won't apply if the text already includes new lines.
+     * @param hoverTextWidth The url hover text length
+     * @return The MineDownParser instance
+     */
+    public MineDownParser hoverTextWidth(int hoverTextWidth) {
+        this.hoverTextWidth = hoverTextWidth;
         return this;
     }
 

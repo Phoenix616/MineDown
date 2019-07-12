@@ -26,11 +26,17 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Util {
+
+    private static final Pattern WRAP_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
+
     /**
      * Utility method to throw an IllegalArgumentException if the value is false
      * @param value   The value to validate
@@ -223,5 +229,47 @@ public class Util {
             e++;
         }
         return e % 2 != 0;
+    }
+
+    /**
+     * Wrap a string if it is longer than the line length and contains no new line.
+     * Will try to wrap at spaces between words.
+     * @param string        The string to wrap
+     * @param lineLength    The max length of a line
+     * @return The wrapped string
+     */
+    public static String wrap(String string, int lineLength) {
+        if (string.length() <= lineLength || string.contains("\n")) {
+            return string;
+        }
+
+        List<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
+        for (String s : WRAP_PATTERN.split(string)) {
+            if (currentLine.length() + s.length() + 1 > lineLength) {
+                int rest = lineLength - currentLine.length() - 1;
+                if (rest > lineLength / 4 && s.length() > Math.min(rest * 2, lineLength / 4)) {
+                    currentLine.append(" ").append(s, 0, rest);
+                } else {
+                    rest = 0;
+                }
+                lines.add(currentLine.toString());
+                String restString = s.substring(rest);
+                while (restString.length() >= lineLength) {
+                    lines.add(restString.substring(0, lineLength));
+                    restString = restString.substring(lineLength);
+                }
+                currentLine = new StringBuilder(restString);
+            } else {
+                if (currentLine.length() > 0) {
+                    currentLine.append(" ");
+                }
+                currentLine.append(s);
+            }
+        }
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
+        }
+        return String.join("\n", lines);
     }
 }

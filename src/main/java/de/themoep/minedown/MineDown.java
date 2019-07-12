@@ -261,6 +261,19 @@ public class MineDown {
     }
 
     /**
+     * Set the max width the hover text should have.
+     * Minecraft itself will wrap after 60 characters.
+     * Won't apply if the text already includes new lines.
+     * @param hoverTextWidth   The url hover text length
+     * @return                  The MineDown instance
+     */
+    public MineDown hoverTextWidth(int hoverTextWidth) {
+        reset();
+        parser().hoverTextWidth(hoverTextWidth);
+        return this;
+    }
+
+    /**
      * Enable an option. Unfilter it if you filtered it before.
      * @param option    The option to enable
      * @return          The MineDown instance
