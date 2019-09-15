@@ -269,9 +269,7 @@ public class Replacer {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
             String replValue = replacement.getValue() != null ? replacement.getValue() : "null";
             if (ignorePlaceholderCase()) {
-                String placeholder = placeholderPrefix()
-                        + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
-                        + placeholderSuffix();
+                String placeholder = placeholderPrefix() + replacement.getKey().toLowerCase() + placeholderSuffix();
                 int nextStart = 0;
                 int startIndex;
                 while (nextStart < string.length() && (startIndex = string.toLowerCase().indexOf(placeholder, nextStart)) > -1) {

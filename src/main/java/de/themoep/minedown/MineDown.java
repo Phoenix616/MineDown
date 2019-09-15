@@ -139,7 +139,7 @@ public class MineDown {
      * @param replacements  The replacements mapped placeholder to value
      * @return              The MineDown instance
      */
-    public MineDown replace(Map<String, String> replacements) {
+    public MineDown replace(Map<String, ?> replacements) {
         reset();
         replacer().replace(replacements);
         return this;
