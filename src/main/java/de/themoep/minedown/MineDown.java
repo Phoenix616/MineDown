@@ -250,6 +250,17 @@ public class MineDown {
     }
 
     /**
+     * Automatically add http to values of open_url when there doesn't exist any? (Default: true)
+     * @param enabled   Whether or not to automatically add http when missing
+     * @return          The MineDown instance
+     */
+    public MineDown autoAddUrlPrefix(boolean enabled) {
+        reset();
+        parser().autoAddUrlPrefix(enabled);
+        return this;
+    }
+
+    /**
      * The text to display when hovering over an URL
      * @param text  The text to display when hovering over an URL
      * @return      The MineDown instance

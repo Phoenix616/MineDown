@@ -75,6 +75,11 @@ public class MineDownParser {
     private String urlHoverText = "Click to open url";
 
     /**
+     * Automatically add http to values of open_url when there doesn't exist any? (Default: true)
+     */
+    private boolean autoAddUrlPrefix = true;
+
+    /**
      * The max width the hover text should have.
      * Minecraft itself will wrap after 60 characters.
      * Won't apply if the text already includes new lines.
@@ -442,7 +447,7 @@ public class MineDownParser {
 
             if (clickAction != null) {
                 String v = value.toString();
-                if (clickAction == ClickEvent.Action.OPEN_URL && !v.startsWith("http://") && !v.startsWith("https://")) {
+                if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !v.startsWith("http://") && !v.startsWith("https://")) {
                     v = "http://" + v;
                 }
                 clickEvent = new ClickEvent(clickAction, v);
@@ -589,6 +594,7 @@ public class MineDownParser {
         lenient(from.lenient());
         urlDetection(from.urlDetection());
         urlHoverText(from.urlHoverText());
+        autoAddUrlPrefix(from.autoAddUrlPrefix());
         hoverTextWidth(from.hoverTextWidth());
         enabledOptions(from.enabledOptions());
         filteredOptions(from.filteredOptions());
@@ -844,6 +850,24 @@ public class MineDownParser {
      */
     public MineDownParser urlHoverText(String urlHoverText) {
         this.urlHoverText = urlHoverText;
+        return this;
+    }
+
+    /**
+     * Get whether or not to automatically add http to values of open_url when there doesn't exist any?
+     * @return whether or not to automatically add http to values of open_url when there doesn't exist any? (Default: true)
+     */
+    public boolean autoAddUrlPrefix() {
+        return this.autoAddUrlPrefix;
+    }
+
+    /**
+     * Set whether or not to automatically add http to values of open_url when there doesn't exist any?
+     * @param autoAddUrlPrefix Whether or not automatically add http to values of open_url when there doesn't exist any? (Default: true)
+     * @return The MineDownParser instance
+     */
+    public MineDownParser autoAddUrlPrefix(boolean autoAddUrlPrefix) {
+        this.autoAddUrlPrefix = autoAddUrlPrefix;
         return this;
     }
 
