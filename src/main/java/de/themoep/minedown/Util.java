@@ -26,10 +26,13 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -251,5 +254,71 @@ public class Util {
             lines.add(currentLine.toString());
         }
         return String.join("\n", lines);
+    }
+
+    private static Map<ChatColor, Color> legacyColors = new LinkedHashMap<>();
+
+    static {
+        legacyColors.put(ChatColor.BLACK, new Color(0x000000));
+        legacyColors.put(ChatColor.DARK_BLUE, new Color(0x0000AA));
+        legacyColors.put(ChatColor.DARK_GREEN, new Color(0x00AA00));
+        legacyColors.put(ChatColor.DARK_AQUA, new Color(0x00AAAA));
+        legacyColors.put(ChatColor.DARK_RED, new Color(0xAA0000));
+        legacyColors.put(ChatColor.DARK_PURPLE, new Color(0xAA00AA));
+        legacyColors.put(ChatColor.GOLD, new Color(0xFFAA00));
+        legacyColors.put(ChatColor.GRAY, new Color(0xAAAAAA));
+        legacyColors.put(ChatColor.DARK_GRAY, new Color(0x555555));
+        legacyColors.put(ChatColor.BLUE, new Color(0x05555FF));
+        legacyColors.put(ChatColor.GREEN, new Color(0x55FF55));
+        legacyColors.put(ChatColor.AQUA, new Color(0x55FFFF));
+        legacyColors.put(ChatColor.RED, new Color(0xFF5555));
+        legacyColors.put(ChatColor.LIGHT_PURPLE, new Color(0xFF55FF));
+        legacyColors.put(ChatColor.YELLOW, new Color(0xFFFF55));
+        legacyColors.put(ChatColor.WHITE, new Color(0xFFFFFF));
+    }
+
+    /**
+     * Utility method to remove RGB colors from components. This modifies the input array!
+     * @param components    The components to remove the rgb colors from
+     * @return The modified components (same as input).
+     */
+    public static BaseComponent[] rgbColorsToLegacy(BaseComponent[] components) {
+        for (BaseComponent component : components) {
+            if (component.getColorRaw() != null && component.getColorRaw().getName().startsWith("#")) {
+                component.setColor(getClosestLegacy(new Color(Integer.parseInt(component.getColorRaw().getName().substring(1), 16))));
+            }
+            rgbColorsToLegacy(component.getExtra().toArray(new BaseComponent[0]));
+        }
+        return components;
+    }
+
+    /**
+     * Get the legacy color closest to a certain RGB color
+     * @param color The color to get teh closest legacy color for
+     * @return The closest legacy color
+     */
+    public static ChatColor getClosestLegacy(Color color) {
+        ChatColor closest = null;
+        double smallestDistance = Double.MAX_VALUE;
+        for (Map.Entry<ChatColor, Color> legacy : legacyColors.entrySet()) {
+            double distance = distance(color, legacy.getValue());
+            if (distance < smallestDistance) {
+                closest = legacy.getKey();
+            }
+        }
+        return closest;
+    }
+
+    /**
+     * Get the distance between two colors
+     * @param c1 Color A
+     * @param c2 Color B
+     * @return The distance or 0 if they are equal
+     */
+    public static double distance(Color c1, Color c2) {
+        if (c1.getRGB() == c2.getRGB()) {
+            return 0;
+        }
+        return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getGreen() - c2.getGreen(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2));
     }
 }
