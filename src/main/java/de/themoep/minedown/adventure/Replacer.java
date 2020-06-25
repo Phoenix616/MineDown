@@ -1,7 +1,7 @@
-package de.themoep.minedown;
+package de.themoep.minedown.adventure;
 
 /*
- * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +22,19 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.KeybindComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.TranslatableComponent;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,7 +59,7 @@ public class Replacer {
     /**
      * The map of placeholders with their component array replacements
      */
-    private final Map<String, BaseComponent[]> componentReplacements = new LinkedHashMap<>();
+    private final Map<String, Component> componentReplacements = new LinkedHashMap<>();
 
     /**
      * The placeholder indicator's prefix character
@@ -89,23 +90,23 @@ public class Replacer {
     /**
      * Replace certain placeholders with values in a component array.
      * This uses the % character as placeholder indicators (suffix and prefix)
-     * @param message      The BaseComponent array to replace in
+     * @param message      The Component to replace in
      * @param replacements The replacements, nth element is the placeholder, n+1th the value
-     * @return A copy of the BaseComponent array with all the placeholders replaced
+     * @return A copy of the Component array with all the placeholders replaced
      */
-    public static BaseComponent[] replaceIn(BaseComponent[] message, String... replacements) {
+    public static Component replaceIn(Component message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
 
     /**
      * Replace a certain placeholder with a component array in a component array.
      * This uses the % character as placeholder indicators (suffix and prefix)
-     * @param message     The BaseComponent array to replace in
+     * @param message     The Component to replace in
      * @param placeholder The placeholder to replace
      * @param replacement The replacement components
-     * @return A copy of the BaseComponent array with all the placeholders replaced
+     * @return A copy of the Component array with all the placeholders replaced
      */
-    public static BaseComponent[] replaceIn(BaseComponent[] message, String placeholder, BaseComponent... replacement) {
+    public static Component replaceIn(Component message, String placeholder, Component replacement) {
         return new Replacer().replace(placeholder, replacement).replaceIn(message);
     }
 
@@ -134,8 +135,8 @@ public class Replacer {
             Object any = replacements.values().stream().findAny().orElse(null);
             if (any instanceof String) {
                 replacements().putAll((Map<String, String>) replacements);
-            } else if (any != null && any.getClass().isArray() && BaseComponent.class.isAssignableFrom(any.getClass().getComponentType())) {
-                componentReplacements().putAll((Map<String, BaseComponent[]>) replacements);
+            } else if (any != null && any.getClass().isArray() && Component.class.isAssignableFrom(any.getClass().getComponentType())) {
+                componentReplacements().putAll((Map<String, Component>) replacements);
             } else {
                 for (Map.Entry<String, ?> entry : replacements.entrySet()) {
                     replacements().put(entry.getKey(), String.valueOf(entry.getValue()));
@@ -151,7 +152,7 @@ public class Replacer {
      * @param replacement The replacement components
      * @return The Replacer instance
      */
-    public Replacer replace(String placeholder, BaseComponent... replacement) {
+    public Replacer replace(String placeholder, Component replacement) {
         componentReplacements().put(placeholder, replacement);
         return this;
     }
@@ -168,96 +169,112 @@ public class Replacer {
     }
 
     /**
-     * Replace the placeholders in a component array
-     * @param components The BaseComponent array to replace in
+     * Replace the placeholders in a component list
+     * @param components The Component list to replace in
      * @return A copy of the array with the placeholders replaced
      */
-    public BaseComponent[] replaceIn(BaseComponent... components) {
-        return replaceIn(Arrays.asList(components));
+    public List<Component> replaceIn(List<Component> components) {
+        List<Component> replaced = new ArrayList<>();
+        for (Component component : components) {
+            replaced.add(replaceIn(component));
+        }
+        return replaced;
     }
 
     /**
      * Replace the placeholders in a component list
-     * @param components The BaseComponent list to replace in
+     * @param component The Component list to replace in
      * @return A copy of the array with the placeholders replaced
      */
-    public BaseComponent[] replaceIn(List<BaseComponent> components) {
-        List<BaseComponent> returnList = new ArrayList<>();
-        // String replacements:
-        for (int i = 0; i < components.size(); i++) {
-            BaseComponent component = components.get(i).duplicate();
-            if (component instanceof KeybindComponent) {
-                ((KeybindComponent) component).setKeybind(replaceIn(((KeybindComponent) component).getKeybind()));
-            }
-            if (component instanceof TextComponent) {
-                ((TextComponent) component).setText(replaceIn(((TextComponent) component).getText()));
-            }
-            if (component instanceof TranslatableComponent) {
-                ((TranslatableComponent) component).setTranslate(replaceIn(((TranslatableComponent) component).getTranslate()));
-                ((TranslatableComponent) component).setWith(Arrays.asList(replaceIn(((TranslatableComponent) component).getWith())));
-            }
-            if (component.getClickEvent() != null) {
-                component.setClickEvent(new ClickEvent(
-                        component.getClickEvent().getAction(),
-                        replaceIn(component.getClickEvent().getValue())
-                ));
-            }
-            if (component.getHoverEvent() != null) {
-                component.setHoverEvent(new HoverEvent(
-                        component.getHoverEvent().getAction(),
-                        replaceIn(component.getHoverEvent().getValue())
-                ));
-            }
-            if (component.getExtra() != null) {
-                component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
-            }
+    public Component replaceIn(Component component) {
+        TextComponent.Builder builder = TextComponent.builder();
 
-            // Component replacements
-            List<BaseComponent> replacedComponents = new ArrayList<>();
-            replacedComponents.add(component);
-
-            for (Map.Entry<String, BaseComponent[]> replacement : componentReplacements().entrySet()) {
-                List<BaseComponent> newReplacedComponents = new ArrayList<>();
-
-                for (BaseComponent replaceComponent : replacedComponents) {
-                    if (replaceComponent instanceof TextComponent) {
-                        TextComponent textComponent = (TextComponent) replaceComponent;
-                        String placeHolder = placeholderPrefix()
-                                + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
-                                + placeholderSuffix();
-                        String text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
-                        int index = text.indexOf(placeHolder);
-                        if (index > -1) {
-                            do {
-                                TextComponent startComponent = new TextComponent(textComponent);
-                                if (index > 0) {
-                                    startComponent.setText(textComponent.getText().substring(0, index));
-                                } else {
-                                    startComponent.setText("");
-                                }
-                                startComponent.setExtra(Arrays.asList(replacement.getValue()));
-                                newReplacedComponents.add(startComponent);
-
-                                if (index + placeHolder.length() < textComponent.getText().length()) {
-                                    textComponent.setText(textComponent.getText().substring(index + placeHolder.length()));
-                                } else {
-                                    textComponent.setText("");
-                                }
-                                text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
-                                newReplacedComponents.add(textComponent);
-                            } while (!text.isEmpty() && (index = text.indexOf(placeHolder)) > -1);
-                            continue;
-                        }
-                    }
-
-                    // Nothing was replaced, just add it
-                    newReplacedComponents.add(replaceComponent);
-                }
-                replacedComponents = newReplacedComponents;
-            }
-            returnList.addAll(replacedComponents);
+        if (component instanceof KeybindComponent) {
+            component = ((KeybindComponent) component).keybind(replaceIn(((KeybindComponent) component).keybind()));
         }
-        return returnList.toArray(new BaseComponent[0]);
+        if (component instanceof TextComponent) {
+            component = ((TextComponent) component).content(replaceIn(((TextComponent) component).content()));
+        }
+        if (component instanceof TranslatableComponent) {
+            component = ((TranslatableComponent) component).key(replaceIn(((TranslatableComponent) component).key()));
+            component = ((TranslatableComponent) component).args(replaceIn(((TranslatableComponent) component).args()));
+        }
+        if (component.clickEvent() != null) {
+            component = component.clickEvent(ClickEvent.of(
+                    component.clickEvent().action(),
+                    replaceIn(component.clickEvent().value())
+            ));
+        }
+        if (component.hoverEvent() != null) {
+            if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT ) {
+                component = component.hoverEvent(HoverEvent.showText(
+                        replaceIn((Component) component.hoverEvent().value())
+                ));
+            } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ENTITY) {
+                HoverEvent.ShowEntity showEntity = (HoverEvent.ShowEntity) component.hoverEvent().value();
+                component = component.hoverEvent(HoverEvent.showEntity(
+                        new HoverEvent.ShowEntity(
+                                Key.of(replaceIn(showEntity.type().asString())),
+                                showEntity.id(),
+                                replaceIn(showEntity.name())
+                        )
+                ));
+            } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ITEM) {
+                HoverEvent.ShowItem showItem = (HoverEvent.ShowItem) component.hoverEvent().value();
+                component = component.hoverEvent(HoverEvent.showItem(
+                        new HoverEvent.ShowItem(
+                                Key.of(replaceIn(showItem.item().asString())),
+                                showItem.count()
+                        )
+                ));
+            }
+        }
+
+        component = component.children(replaceIn(component.children()));
+
+        // Component replacements
+        List<Component> replacedComponents = new ArrayList<>();
+        replacedComponents.add(component);
+
+        for (Map.Entry<String, Component> replacement : componentReplacements().entrySet()) {
+            List<Component> newReplacedComponents = new ArrayList<>();
+
+            for (Component replaceComponent : replacedComponents) {
+                if (replaceComponent instanceof TextComponent) {
+                    TextComponent textComponent = (TextComponent) replaceComponent;
+                    String placeHolder = placeholderPrefix()
+                            + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase(Locale.ROOT) : replacement.getKey())
+                            + placeholderSuffix();
+                    String text = ignorePlaceholderCase() ? textComponent.content().toLowerCase(Locale.ROOT) : textComponent.content();
+                    int index = text.indexOf(placeHolder);
+                    if (index > -1) {
+                        do {
+                            TextComponent.Builder startBuilder = TextComponent.builder().mergeStyle(textComponent);
+                            if (index > 0) {
+                                startBuilder.content(textComponent.content().substring(0, index));
+                            }
+                            startBuilder.append(replacement.getValue());
+                            newReplacedComponents.add(startBuilder.build());
+
+                            if (index + placeHolder.length() < textComponent.content().length()) {
+                                newReplacedComponents.add((textComponent = textComponent.content(textComponent.content().substring(index + placeHolder.length()))));
+                            } else {
+                                textComponent = textComponent.content("");
+                            }
+                            text = ignorePlaceholderCase() ? textComponent.content().toLowerCase(Locale.ROOT) : textComponent.content();
+                        } while (!text.isEmpty() && (index = text.indexOf(placeHolder)) > -1);
+                        continue;
+                    }
+                }
+
+                // Nothing was replaced, just add it
+                newReplacedComponents.add(replaceComponent);
+            }
+            replacedComponents = newReplacedComponents;
+        }
+        builder.append(replacedComponents);
+
+        return builder.build();
     }
 
     /**
@@ -269,10 +286,10 @@ public class Replacer {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
             String replValue = replacement.getValue() != null ? replacement.getValue() : "null";
             if (ignorePlaceholderCase()) {
-                String placeholder = placeholderPrefix() + replacement.getKey().toLowerCase() + placeholderSuffix();
+                String placeholder = placeholderPrefix() + replacement.getKey().toLowerCase(Locale.ROOT) + placeholderSuffix();
                 int nextStart = 0;
                 int startIndex;
-                while (nextStart < string.length() && (startIndex = string.toLowerCase().indexOf(placeholder, nextStart)) > -1) {
+                while (nextStart < string.length() && (startIndex = string.toLowerCase(Locale.ROOT).indexOf(placeholder, nextStart)) > -1) {
                     nextStart = startIndex + replValue.length();
                     string = string.substring(0, startIndex) + replValue + string.substring(startIndex + placeholder.length());
                 }
@@ -323,7 +340,7 @@ public class Replacer {
      * Get the map of placeholders with their component array replacements
      * @return the replacement map
      */
-    public Map<String, BaseComponent[]> componentReplacements() {
+    public Map<String, Component> componentReplacements() {
         return this.componentReplacements;
     }
 

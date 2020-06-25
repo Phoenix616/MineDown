@@ -1,7 +1,7 @@
-package de.themoep.minedown;
+package de.themoep.minedown.adventure;
 
 /*
- * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,11 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.Map;
 
@@ -38,8 +39,8 @@ import java.util.Map;
  *
  * <table>
  * <caption><strong> Inline Formatting </strong></caption>
- * <tr><td> Color legacy  </td><td><tt> &amp;6Text         </tt></td><td> {@link ChatColor} codes </td></tr>
- * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text </tt></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> Color legacy  </td><td><tt> &amp;6Text         </tt></td><td> {@link TextColor} codes </td></tr>
+ * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text </tt></td><td> {@link TextColor} codes </td></tr>
  * <tr><td> Bold          </td><td><tt> **Text**           </tt></td></tr>
  * <tr><td> Italic        </td><td><tt> ##Text##           </tt></td></tr>
  * <tr><td> Underlined    </td><td><tt> __Text__           </tt></td></tr>
@@ -76,7 +77,7 @@ public class MineDown {
     private String message;
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();
-    private BaseComponent[] baseComponents = null;
+    private Component components = null;
     
     /**
      * Create a new MineDown builder with a certain message
@@ -92,35 +93,35 @@ public class MineDown {
      * @param replacements  Optional placeholder replacements
      * @return              The parsed components
      */
-    public static BaseComponent[] parse(String message, String... replacements) {
+    public static Component parse(String message, String... replacements) {
         return new MineDown(message).replace(replacements).toComponent();
     }
     
     /**
      * Convert components to a MineDown string
-     * @param components    The components to convert
-     * @return              The components represented as a MineDown string
+     * @param component The components to convert
+     * @return          The components represented as a MineDown string
      */
-    public static String stringify(BaseComponent[] components) {
-        return new MineDownStringifier().stringify(components);
+    public static String stringify(Component component) {
+        return new MineDownStringifier().stringify(component);
     }
     
     /**
      * Parse and convert the message to the component
      * @return The parsed component message
      */
-    public BaseComponent[] toComponent() {
-        if (baseComponents() == null) {
-            baseComponents = replacer().replaceIn(parser().parse(message()).create());
+    public Component toComponent() {
+        if (components() == null) {
+            components = replacer().replaceIn(parser().parse(message()).build());
         }
-        return baseComponents();
+        return components();
     }
     
     /**
      * Remove a cached component and re-parse the next time {@link #toComponent} is called
      */
     private void reset() {
-        baseComponents = null;
+        components = null;
     }
     
     /**
@@ -148,12 +149,12 @@ public class MineDown {
     /**
      * Add a placeholder to component mapping that should get replaced in the message
      * @param placeholder   The placeholder to replace
-     * @param replacement   The replacement components
+     * @param replacement   The replacement component
      * @return              The Replacer instance
      */
-    public MineDown replace(String placeholder, BaseComponent... replacement) {
+    public MineDown replace(String placeholder, Component replacement) {
         reset();
-        replacer().replace(placeholder,replacement);
+        replacer().replace(placeholder, replacement);
         return this;
     }
     
@@ -377,8 +378,8 @@ public class MineDown {
         return this.parser;
     }
 
-    protected BaseComponent[] baseComponents() {
-        return this.baseComponents;
+    protected Component components() {
+        return this.components;
     }
 
     /**
@@ -405,39 +406,39 @@ public class MineDown {
      * @param format    The format
      * @return          The MineDown string or an empty one if it's not a format
      */
-    public static String getFormatString(ChatColor format) {
+    public static String getFormatString(TextDecoration format) {
         switch (format) {
             case BOLD:
                 return "**";
             case ITALIC:
                 return "##";
-            case UNDERLINE:
+            case UNDERLINED:
                 return "__";
             case STRIKETHROUGH:
                 return "~~";
-            case MAGIC:
+            case OBFUSCATED:
                 return "??";
         }
         return "";
     }
     
     /**
-     * Get the ChatColor format from a MineDown string
+     * Get the TextColor format from a MineDown string
      * @param c The character
-     * @return  The ChatColor of that format or <tt>null</tt> it none was found
+     * @return  The TextColor of that format or <tt>null</tt> it none was found
      */
-    public static ChatColor getFormatFromChar(char c) {
+    public static TextDecoration getFormatFromChar(char c) {
         switch (c) {
             case '~':
-                return ChatColor.STRIKETHROUGH;
+                return TextDecoration.STRIKETHROUGH;
             case '_':
-                return ChatColor.UNDERLINE;
+                return TextDecoration.UNDERLINED;
             case '*':
-                return ChatColor.BOLD;
+                return TextDecoration.BOLD;
             case '#':
-                return ChatColor.ITALIC;
+                return TextDecoration.ITALIC;
             case '?':
-                return ChatColor.MAGIC;
+                return TextDecoration.OBFUSCATED;
         }
         return null;
     }

@@ -1,46 +1,57 @@
-# Minedown
+# MineDown-adventure
 A library that adds the ability to use a MarkDown inspired markup to write Minecraft chat components!
 
 It provides a custom mark up syntax which is loosely based on MarkDown that adds the ability to use the full power of 
 component messages with the same simplicity as legacy formatting codes. (Which it can still support!)
 It also includes a way to directly replace placeholders in the messages, both string based and component based ones!
 
-This requires BungeeCord's chat API so it will only work on **Spigot** or **BungeeCord**! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple implementation.
+This requires the [kyori-adventure](https://github.com/KyoriPowered/adventure) chat API so you need to provide one of 
+the [platform libraries](https://github.com/KyoriPowered/adventure-platform) in your project in order to use these
+messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/tree/kyori-adventure) for a simple implementation.
 
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax       | More Info
- --------------|--------------|---------------------------------------------------------------------
- Color legacy  |` &6Text     `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Color         |` &gold&Text `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Bold          |` **Text**   `| 
- Italic        |` ##Text##   `| 
- Underlined    |` __Text__   `| 
- Strikethrough |` ~~Text~~   `| 
- Obfuscated    |` ??Text??   `| 
+ Description   | Syntax          | More Info
+ --------------|-----------------|---------------------------------------------------------------------
+ Color legacy  |` &6Text        `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ Color         |` &gold&Text    `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color |` &#ff00ff&Text `| Full hexadecimal format 
+ RGB Hex Color |` &#f0f&Text    `| Short format (equivalent to long one)
+ Bold          |` **Text**      `| 
+ Italic        |` ##Text##      `| 
+ Underlined    |` __Text__      `| 
+ Strikethrough |` ~~Text~~      `| 
+ Obfuscated    |` ??Text??      `| 
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax.
 
 #### Simple Syntax
  Description                    | Syntax
- -------------------------------|---------------------------------------------------------
- General syntax                 |` [Text](text-color text-formatting... link hover text) `
- Simple Link                    |` [Text](https://example.com)                           `
- Simple Command                 |` [Text](/command to run)                               `
- Link + Hover                   |` [Text](https://example.com Hover Text)                `
- Text formatting + Link + Hover |` [Text](blue underline https://example.com Hover Text) `
+ -------------------------------|------------------------------------------------------------
+ General syntax                 |` [Text](text-color text-formatting... link hover text)    `
+ Simple Link                    |` [Text](https://example.com)                              `
+ Simple Command                 |` [Text](/command to run)                                  `
+ Link + Hover                   |` [Text](https://example.com Hover Text)                   `
+ Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
  
 #### Advanced Syntax
- Description    | Syntax                                 | More Info
- ---------------|----------------------------------------|----
- General syntax |` [Text](action=value)                 `|[ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
- Link           |` [Text](open_url=https://example.com) `|
- Color          |` [Text](color=red)                    `|
- Formatting     |` [Text](format=underline,bold)        `|
- Hover          |` [Text](hover=Hover Text)             `|
- Command        |` [Text](run_command=/command string)  `|
+ Description        | Syntax                                 | More Info
+ -------------------|----------------------------------------|----
+ General syntax     |` [Text](action=value)                 `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
+ Link               |` [Text](open_url=https://example.com) `|
+ Color              |` [Text](color=red)                    `|
+ RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
+ RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
+ Formatting         |` [Text](format=underline,bold)        `|
+ Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
+ Run Command        |` [Text](run_command=/command string)  `| Run command on click
+ Suggest Command    |` [Text](run_command=/command string)  `| Suggest a command on click
+ Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
+ Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
+ Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
+ Hover Item Info    |` [Text](show_item=stone*2 nbt...)     `| Show item information, additional information needs to be provided as a string of the nbt in json
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
@@ -48,13 +59,13 @@ You can't however add multiple different colors or click and hover actions!
 ## How to use it
 The library's main API access is through the [MineDown.class](https://docs.minebench.de/minedown/de/themoep/minedown/MineDown.html) and its parse methods.
 
-E.g. you can use it like this in your Spigot plugin:
+E.g. you can use it like this in your Bukkit plugin:
 ```java
-player.spigot().sendMessage(new MineDown(rawMessage).replace(replacements).toComponent());
+BukkitPlatform.of(plugin).player(player).sendMessage(new MineDown(rawMessage).replace(replacements).toComponent());
 ```
 or with a static approach:
 ```java
-player.spigot().sendMessage(MineDown.parse(rawMessage, replacements));
+BukkitPlatform.of(plugin).player(player).sendMessage(MineDown.parse(rawMessage, replacements));
 ```
 
 Take a look at the [MineDown JavaDocs](https://docs.minebench.de/minedown/) for more
@@ -79,8 +90,8 @@ Make sure to relocate it into your plugin's package!
 <dependencies>
     <dependency>
         <groupId>de.themoep</groupId>
-        <artifactId>minedown</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <artifactId>minedown-adventure</artifactId>
+        <version>1.6.1-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>

@@ -1,7 +1,7 @@
-package de.themoep.minedown;
+package de.themoep.minedown.adventure;
 
 /*
- * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +22,20 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,125 +77,168 @@ public class MineDownStringifier {
 
     private StringBuilder value = new StringBuilder();
 
-    private ChatColor color = null;
+    private TextColor color = null;
     private ClickEvent clickEvent = null;
     private HoverEvent hoverEvent = null;
-    private Set<ChatColor> formats = new LinkedHashSet<>();
+    private Set<TextDecoration> formats = new LinkedHashSet<>();
 
     /**
      * Create a {@link MineDown} string from a component message
      * @param components The components to generate a MineDown string from
      * @return The MineDown string
      */
-    public String stringify(BaseComponent[] components) {
+    public String stringify(List<Component> components) {
         StringBuilder sb = new StringBuilder();
-        for (BaseComponent component : components) {
-            if (!component.hasFormatting()) {
-                appendText(sb, component);
-                continue;
-            }
-            if (component.getClickEvent() != null || component.getHoverEvent() != null) {
-                sb.append('[');
-                if (!formattingInEventDefinition()) {
-                    appendFormat(sb, component);
-                }
-                if (!colorInEventDefinition()) {
-                    appendColor(sb, component.getColor());
-                }
-            } else if (component.getColorRaw() != null) {
-                appendFormat(sb, component);
-                appendColor(sb, component.getColor());
-            } else {
-                appendFormat(sb, component);
-            }
-
-            appendText(sb, component);
-
-            if (component.getExtra() != null && !component.getExtra().isEmpty()) {
-                sb.append(copy().stringify(component.getExtra().toArray(new BaseComponent[0])));
-            }
-
-            if (component.getClickEvent() != clickEvent || component.getHoverEvent() != hoverEvent) {
-                clickEvent = component.getClickEvent();
-                hoverEvent = component.getHoverEvent();
-                if (!formattingInEventDefinition()) {
-                    appendFormatSuffix(sb, component);
-                }
-                sb.append("](");
-                List<String> definitions = new ArrayList<>();
-                if (colorInEventDefinition()) {
-                    StringBuilder sbi = new StringBuilder();
-                    if (!preferSimpleEvents()) {
-                        sbi.append(COLOR_PREFIX);
-                    }
-                    sbi.append(component.getColor().getName().toLowerCase());
-                    definitions.add(sbi.toString());
-                }
-                if (formattingInEventDefinition()) {
-                    StringBuilder sbi = new StringBuilder();
-                    if (!preferSimpleEvents) {
-                        sbi.append(FORMAT_PREFIX);
-                    }
-                    sbi.append(Util.getFormats(component, true).stream().map(c -> c.getName().toLowerCase()).collect(Collectors.joining(" ")));
-                    definitions.add(sbi.toString());
-                }
-                if (component.getClickEvent() != null) {
-                    if (preferSimpleEvents() && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
-                        definitions.add(component.getClickEvent().getValue());
-                    } else {
-                        definitions.add(component.getClickEvent().getAction().toString().toLowerCase() + "=" + component.getClickEvent().getValue());
-                    }
-                }
-                if (component.getHoverEvent() != null) {
-                    StringBuilder sbi = new StringBuilder();
-                    if (preferSimpleEvents()) {
-                        if (component.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT &&
-                                (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
-                            sbi.append("hover=");
-                        }
-                    } else {
-                        sbi.append(component.getHoverEvent().getAction().toString().toLowerCase()).append('=');
-                    }
-                    sbi.append(copy().stringify(component.getHoverEvent().getValue()));
-                    definitions.add(sbi.toString());
-                }
-                sb.append(definitions.stream().collect(Collectors.joining(" ")));
-                sb.append(')');
-            } else {
-                appendFormatSuffix(sb, component);
-            }
+        for (Component component : components) {
+            sb.append(stringify(component));
         }
         return sb.toString();
     }
 
-    private void appendText(StringBuilder sb, BaseComponent component) {
+    /**
+     * Create a {@link MineDown} string from a component message
+     * @param component The component to generate a MineDown string from
+     * @return The MineDown string
+     */
+    public String stringify(Component component) {
+        StringBuilder sb = new StringBuilder();
+        if (!component.hasStyling() && component.children().isEmpty() &&  component instanceof TextComponent) {
+            appendText(sb, component);
+            return sb.toString();
+        }
+        if (component.clickEvent() != null || component.hoverEvent() != null) {
+            sb.append('[');
+            if (!formattingInEventDefinition()) {
+                appendFormat(sb, component);
+            }
+            if (!colorInEventDefinition()) {
+                appendColor(sb, component.color());
+            }
+        } else if (component.color() != null) {
+            appendFormat(sb, component);
+            appendColor(sb, component.color());
+        } else {
+            appendFormat(sb, component);
+        }
+
+        appendText(sb, component);
+
+        if (!component.children().isEmpty()) {
+            sb.append(copy().stringify(component.children()));
+        }
+
+        if (component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent) {
+            clickEvent = component.clickEvent();
+            hoverEvent = component.hoverEvent();
+            if (!formattingInEventDefinition()) {
+                appendFormatSuffix(sb, component);
+            }
+            sb.append("](");
+            List<String> definitions = new ArrayList<>();
+            if (colorInEventDefinition() && component.color() != null) {
+                StringBuilder sbi = new StringBuilder();
+                if (!preferSimpleEvents()) {
+                    sbi.append(COLOR_PREFIX);
+                }
+                if (component.color() instanceof NamedTextColor) {
+                    sbi.append(((NamedTextColor) component.color()).toString().toLowerCase(Locale.ROOT));
+                } else {
+                    sbi.append(component.color().asHexString().toLowerCase(Locale.ROOT));
+                }
+                definitions.add(sbi.toString());
+            }
+            if (formattingInEventDefinition()) {
+                StringBuilder sbi = new StringBuilder();
+                if (!preferSimpleEvents) {
+                    sbi.append(FORMAT_PREFIX);
+                }
+                sbi.append(component.decorations().entrySet().stream()
+                        .filter(e -> e.getValue() == TextDecoration.State.TRUE)
+                        .map(e -> e.getKey().name().toLowerCase(Locale.ROOT))
+                        .collect(Collectors.joining(" ")));
+                definitions.add(sbi.toString());
+            }
+            if (component.clickEvent() != null) {
+                if (preferSimpleEvents() && component.clickEvent().action() == ClickEvent.Action.OPEN_URL) {
+                    definitions.add(component.clickEvent().value());
+                } else {
+                    definitions.add(component.clickEvent().action().toString().toLowerCase(Locale.ROOT) + "=" + component.clickEvent().value());
+                }
+            }
+            if (component.hoverEvent() != null) {
+                StringBuilder sbi = new StringBuilder();
+                if (preferSimpleEvents()) {
+                    if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT &&
+                            (component.clickEvent() == null || component.clickEvent().action() != ClickEvent.Action.OPEN_URL)) {
+                        sbi.append(HOVER_PREFIX);
+                    }
+                } else {
+                    sbi.append(component.hoverEvent().action().toString().toLowerCase(Locale.ROOT)).append('=');
+                }
+                HoverEvent<?> hoverEvent = component.hoverEvent();
+                if (hoverEvent.value() instanceof Component) {
+                    sbi.append(copy().stringify((Component) hoverEvent.value()));
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity) {
+                    HoverEvent.ShowEntity contentEntity = (HoverEvent.ShowEntity) hoverEvent.value();
+                    sb.append(contentEntity.id()).append(":").append(contentEntity.type());
+                    if (contentEntity.name() != null) {
+                        sb.append(" ").append(stringify(contentEntity.name()));
+                    }
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowItem) {
+                    HoverEvent.ShowItem contentItem = (HoverEvent.ShowItem) hoverEvent.value();
+                    sb.append(contentItem.item());
+                    if (contentItem.count() > 0) {
+                        sb.append("*").append(contentItem.count());
+                    }
+                    if (contentItem.nbt() != null) {
+                        sb.append(" ").append(contentItem.nbt().string());
+                    }
+                }
+                definitions.add(sbi.toString());
+            }
+            sb.append(String.join(" ", definitions));
+            sb.append(')');
+        } else {
+            appendFormatSuffix(sb, component);
+        }
+        return sb.toString();
+    }
+
+    private void appendText(StringBuilder sb, Component component) {
         if (component instanceof TextComponent) {
-            sb.append(((TextComponent) component).getText());
+            sb.append(((TextComponent) component).content());
         } else {
             throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
         }
     }
 
-    private void appendColor(StringBuilder sb, ChatColor color) {
+    private void appendColor(StringBuilder sb, TextColor color) {
         if (this.color != color) {
             this.color = color;
             if (useLegacyColors()) {
-                sb.append(colorChar()).append(color.toString().substring(1));
+                try {
+                    char colorChar = Util.getLegacyFormatChar(color);
+                    sb.append(colorChar()).append(colorChar);
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+            } else if (color instanceof NamedTextColor) {
+                sb.append(colorChar()).append(((NamedTextColor) color).toString()).append(colorChar());
             } else {
-                sb.append(colorChar()).append(color.getName()).append(colorChar());
+                sb.append(colorChar()).append(color.asHexString()).append(colorChar());
             }
         }
     }
 
-    private void appendFormat(StringBuilder sb, BaseComponent component) {
-        Set<ChatColor> formats = Util.getFormats(component, true);
+    private void appendFormat(StringBuilder sb, Component component) {
+        Set<TextDecoration> formats = Util.getFormats(component, true);
         if (!formats.containsAll(this.formats)) {
             if (useLegacyFormatting()) {
-                sb.append(colorChar()).append(ChatColor.RESET.toString().charAt(1));
+                sb.append(colorChar()).append(Util.TextControl.RESET.getChar());
             } else {
-                Deque<ChatColor> formatDeque = new ArrayDeque<>(this.formats);
+                Deque<TextDecoration> formatDeque = new ArrayDeque<>(this.formats);
                 while (!formatDeque.isEmpty()) {
-                    ChatColor format = formatDeque.pollLast();
+                    TextDecoration format = formatDeque.pollLast();
                     if (!formats.contains(format)) {
                         sb.append(MineDown.getFormatString(format));
                     }
@@ -201,9 +247,14 @@ public class MineDownStringifier {
         } else {
             formats.removeAll(this.formats);
         }
-        for (ChatColor format : formats) {
+        for (TextDecoration format : formats) {
             if (useLegacyFormatting()) {
-                sb.append(colorChar()).append(format.toString().charAt(1));
+                try {
+                    char colorChar = Util.getLegacyFormatChar(format);
+                    sb.append(colorChar()).append(colorChar);
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
             } else {
                 sb.append(MineDown.getFormatString(format));
             }
@@ -212,10 +263,10 @@ public class MineDownStringifier {
         this.formats.addAll(formats);
     }
 
-    private void appendFormatSuffix(StringBuilder sb, BaseComponent component) {
+    private void appendFormatSuffix(StringBuilder sb, Component component) {
         if (!useLegacyFormatting()) {
-            Set<ChatColor> formats = Util.getFormats(component, true);
-            for (ChatColor format : formats) {
+            Set<TextDecoration> formats = Util.getFormats(component, true);
+            for (TextDecoration format : formats) {
                 sb.append(MineDown.getFormatString(format));
             }
             this.formats.removeAll(formats);

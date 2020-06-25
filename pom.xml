@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.themoep</groupId>
-    <artifactId>minedown</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <artifactId>minedown-adventure</artifactId>
+    <version>1.6.1-SNAPSHOT</version>
 
     <name>MineDown</name>
 
@@ -27,10 +27,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-chat</artifactId>
-            <version>1.12-SNAPSHOT</version>
-            <scope>provided</scope>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-gson</artifactId>
+            <version>4.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

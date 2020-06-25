@@ -1,7 +1,7 @@
-package de.themoep.minedown;
+package de.themoep.minedown.adventure;
 
 /*
- * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,26 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.ComponentBuilder;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.TextFormat;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,10 +99,10 @@ public class MineDownParser {
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
 
-    private ComponentBuilder builder;
+    private ComponentBuilder<?, ?> builder;
     private StringBuilder value;
-    private ChatColor color;
-    private Set<ChatColor> format;
+    private TextColor color;
+    private Set<TextDecoration> format;
     private ClickEvent clickEvent;
     private HoverEvent hoverEvent;
 
@@ -117,7 +124,7 @@ public class MineDownParser {
 
             boolean isEscape = c == '\\' && i + 1 < message.length();
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
-                    && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+                    && i + 1 < message.length() && (c == '§' || c == colorChar());
             boolean isEvent = false;
             if (isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
                 int nextEventClose = Util.indexOfNotEscaped(message, "](", i + 1);
@@ -164,13 +171,13 @@ public class MineDownParser {
                 if (code >= 'A' && code <= 'Z') {
                     code += 32;
                 }
-                ChatColor encoded = null;
+                TextFormat encoded = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
                     char c1 = message.charAt(j);
                     if (c1 == c) {
                         try {
-                            encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
+                            encoded = NamedTextColor.NAMES.value(colorString.toString().toLowerCase(Locale.ROOT));
                             i = j;
                         } catch (IllegalArgumentException ignored) {
                         }
@@ -182,27 +189,27 @@ public class MineDownParser {
                     colorString.append(c1);
                 }
                 if (encoded == null) {
-                    encoded = ChatColor.getByChar(code);
+                    encoded = Util.getFormatFromLegacy(code);
                 }
 
                 if (encoded != null) {
                     if (!isFiltered(Option.LEGACY_COLORS)) {
-                        if (encoded == ChatColor.RESET) {
+                        if (encoded == Util.TextControl.RESET) {
                             appendValue();
                             color = null;
                             Util.applyFormat(builder, format);
                             format = new HashSet<>();
-                        } else if (!Util.isFormat(encoded)) {
+                        } else if (encoded instanceof TextColor) {
                             if (value.length() > 0) {
                                 appendValue();
                             }
-                            color = encoded;
+                            color = (TextColor) encoded;
                             format = new HashSet<>();
                         } else {
                             if (value.length() > 0) {
                                 appendValue();
                             }
-                            format.add(encoded);
+                            format.add((TextDecoration) encoded);
                         }
                     }
                 } else {
@@ -226,7 +233,7 @@ public class MineDownParser {
                 // Simple formatting
             } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
-                Set<ChatColor> formats = new HashSet<>(format);
+                Set<TextDecoration> formats = new HashSet<>(format);
                 if (!isFiltered(Option.SIMPLE_FORMATTING)) {
                     formats.add(MineDown.getFormatFromChar(c));
                 }
@@ -259,85 +266,50 @@ public class MineDownParser {
         }
         appendValue();
         if (builder == null) {
-            builder = new ComponentBuilder("");
+            builder = TextComponent.builder();
         }
         return builder;
     }
 
     private void append(ComponentBuilder builder) {
-        append(builder.create());
-    }
-
-    private void append(BaseComponent[] components) {
         if (this.builder == null) {
-            if (components.length > 0) {
-                this.builder = new ComponentBuilder(components[0]);
-                for (int i = 1; i < components.length; i++) {
-                    builder.append(components[i]);
-                }
-            } else {
-                this.builder = new ComponentBuilder("");
-            }
+            this.builder = TextComponent.builder().append(builder);
         } else {
-            try {
-                this.builder.append(components);
-            } catch (NoSuchMethodError e) {
-                // Older versions didn't have ComponentBuilder#append(BaseComponent[])
-                // Recreating it with reflections. That might be slower but they should just update anyways...
-                if (components.length > 0) {
-                    try {
-                        Field fCurrent = this.builder.getClass().getDeclaredField("current");
-                        fCurrent.setAccessible(true);
-                        BaseComponent previous = (BaseComponent) fCurrent.get(this.builder);
-                        Field fParts = this.builder.getClass().getDeclaredField("parts");
-                        fParts.setAccessible(true);
-                        List<BaseComponent> parts = (List<BaseComponent>) fParts.get(this.builder);
-
-                        for (BaseComponent component : components) {
-                            parts.add(previous);
-                            fCurrent.set(this.builder, component.duplicate());
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            }
+            this.builder.append(builder);
         }
     }
 
     private void appendValue() {
-        appendValue(ComponentBuilder.FormatRetention.NONE);
+        appendValue(Style.empty());
     }
 
-    private void appendValue(ComponentBuilder.FormatRetention retention) {
-        if (value.length() > 0) {
-            if (builder == null) {
-                builder = new ComponentBuilder(value.toString());
-            } else {
-                builder.append(value.toString(), retention);
-            }
-            builder.color(color);
-            Util.applyFormat(builder, format);
-            if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
-                String v = value.toString();
-                if (!v.startsWith("http://") && !v.startsWith("https://")) {
-                    v = "http://" + v;
-                }
-                builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, v));
-                if (urlHoverText() != null && !urlHoverText().isEmpty()) {
-                    builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
-                    ));
-                }
-            }
-            if (clickEvent != null) {
-                builder.event(clickEvent);
-            }
-            if (hoverEvent != null) {
-                builder.event(hoverEvent);
-            }
-            value = new StringBuilder();
+    private void appendValue(Style style) {
+        if (builder == null) {
+            builder = TextComponent.builder(value.toString());
+        } else {
+            builder.append(value.toString()).style(style);
         }
+        builder.color(color);
+        Util.applyFormat(builder, format);
+        if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
+            String v = value.toString();
+            if (!v.startsWith("http://") && !v.startsWith("https://")) {
+                v = "http://" + v;
+            }
+            builder.clickEvent(ClickEvent.of(ClickEvent.Action.OPEN_URL, v));
+            if (urlHoverText() != null && !urlHoverText().isEmpty()) {
+                builder.hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
+                        new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
+                ));
+            }
+        }
+        if (clickEvent != null) {
+            builder.clickEvent(clickEvent);
+        }
+        if (hoverEvent != null) {
+            builder.hoverEvent(hoverEvent);
+        }
+        value = new StringBuilder();
     }
 
     /**
@@ -355,8 +327,8 @@ public class MineDownParser {
         if (definitions.endsWith(" ")) {
             defParts.add("");
         }
-        ChatColor color = null;
-        Set<ChatColor> formats = new HashSet<>();
+        TextColor color = null;
+        Set<TextDecoration> formats = new HashSet<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
 
@@ -364,33 +336,46 @@ public class MineDownParser {
 
         for (int i = 0; i < defParts.size(); i++) {
             String definition = defParts.get(i);
-            ChatColor parsed = parseColor(definition, "", true);
+            TextFormat parsed = parse(definition, "", true);
             if (parsed != null) {
-                if (Util.isFormat(parsed)) {
-                    formats.add(parsed);
-                } else {
-                    color = parsed;
+                if (parsed == Util.TextControl.RESET) {
+                    color = null;
+                } else if (parsed instanceof TextDecoration) {
+                    formats.add((TextDecoration) parsed);
+                } else if (parsed instanceof TextColor) {
+                    color = (TextColor) parsed;
                 }
                 formatEnd = i;
                 continue;
             }
 
-            if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
-                color = parseColor(definition, COLOR_PREFIX, lenient());
-                if (!lenient() && Util.isFormat(color)) {
-                    throw new IllegalArgumentException(color + " is a format and not a color!");
-                }
-                formatEnd = i;
-                continue;
-            }
-
-            if (definition.toLowerCase().startsWith(FORMAT_PREFIX)) {
-                for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
-                    ChatColor format = parseColor(formatStr, "", lenient());
-                    if (!lenient() && !Util.isFormat(format)) {
-                        throw new IllegalArgumentException(formats + " is a color and not a format!");
+            if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
+                parsed = parse(definition, COLOR_PREFIX, lenient());
+                if (parsed instanceof TextColor) {
+                    color = (TextColor) parsed;
+                } else if (!lenient()) {
+                    if (parsed == null) {
+                        throw new IllegalArgumentException("Unable to parse " + definition);
+                    } else {
+                        throw new IllegalArgumentException(definition + " -> " + color + " is a format and not a color!");
                     }
-                    formats.add(format);
+                }
+                formatEnd = i;
+                continue;
+            }
+
+            if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
+                for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
+                    parsed = parse(formatStr, "", lenient());
+                    if (parsed instanceof TextDecoration) {
+                        formats.add((TextDecoration) parsed);
+                    } else if (!lenient()) {
+                        if (parsed == null) {
+                            throw new IllegalArgumentException("Unable to parse " + formatStr);
+                        } else {
+                            throw new IllegalArgumentException(formatStr + " -> " + formats + " is a color and not a format!");
+                        }
+                    }
                 }
                 formatEnd = i;
                 continue;
@@ -400,22 +385,22 @@ public class MineDownParser {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
                 }
-                clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, definition);
+                clickEvent = ClickEvent.of(ClickEvent.Action.OPEN_URL, definition);
                 continue;
             }
 
             ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.RUN_COMMAND : null;
             HoverEvent.Action hoverAction = null;
-            if (definition.toLowerCase().startsWith(HOVER_PREFIX)) {
+            if (definition.toLowerCase(Locale.ROOT).startsWith(HOVER_PREFIX)) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             String[] parts = definition.split("=", 2);
             try {
-                hoverAction = HoverEvent.Action.valueOf(parts[0].toUpperCase());
+                hoverAction = HoverEvent.Action.NAMES.value(parts[0].toLowerCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
             }
             try {
-                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase());
+                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
             }
 
@@ -450,23 +435,75 @@ public class MineDownParser {
                 if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !v.startsWith("http://") && !v.startsWith("https://")) {
                     v = "http://" + v;
                 }
-                clickEvent = new ClickEvent(clickAction, v);
+                clickEvent = ClickEvent.of(clickAction, v);
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
                 String valueStr = value.toString();
-                hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(
-                        hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
-                ).create());
+                if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
+                    hoverEvent = HoverEvent.of(hoverAction, copy(false).urlDetection(false).parse(Util.wrap(valueStr, hoverTextWidth())).build());
+                } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
+                    String[] valueParts = valueStr.split(":", 2);
+                    try {
+                        String[] additionalParts = valueParts[1].split(" ", 2);
+                        if (!additionalParts[0].contains(":")) {
+                            additionalParts[0] = "minecraft:" + additionalParts[0];
+                        }
+                        hoverEvent = HoverEvent.showEntity(new HoverEvent.ShowEntity(
+                                Key.of(additionalParts[0]), UUID.fromString(valueParts[0]),
+                                additionalParts.length > 1 && additionalParts[1] != null ?
+                                        copy(false).urlDetection(false).parse(additionalParts[1]).build() : null
+                        ));
+                    } catch (Exception e) {
+                        if (!lenient()) {
+                            if (valueParts.length < 2) {
+                                throw new IllegalArgumentException("Invalid entity definition. Needs to be of format uuid:id or uuid:namespace:id!");
+                            }
+                            throw new IllegalArgumentException(e.getMessage());
+                        }
+                    }
+                } else if (hoverAction == HoverEvent.Action.SHOW_ITEM) {
+                    String[] valueParts = valueStr.split(" ", 2);
+                    String id = valueParts[0];
+                    if (!id.contains(":")) {
+                        id = "minecraft:" + id;
+                    }
+                    int count = 1;
+                    int countIndex = valueParts[0].indexOf('*');
+                    if (countIndex > 0 && countIndex + 1 < valueParts[0].length()) {
+                        try {
+                            count = Integer.parseInt(valueParts[0].substring(countIndex + 1));
+                            id = valueParts[0].substring(0, countIndex);
+                        } catch (NumberFormatException e) {
+                            if (!lenient()) {
+                                throw new IllegalArgumentException(e.getMessage());
+                            }
+                        }
+                    }
+                    BinaryTagHolder tag = null;
+                    if (valueParts.length > 1 && valueParts[1] != null) {
+                        tag = BinaryTagHolder.of(valueParts[1]);
+                    }
+
+                    try {
+                        hoverEvent = HoverEvent.showItem(new HoverEvent.ShowItem(
+                                Key.of(id), count, tag
+                        ));
+                    } catch (Exception e) {
+                        if (!lenient()) {
+                            throw new IllegalArgumentException(e.getMessage());
+                        }
+                    }
+                }
             }
         }
 
         if (clickEvent != null && hoverEvent == null) {
-            hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder(clickEvent.getAction().toString().toLowerCase().replace('_', ' ')).color(ChatColor.BLUE)
-                            .append(" " + clickEvent.getValue()).color(ChatColor.WHITE)
-                            .create());
+            hoverEvent = HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
+                    TextComponent.builder(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')).color(NamedTextColor.BLUE)
+                            .append(" " + clickEvent.action()).color(NamedTextColor.WHITE)
+                            .build());
         }
 
         return copy()
@@ -496,21 +533,21 @@ public class MineDownParser {
         return this.value;
     }
 
-    protected MineDownParser color(ChatColor color) {
+    protected MineDownParser color(TextColor color) {
         this.color = color;
         return this;
     }
 
-    protected ChatColor color() {
+    protected TextColor color() {
         return this.color;
     }
 
-    protected MineDownParser format(Set<ChatColor> format) {
+    protected MineDownParser format(Set<TextDecoration> format) {
         this.format = format;
         return this;
     }
 
-    protected Set<ChatColor> format() {
+    protected Set<TextDecoration> format() {
         return this.format;
     }
 
@@ -533,29 +570,32 @@ public class MineDownParser {
     }
 
     /**
-     * Parse a color definition
+     * Parse a color/format definition
      * @param colorString The string to parse
      * @param prefix      The color prefix e.g. ampersand (&amp;)
      * @param lenient     Whether or not to accept malformed strings
      * @return The parsed color or <tt>null</tt> if lenient is true and no color was found
      */
-    public static ChatColor parseColor(String colorString, String prefix, boolean lenient) {
-        ChatColor color = null;
+    public static TextFormat parse(String colorString, String prefix, boolean lenient) {
+        TextFormat format = null;
         if (prefix.length() + 1 == colorString.length()) {
-            color = ChatColor.getByChar(colorString.charAt(prefix.length()));
-            if (color == null && !lenient) {
+            format = Util.getFormatFromLegacy(colorString.charAt(prefix.length()));
+            if (format == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
         } else {
-            try {
-                color = ChatColor.valueOf(colorString.substring(prefix.length()).toUpperCase());
-            } catch (IllegalArgumentException e) {
-                if (!lenient) {
-                    throw e;
+            format = NamedTextColor.NAMES.value(colorString.substring(prefix.length()).toLowerCase(Locale.ROOT));
+            if (format == null) {
+                try {
+                    format = TextDecoration.valueOf(colorString.substring(prefix.length()).toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException e2) {
+                    if (!lenient) {
+                        throw e2;
+                    }
                 }
             }
         }
-        return color;
+        return format;
     }
 
     /**
@@ -716,7 +756,7 @@ public class MineDownParser {
 
             boolean isEscape = c == '\\';
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
-                    && i + 1 < string.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+                    && i + 1 < string.length() && (c == '§' || c == colorChar());
             boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
                     && c == '[';
             boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
