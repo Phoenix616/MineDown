@@ -406,17 +406,16 @@ public class MineDown {
      * @return          The MineDown string or an empty one if it's not a format
      */
     public static String getFormatString(ChatColor format) {
-        switch (format) {
-            case BOLD:
-                return "**";
-            case ITALIC:
-                return "##";
-            case UNDERLINE:
-                return "__";
-            case STRIKETHROUGH:
-                return "~~";
-            case MAGIC:
-                return "??";
+        if (format == ChatColor.BOLD) {
+            return "**";
+        } else if (format == ChatColor.ITALIC) {
+            return "##";
+        } else if (format == ChatColor.UNDERLINE) {
+            return "__";
+        } else if (format == ChatColor.STRIKETHROUGH) {
+            return "~~";
+        } else if (format == ChatColor.MAGIC) {
+            return "??";
         }
         return "";
     }

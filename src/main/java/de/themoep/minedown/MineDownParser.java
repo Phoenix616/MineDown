@@ -170,13 +170,13 @@ public class MineDownParser {
                     char c1 = message.charAt(j);
                     if (c1 == c) {
                         try {
-                            encoded = ChatColor.valueOf(colorString.toString().toUpperCase());
+                            encoded = parseColor(colorString.toString(), "", lenient());
                             i = j;
                         } catch (IllegalArgumentException ignored) {
                         }
                         break;
                     }
-                    if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
+                    if (c1 != '_' && c1 != '#' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
                         break;
                     }
                     colorString.append(c1);
@@ -548,7 +548,15 @@ public class MineDownParser {
             }
         } else {
             try {
-                color = ChatColor.valueOf(colorString.substring(prefix.length()).toUpperCase());
+                colorString = colorString.substring(prefix.length());
+                if (colorString.charAt(0) == '#' && colorString.length() == 4) {
+                    StringBuilder sb = new StringBuilder("#");
+                    for (int i = 1; i < 4; i++) {
+                        sb.append(colorString.charAt(i)).append(colorString.charAt(i));
+                    }
+                    colorString = sb.toString();
+                }
+                color = ChatColor.of(colorString);
             } catch (IllegalArgumentException e) {
                 if (!lenient) {
                     throw e;

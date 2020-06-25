@@ -10,15 +10,17 @@ This requires BungeeCord's chat API so it will only work on **Spigot** or **Bung
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax       | More Info
- --------------|--------------|---------------------------------------------------------------------
- Color legacy  |` &6Text     `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Color         |` &gold&Text `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Bold          |` **Text**   `| 
- Italic        |` ##Text##   `| 
- Underlined    |` __Text__   `| 
- Strikethrough |` ~~Text~~   `| 
- Obfuscated    |` ??Text??   `| 
+ Description   | Syntax          | More Info
+ --------------|-----------------|---------------------------------------------------------------------
+ Color legacy  |` &6Text        `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ Color         |` &gold&Text    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color |` &#ff00ff&Text `| Full hexadecimal format 
+ RGB Hex Color |` &#f0f&Text    `| Short format (equivalent to long one)
+ Bold          |` **Text**      `| 
+ Italic        |` ##Text##      `| 
+ Underlined    |` __Text__      `| 
+ Strikethrough |` ~~Text~~      `| 
+ Obfuscated    |` ??Text??      `| 
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax.
@@ -30,14 +32,17 @@ You can define click and hover events with the commonly used MarkDown link synta
  Simple Link                    |` [Text](https://example.com)                           `
  Simple Command                 |` [Text](/command to run)                               `
  Link + Hover                   |` [Text](https://example.com Hover Text)                `
- Text formatting + Link + Hover |` [Text](blue underline https://example.com Hover Text) `
+ Text formatting                |` [Text](blue underline)                             `
+ Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
  
 #### Advanced Syntax
  Description    | Syntax                                 | More Info
  ---------------|----------------------------------------|----
- General syntax |` [Text](action=value)                 `|[ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
+ General syntax |` [Text](action=value)                 `| [ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
  Link           |` [Text](open_url=https://example.com) `|
- Color          |` [Text](color=red)                    `|
+ Color          |` [Text](color=red)                    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color  |` [Text](color=#ff00ff)                `| Full hexadecimal format 
+ RGB Hex Color  |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
  Formatting     |` [Text](format=underline,bold)        `|
  Hover          |` [Text](hover=Hover Text)             `|
  Command        |` [Text](run_command=/command string)  `|
@@ -80,7 +85,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.6.1-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>

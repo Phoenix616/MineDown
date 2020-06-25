@@ -6,7 +6,7 @@
 
     <groupId>de.themoep</groupId>
     <artifactId>minedown</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6.1-SNAPSHOT</version>
 
     <name>MineDown</name>
 
@@ -18,18 +18,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>bungee-repo</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-chat</artifactId>
-            <version>1.12-SNAPSHOT</version>
+            <version>1.16-R0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

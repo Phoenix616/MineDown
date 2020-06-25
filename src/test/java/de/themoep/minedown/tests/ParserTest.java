@@ -44,6 +44,18 @@ public class ParserTest {
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));
     }
+
+    @Test
+    public void testParseHexColors() {
+        System.out.println("testParsing");
+        Assertions.assertAll(
+                () -> parse("##&eTest## [&#593&b__this__](Text) ~~string~~!"),
+                () -> parse("##&eTest## [&#593593&b__this__](Text) ~~string~~!"),
+                () -> parse("##&eTest## [__this \\&6 \\that__](#290329 /example command hover=**Hover ??text??**) ~~string~~!"),
+                () -> parse("##&eTest## [__this \\&6 \\that__](color=#290329 /example command hover=**Hover ??text??**) ~~string~~!")
+        );
+        Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));
+    }
     
     @Test
     public void testReplacing() {

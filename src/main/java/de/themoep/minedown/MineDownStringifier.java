@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
 public class MineDownStringifier {
 
     /**
-     * Whether or not to use legacy color codes (Default: true)
+     * Whether or not to use legacy color codes (Default: false)
      */
-    private boolean useLegacyColors = true;
+    private boolean useLegacyColors = false;
 
     /**
      * Whether or not to translate legacy formatting codes over Minedown ones (Default: false)
@@ -59,9 +59,9 @@ public class MineDownStringifier {
     private boolean formattingInEventDefinition = false;
 
     /**
-     * Whether or not to put colors in event definitions (Default: false)
+     * Whether or not to put colors in event definitions (Default: true)
      */
-    private boolean colorInEventDefinition = false;
+    private boolean colorInEventDefinition = true;
 
     /**
      * The character to use as a special color code. (Default: ampersand &amp;)
@@ -148,7 +148,7 @@ public class MineDownStringifier {
                     if (preferSimpleEvents()) {
                         if (component.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT &&
                                 (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
-                            sbi.append("hover=");
+                            sbi.append(HOVER_PREFIX);
                         }
                     } else {
                         sbi.append(component.getHoverEvent().getAction().toString().toLowerCase()).append('=');

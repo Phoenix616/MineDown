@@ -57,31 +57,25 @@ public class Util {
      */
     public static BaseComponent applyFormat(BaseComponent component, Collection<ChatColor> formats) {
         for (ChatColor format : formats) {
-            switch (format) {
-                case BOLD:
-                    component.setBold(true);
-                    break;
-                case ITALIC:
-                    component.setItalic(true);
-                    break;
-                case UNDERLINE:
-                    component.setUnderlined(true);
-                    break;
-                case STRIKETHROUGH:
-                    component.setStrikethrough(true);
-                    break;
-                case MAGIC:
-                    component.setObfuscated(true);
-                    break;
-                case RESET:
-                    component.setBold(false);
-                    component.setItalic(false);
-                    component.setUnderlined(false);
-                    component.setStrikethrough(false);
-                    component.setObfuscated(false);
-                    format = ChatColor.WHITE;
-                default:
-                    component.setColor(format);
+            if (format == ChatColor.BOLD) {
+                component.setBold(true);
+            } else if (format == ChatColor.ITALIC) {
+                component.setItalic(true);
+            } else if (format == ChatColor.UNDERLINE) {
+                component.setUnderlined(true);
+            } else if (format == ChatColor.STRIKETHROUGH) {
+                component.setStrikethrough(true);
+            } else if (format == ChatColor.MAGIC) {
+                component.setObfuscated(true);
+            } else if (format == ChatColor.RESET) {
+                component.setBold(false);
+                component.setItalic(false);
+                component.setUnderlined(false);
+                component.setStrikethrough(false);
+                component.setObfuscated(false);
+                component.setColor(ChatColor.WHITE);
+            } else {
+                component.setColor(format);
             }
         }
         if (component.getExtra() != null) {
@@ -100,31 +94,25 @@ public class Util {
      */
     public static ComponentBuilder applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
         for (ChatColor format : formats) {
-            switch (format) {
-                case BOLD:
-                    builder.bold(true);
-                    break;
-                case ITALIC:
-                    builder.italic(true);
-                    break;
-                case UNDERLINE:
-                    builder.underlined(true);
-                    break;
-                case STRIKETHROUGH:
-                    builder.strikethrough(true);
-                    break;
-                case MAGIC:
-                    builder.obfuscated(true);
-                    break;
-                case RESET:
-                    builder.bold(false);
-                    builder.italic(false);
-                    builder.underlined(false);
-                    builder.strikethrough(false);
-                    builder.obfuscated(false);
-                    format = null;
-                default:
-                    builder.color(format);
+            if (format == ChatColor.BOLD) {
+                builder.bold(true);
+            } else if (format == ChatColor.ITALIC) {
+                builder.italic(true);
+            } else if (format == ChatColor.UNDERLINE) {
+                builder.underlined(true);
+            } else if (format == ChatColor.STRIKETHROUGH) {
+                builder.strikethrough(true);
+            } else if (format == ChatColor.MAGIC) {
+                builder.obfuscated(true);
+            } else if (format == ChatColor.RESET) {
+                builder.bold(false);
+                builder.italic(false);
+                builder.underlined(false);
+                builder.strikethrough(false);
+                builder.obfuscated(false);
+                builder.color(ChatColor.WHITE);
+            } else {
+                builder.color(format);
             }
         }
         return builder;
@@ -146,15 +134,7 @@ public class Util {
      * @return <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
      */
     public static boolean isFormat(ChatColor format) {
-        switch (format) {
-            case BOLD:
-            case ITALIC:
-            case UNDERLINE:
-            case STRIKETHROUGH:
-            case MAGIC:
-                return true;
-        }
-        return false;
+        return !MineDown.getFormatString(format).isEmpty();
     }
 
     /**
