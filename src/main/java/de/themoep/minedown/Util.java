@@ -287,7 +287,9 @@ public class Util {
             if (component.getColorRaw() != null && component.getColorRaw().getName().startsWith("#")) {
                 component.setColor(getClosestLegacy(new Color(Integer.parseInt(component.getColorRaw().getName().substring(1), 16))));
             }
-            rgbColorsToLegacy(component.getExtra().toArray(new BaseComponent[0]));
+            if (component.getExtra() != null) {
+                rgbColorsToLegacy(component.getExtra().toArray(new BaseComponent[0]));
+            }
         }
         return components;
     }
@@ -303,6 +305,7 @@ public class Util {
         for (Map.Entry<ChatColor, Color> legacy : legacyColors.entrySet()) {
             double distance = distance(color, legacy.getValue());
             if (distance < smallestDistance) {
+                smallestDistance = distance;
                 closest = legacy.getKey();
             }
         }
