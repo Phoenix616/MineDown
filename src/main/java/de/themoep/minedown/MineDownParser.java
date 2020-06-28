@@ -171,7 +171,9 @@ public class MineDownParser {
                     if (c1 == c) {
                         try {
                             encoded = parseColor(colorString.toString(), "", lenient());
-                            i = j;
+                            if(j - 1 > i) {
+                                i = j;
+                            }
                         } catch (IllegalArgumentException ignored) {
                         }
                         break;
