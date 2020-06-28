@@ -165,12 +165,15 @@ public class MineDownParser {
                     code += 32;
                 }
                 ChatColor encoded = null;
+                Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
                     char c1 = message.charAt(j);
-                    if (c1 == c) {
+                    // Check if we have reached another indicator char and have a color string that isn't just one char
+                    if (c1 == c && colorString.length() > 1) {
                         try {
                             encoded = parseColor(colorString.toString(), "", lenient());
+                            filterOption = Option.SIMPLE_FORMATTING;
                             i = j;
                         } catch (IllegalArgumentException ignored) {
                         }
@@ -183,10 +186,13 @@ public class MineDownParser {
                 }
                 if (encoded == null) {
                     encoded = ChatColor.getByChar(code);
+                    if (encoded != null) {
+                        filterOption = Option.LEGACY_COLORS;
+                    }
                 }
 
                 if (encoded != null) {
-                    if (!isFiltered(Option.LEGACY_COLORS)) {
+                    if (!isFiltered(filterOption)) {
                         if (encoded == ChatColor.RESET) {
                             appendValue();
                             color = null;
