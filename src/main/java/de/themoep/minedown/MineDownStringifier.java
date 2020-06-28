@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
 
 public class MineDownStringifier {
 
+    private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(BaseComponent.class, "getFontRaw");
+
     /**
      * Whether or not to use legacy color codes (Default: false)
      */
@@ -68,6 +70,7 @@ public class MineDownStringifier {
      */
     private char colorChar = '&';
 
+    public static final String FONT_PREFIX = "font=";
     public static final String COLOR_PREFIX = "color=";
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
@@ -135,6 +138,9 @@ public class MineDownStringifier {
                     }
                     sbi.append(Util.getFormats(component, true).stream().map(c -> c.getName().toLowerCase()).collect(Collectors.joining(" ")));
                     definitions.add(sbi.toString());
+                }
+                if (HAS_FONT_SUPPORT && component.getFontRaw() != null) {
+                    definitions.add(FONT_PREFIX + component.getFontRaw());
                 }
                 if (component.getClickEvent() != null) {
                     if (preferSimpleEvents() && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {

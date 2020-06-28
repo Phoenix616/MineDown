@@ -41,13 +41,8 @@ import java.util.regex.Pattern;
 
 public class MineDownParser {
 
-    public static final boolean HAS_RGB_SUPPORT;
-    public static final boolean HAS_FONT_SUPPORT;
-
-    static {
-        HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of");
-        HAS_FONT_SUPPORT = Util.hasMethod(ComponentBuilder.class, "font");
-    }
+    private static final boolean HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of", String.class);
+    private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(ComponentBuilder.class, "font", String.class);
 
     /**
      * The character to use as a special color code. (Default: ampersand &amp;)
