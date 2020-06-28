@@ -44,6 +44,7 @@ You can define click and hover events with the commonly used MarkDown link synta
  RGB Hex Color  |` [Text](color=#ff00ff)                `| Full hexadecimal format 
  RGB Hex Color  |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
  Formatting     |` [Text](format=underline,bold)        `|
+ Font           |` [Text](font=custom_font)             `| Set a custom font from a resource pack
  Hover          |` [Text](hover=Hover Text)             `|
  Command        |` [Text](run_command=/command string)  `|
  

@@ -42,9 +42,11 @@ import java.util.regex.Pattern;
 public class MineDownParser {
 
     public static final boolean HAS_RGB_SUPPORT;
+    public static final boolean HAS_FONT_SUPPORT;
 
     static {
         HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of");
+        HAS_FONT_SUPPORT = Util.hasMethod(ComponentBuilder.class, "font");
     }
 
     /**
@@ -95,12 +97,14 @@ public class MineDownParser {
 
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
 
+    public static final String FONT_PREFIX = "font=";
     public static final String COLOR_PREFIX = "color=";
     public static final String FORMAT_PREFIX = "format=";
     public static final String HOVER_PREFIX = "hover=";
 
     private ComponentBuilder builder;
     private StringBuilder value;
+    private String font;
     private ChatColor color;
     private Set<ChatColor> format;
     private ClickEvent clickEvent;
@@ -329,6 +333,9 @@ public class MineDownParser {
             } else {
                 builder.append(value.toString(), retention);
             }
+            if (HAS_FONT_SUPPORT) {
+                builder.font(font);
+            }
             builder.color(color);
             Util.applyFormat(builder, format);
             if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
@@ -368,6 +375,7 @@ public class MineDownParser {
         if (definitions.endsWith(" ")) {
             defParts.add("");
         }
+        String font = null;
         ChatColor color = null;
         Set<ChatColor> formats = new HashSet<>();
         ClickEvent clickEvent = null;
@@ -386,6 +394,10 @@ public class MineDownParser {
                 }
                 formatEnd = i;
                 continue;
+            }
+
+            if (definition.toLowerCase().startsWith(FONT_PREFIX)) {
+                font = definition.substring(FONT_PREFIX.length());
             }
 
             if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
@@ -484,6 +496,7 @@ public class MineDownParser {
 
         return copy()
                 .urlDetection(false)
+                .font(font)
                 .color(color)
                 .format(formats)
                 .clickEvent(clickEvent)
@@ -507,6 +520,15 @@ public class MineDownParser {
 
     protected StringBuilder value() {
         return this.value;
+    }
+
+    private MineDownParser font(String font) {
+        this.font = font;
+        return this;
+    }
+
+    protected String font() {
+        return this.font;
     }
 
     protected MineDownParser color(ChatColor color) {
@@ -627,6 +649,7 @@ public class MineDownParser {
         if (formatting) {
             format(from.format());
             color(from.color());
+            font(from.font());
             clickEvent(from.clickEvent());
             hoverEvent(from.hoverEvent());
         }
@@ -640,6 +663,7 @@ public class MineDownParser {
     public MineDownParser reset() {
         builder = null;
         value = new StringBuilder();
+        font = null;
         color = null;
         format = new HashSet<>();
         clickEvent = null;
