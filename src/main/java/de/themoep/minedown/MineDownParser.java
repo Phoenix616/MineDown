@@ -28,6 +28,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
+import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +40,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MineDownParser {
+
+    public static final boolean HAS_RGB_SUPPORT;
+
+    static {
+        HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of");
+    }
 
     /**
      * The character to use as a special color code. (Default: ampersand &amp;)
@@ -562,7 +569,11 @@ public class MineDownParser {
                     }
                     colorString = sb.toString();
                 }
-                color = ChatColor.of(colorString);
+                if (HAS_RGB_SUPPORT) {
+                    color = ChatColor.of(colorString);
+                } else {
+                    color = Util.getClosestLegacy(new Color(Integer.parseInt(colorString.substring(1), 16)));
+                }
             } catch (IllegalArgumentException e) {
                 if (!lenient) {
                     throw e;

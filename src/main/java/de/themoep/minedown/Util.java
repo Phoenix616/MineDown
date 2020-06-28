@@ -324,4 +324,20 @@ public class Util {
         }
         return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getGreen() - c2.getGreen(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2));
     }
+
+    /**
+     * Check if a class has a certain method. See {@link Class#getMethod(String, Class[])}
+     * @param clazz     The class to check
+     * @param method    The method to check for
+     * @param parameter Method parameter types
+     * @return <tt>true</tt> if the class has the method, <tt>false</tt> if not
+     */
+    public static boolean hasMethod(Class<?> clazz, String method, Class<?>... parameter) {
+        try {
+            clazz.getMethod(method, parameter);
+            return true;
+        } catch (NoSuchMethodException methodDoesntExist) {
+            return false;
+        }
+    }
 }
