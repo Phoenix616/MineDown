@@ -584,17 +584,21 @@ public class MineDownParser {
         } else {
             try {
                 colorString = colorString.substring(prefix.length());
-                if (colorString.charAt(0) == '#' && colorString.length() == 4) {
-                    StringBuilder sb = new StringBuilder("#");
-                    for (int i = 1; i < 4; i++) {
-                        sb.append(colorString.charAt(i)).append(colorString.charAt(i));
+                if (colorString.charAt(0) == '#') {
+                    if (colorString.length() == 4){
+                        StringBuilder sb = new StringBuilder("#");
+                        for (int i = 1; i < 4; i++) {
+                            sb.append(colorString.charAt(i)).append(colorString.charAt(i));
+                        }
+                        colorString = sb.toString();
                     }
-                    colorString = sb.toString();
-                }
-                if (HAS_RGB_SUPPORT) {
-                    color = ChatColor.of(colorString);
+                    if (HAS_RGB_SUPPORT) {
+                        color = ChatColor.of(colorString);
+                    } else {
+                        color = Util.getClosestLegacy(new Color(Integer.parseInt(colorString.substring(1), 16)));
+                    }
                 } else {
-                    color = Util.getClosestLegacy(new Color(Integer.parseInt(colorString.substring(1), 16)));
+                    color = ChatColor.valueOf(colorString.toUpperCase());
                 }
             } catch (IllegalArgumentException e) {
                 if (!lenient) {
