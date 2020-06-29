@@ -69,6 +69,11 @@ public class MineDownParser {
     private boolean lenient = false;
 
     /**
+     * Should the parser try to detect if RGB/font support is available?
+     */
+    private boolean backwardsCompatibility = true;
+
+    /**
      * Detect urls in strings and add events to them? (Default: true)
      */
     private boolean urlDetection = true;
@@ -178,7 +183,7 @@ public class MineDownParser {
                     // Check if we have reached another indicator char and have a color string that isn't just one char
                     if (c1 == c && colorString.length() > 1) {
                         try {
-                            encoded = parseColor(colorString.toString(), "", lenient());
+                            encoded = parseColor(colorString.toString(), "", lenient(), backwardsCompatibility());
                             filterOption = Option.SIMPLE_FORMATTING;
                             i = j;
                         } catch (IllegalArgumentException ignored) {
@@ -328,7 +333,7 @@ public class MineDownParser {
             } else {
                 builder.append(value.toString(), retention);
             }
-            if (HAS_FONT_SUPPORT) {
+            if (!backwardsCompatibility || HAS_FONT_SUPPORT) {
                 builder.font(font);
             }
             builder.color(color);
@@ -380,7 +385,7 @@ public class MineDownParser {
 
         for (int i = 0; i < defParts.size(); i++) {
             String definition = defParts.get(i);
-            ChatColor parsed = parseColor(definition, "", true);
+            ChatColor parsed = parseColor(definition, "", true, backwardsCompatibility());
             if (parsed != null) {
                 if (Util.isFormat(parsed)) {
                     formats.add(parsed);
@@ -396,7 +401,7 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
-                color = parseColor(definition, COLOR_PREFIX, lenient());
+                color = parseColor(definition, COLOR_PREFIX, lenient(), backwardsCompatibility());
                 if (!lenient() && Util.isFormat(color)) {
                     throw new IllegalArgumentException(color + " is a format and not a color!");
                 }
@@ -406,7 +411,7 @@ public class MineDownParser {
 
             if (definition.toLowerCase().startsWith(FORMAT_PREFIX)) {
                 for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
-                    ChatColor format = parseColor(formatStr, "", lenient());
+                    ChatColor format = parseColor(formatStr, "", lenient(), backwardsCompatibility());
                     if (!lenient() && !Util.isFormat(format)) {
                         throw new IllegalArgumentException(formats + " is a color and not a format!");
                     }
@@ -568,8 +573,14 @@ public class MineDownParser {
      * @param prefix      The color prefix e.g. ampersand (&amp;)
      * @param lenient     Whether or not to accept malformed strings
      * @return The parsed color or <tt>null</tt> if lenient is true and no color was found
+     * @deprecated This does not need to be exposed publicly and will bre private in the next version
      */
+    @Deprecated
     public static ChatColor parseColor(String colorString, String prefix, boolean lenient) {
+        return parseColor(colorString, prefix, lenient, true);
+    }
+
+    private static ChatColor parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
         ChatColor color = null;
         if (prefix.length() + 1 == colorString.length()) {
             color = ChatColor.getByChar(colorString.charAt(prefix.length()));
@@ -587,7 +598,7 @@ public class MineDownParser {
                         }
                         colorString = sb.toString();
                     }
-                    if (HAS_RGB_SUPPORT) {
+                    if (!backwardsCompatibility || HAS_RGB_SUPPORT) {
                         color = ChatColor.of(colorString);
                     } else {
                         color = Util.getClosestLegacy(new Color(Integer.parseInt(colorString.substring(1), 16)));
@@ -863,6 +874,24 @@ public class MineDownParser {
      */
     public MineDownParser lenient(boolean lenient) {
         this.lenient = lenient;
+        return this;
+    }
+
+    /**
+     * Get whether the parser should try to detect if RGB/font support is available
+     * @return whether the parser should try to detect if RGB/font support is available (Default: true)
+     */
+    public boolean backwardsCompatibility() {
+        return this.backwardsCompatibility;
+    }
+
+    /**
+     * Set whether the parser should try to detect if RGB/font support is available
+     * @param backwardsCompatibility Set whether the parser should try to detect if RGB/font support is available (Default: true)
+     * @return The MineDownParser instance
+     */
+    public MineDownParser backwardsCompatibility(boolean backwardsCompatibility) {
+        this.backwardsCompatibility = backwardsCompatibility;
         return this;
     }
 
