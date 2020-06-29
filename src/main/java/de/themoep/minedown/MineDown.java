@@ -38,13 +38,15 @@ import java.util.Map;
  *
  * <table>
  * <caption><strong> Inline Formatting </strong></caption>
- * <tr><td> Color legacy  </td><td><tt> &amp;6Text         </tt></td><td> {@link ChatColor} codes </td></tr>
- * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text </tt></td><td> {@link ChatColor} codes </td></tr>
- * <tr><td> Bold          </td><td><tt> **Text**           </tt></td></tr>
- * <tr><td> Italic        </td><td><tt> ##Text##           </tt></td></tr>
- * <tr><td> Underlined    </td><td><tt> __Text__           </tt></td></tr>
- * <tr><td> Strikethrough </td><td><tt> ~~Text~~           </tt></td></tr>
- * <tr><td> Obfuscated    </td><td><tt> ??Text??           </tt></td></tr>
+ * <tr><td> Color legacy  </td><td><tt> &amp;6Text           </tt></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text   </tt></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> RGB Hex Color </td><td><tt> &amp;ff00ff&amp;Text </tt></td><td> Full hexadecimal format  </td></tr>
+ * <tr><td> RGB Hex Color </td><td><tt> &amp;f0f&amp;Text    </tt></td><td> Short format (equivalent to long one)  </td></tr>
+ * <tr><td> Bold          </td><td><tt> **Text**             </tt></td></tr>
+ * <tr><td> Italic        </td><td><tt> ##Text##             </tt></td></tr>
+ * <tr><td> Underlined    </td><td><tt> __Text__             </tt></td></tr>
+ * <tr><td> Strikethrough </td><td><tt> ~~Text~~             </tt></td></tr>
+ * <tr><td> Obfuscated    </td><td><tt> ??Text??             </tt></td></tr>
  * </table>
  *
  * <h2>Events</h2>
@@ -64,7 +66,10 @@ import java.util.Map;
  * <tr><td> General syntax </td><td><tt> [Text](action=value)                 </tt></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
  * <tr><td> Link           </td><td><tt> [Text](open_url=https://example.com) </tt></td></tr>
  * <tr><td> Color          </td><td><tt> [Text](color=red)                    </tt></td></tr>
+ * <tr><td> RGB Hex Color  </td><td><tt> [Text](color=#ff00ff)                </tt></td><td> Full hexadecimal format </td></tr>
+ * <tr><td> RGB Hex Color  </td><td><tt> [Text](color=#f0f)                   </tt></td><td> Short format (equivalent to long one) </td></tr>
  * <tr><td> Formatting     </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
+ * <tr><td> Font           </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
  * <tr><td> Hover          </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
  * <tr><td> Command        </td><td><tt> [Text](run_command=/command string)  </tt></td></tr>
  * </table>
