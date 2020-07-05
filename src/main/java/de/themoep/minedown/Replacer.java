@@ -29,6 +29,8 @@ import net.md_5.bungee.api.chat.KeybindComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +46,9 @@ import java.util.regex.Pattern;
  * By default these are the % character.
  */
 public class Replacer {
+
+    private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
+    private static final Method HOVER_GET_VALUE = Util.getMethod(HoverEvent.class, "getValue");
 
     /**
      * A cache of compiled replacement patterns
@@ -203,10 +208,21 @@ public class Replacer {
                 ));
             }
             if (component.getHoverEvent() != null) {
-                component.setHoverEvent(new HoverEvent(
-                        component.getHoverEvent().getAction(),
-                        replaceIn(component.getHoverEvent().getValue())
-                ));
+                if (HAS_HOVER_CONTENT_SUPPORT) {
+                    component.setHoverEvent(new HoverEvent(
+                            component.getHoverEvent().getAction(),
+                            replaceInContents(component.getHoverEvent().getContents())
+                    ));
+                } else if (HOVER_GET_VALUE != null) {
+                    try {
+                        component.setHoverEvent(new HoverEvent(
+                                component.getHoverEvent().getAction(),
+                                replaceIn((BaseComponent[]) HOVER_GET_VALUE.invoke(component.getHoverEvent()))
+                        ));
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
             if (component.getExtra() != null) {
                 component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
@@ -258,6 +274,44 @@ public class Replacer {
             returnList.addAll(replacedComponents);
         }
         return returnList.toArray(new BaseComponent[0]);
+    }
+
+    private List<HoverEvent.Content> replaceInContents(List<HoverEvent.Content> contents) {
+        List<HoverEvent.Content> replacedContents = new ArrayList<>();
+        for (HoverEvent.Content content : contents) {
+            if (content instanceof HoverEvent.ContentText) {
+                Object value = ((HoverEvent.ContentText) content).getValue();
+                if (value instanceof BaseComponent[]) {
+                    replacedContents.add(new HoverEvent.ContentText(replaceIn((BaseComponent[]) value)));
+                } else if (value instanceof String) {
+                    replacedContents.add(new HoverEvent.ContentText(replaceIn((String) value)));
+                } else {
+                    throw new UnsupportedOperationException("Cannot replace in " + value.getClass() + "!");
+                }
+            } else if (content instanceof HoverEvent.ContentEntity) {
+                HoverEvent.ContentEntity contentEntity = (HoverEvent.ContentEntity) content;
+                String id = replaceIn(contentEntity.getId());
+                String type;
+                if (contentEntity.getType() != null) {
+                    type = replaceIn(contentEntity.getType());
+                } else {
+                    type = "minecraft:pig"; // Meh
+                }
+                BaseComponent name = null;
+                if (contentEntity.getName() != null) {
+                    name = new TextComponent(replaceIn(TextComponent.toLegacyText(contentEntity.getName())));
+                }
+                replacedContents.add(new HoverEvent.ContentEntity(type, id, name));
+            } else if (content instanceof HoverEvent.ContentItem) {
+                HoverEvent.ContentItem contentItem = (HoverEvent.ContentItem) content;
+                String id = replaceIn(contentItem.getId());
+                // TODO: ItemTag replacements
+                replacedContents.add(new HoverEvent.ContentItem(id, contentItem.getCount(), contentItem.getTag()));
+            } else {
+                replacedContents.add(content); // TODO: Find a good way to clone this
+            }
+        }
+        return replacedContents;
     }
 
     /**

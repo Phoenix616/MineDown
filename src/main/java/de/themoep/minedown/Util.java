@@ -27,8 +27,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 import java.awt.Color;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -338,6 +340,21 @@ public class Util {
             return true;
         } catch (NoSuchMethodException methodDoesntExist) {
             return false;
+        }
+    }
+
+    /**
+     * Get a method from a class if it exists. See {@link Class#getMethod(String, Class[])}
+     * @param clazz     The class
+     * @param method    The method name to get
+     * @param parameter Method parameter types
+     * @return the method, null if it doesn't exist
+     */
+    public static Method getMethod(Class<?> clazz, String method, Class<?>... parameter) {
+        try {
+            return clazz.getMethod(method, parameter);
+        } catch (NoSuchMethodException methodDoesntExist) {
+            return null;
         }
     }
 }

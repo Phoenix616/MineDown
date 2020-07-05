@@ -28,6 +28,8 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 public class MineDownStringifier {
 
     private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(BaseComponent.class, "getFontRaw");
+    private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
+    private static final Method HOVER_GET_VALUE = Util.getMethod(HoverEvent.class, "getValue");
 
     /**
      * Whether or not to use legacy color codes (Default: false)
@@ -87,7 +91,7 @@ public class MineDownStringifier {
      * @param components The components to generate a MineDown string from
      * @return The MineDown string
      */
-    public String stringify(BaseComponent[] components) {
+    public String stringify(BaseComponent... components) {
         StringBuilder sb = new StringBuilder();
         for (BaseComponent component : components) {
             if (!component.hasFormatting()) {
@@ -151,15 +155,21 @@ public class MineDownStringifier {
                 }
                 if (component.getHoverEvent() != null) {
                     StringBuilder sbi = new StringBuilder();
-                    if (preferSimpleEvents()) {
-                        if (component.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT &&
-                                (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
-                            sbi.append(HOVER_PREFIX);
-                        }
+                    if (preferSimpleEvents() && component.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT &&
+                            (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
+                        sbi.append(HOVER_PREFIX);
                     } else {
                         sbi.append(component.getHoverEvent().getAction().toString().toLowerCase()).append('=');
                     }
-                    sbi.append(copy().stringify(component.getHoverEvent().getValue()));
+                    if (HAS_HOVER_CONTENT_SUPPORT) {
+                        sbi.append(copy().stringify(component.getHoverEvent().getContents()));
+                    } else if (HOVER_GET_VALUE != null) {
+                        try {
+                            sbi.append(copy().stringify((BaseComponent[]) HOVER_GET_VALUE.invoke(component.getHoverEvent())));
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     definitions.add(sbi.toString());
                 }
                 sb.append(definitions.stream().collect(Collectors.joining(" ")));
@@ -169,6 +179,39 @@ public class MineDownStringifier {
             }
         }
         return sb.toString();
+    }
+
+    private StringBuilder stringify(List<HoverEvent.Content> contents) {
+        StringBuilder sb = new StringBuilder();
+        for (HoverEvent.Content content : contents) {
+            if (content instanceof HoverEvent.ContentText) {
+                Object value = ((HoverEvent.ContentText) content).getValue();
+                if (value instanceof BaseComponent[]) {
+                    sb.append(stringify((BaseComponent[]) value));
+                } else {
+                    sb.append(value);
+                }
+            } else if (content instanceof HoverEvent.ContentEntity) {
+                HoverEvent.ContentEntity contentEntity = (HoverEvent.ContentEntity) content;
+                sb.append(contentEntity.getId());
+                if (contentEntity.getType() != null) {
+                    sb.append(":").append(contentEntity.getType());
+                }
+                if (contentEntity.getName() != null) {
+                    sb.append(" ").append(stringify(contentEntity.getName()));
+                }
+            } else if (content instanceof HoverEvent.ContentItem) {
+                HoverEvent.ContentItem contentItem = (HoverEvent.ContentItem) content;
+                sb.append(contentItem.getId());
+                if (contentItem.getCount() > 0) {
+                    sb.append("*").append(contentItem.getCount());
+                }
+                if (contentItem.getTag() != null) {
+                    throw new UnsupportedOperationException("ItemTags cannot yet stringified yet! :(");
+                }
+            }
+        }
+        return sb;
     }
 
     private void appendText(StringBuilder sb, BaseComponent component) {

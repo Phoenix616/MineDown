@@ -27,6 +27,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.ItemTag;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.awt.Color;
 import java.lang.reflect.Field;
@@ -41,8 +43,10 @@ import java.util.regex.Pattern;
 
 public class MineDownParser {
 
+    private static final boolean HAS_APPEND_SUPPORT = Util.hasMethod(ComponentBuilder.class, "append", BaseComponent[].class);
     private static final boolean HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of", String.class);
     private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(ComponentBuilder.class, "font", String.class);
+    private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
 
     /**
      * The character to use as a special color code. (Default: ampersand &amp;)
@@ -296,9 +300,9 @@ public class MineDownParser {
                 this.builder = new ComponentBuilder("");
             }
         } else {
-            try {
+            if (HAS_APPEND_SUPPORT) {
                 this.builder.append(components);
-            } catch (NoSuchMethodError e) {
+            } else {
                 // Older versions didn't have ComponentBuilder#append(BaseComponent[])
                 // Recreating it with reflections. That might be slower but they should just update anyways...
                 if (components.length > 0) {
@@ -444,11 +448,11 @@ public class MineDownParser {
             } catch (IllegalArgumentException ignored) {
             }
 
-            boolean hasBracket = parts.length > 1 && parts[1].startsWith("{") && (clickAction != null || hoverAction != null);
+            int bracketDepth = parts.length > 1 && parts[1].startsWith("{") && (clickAction != null || hoverAction != null) ? 1 : 0;
 
             StringBuilder value = new StringBuilder();
             if (parts.length > 1 && clickAction != null || hoverAction != null) {
-                if (hasBracket) {
+                if (bracketDepth > 0) {
                     value.append(parts[1].substring(1));
                 } else {
                     value.append(parts[1]);
@@ -458,16 +462,29 @@ public class MineDownParser {
             }
 
             for (i = i + 1; i < defParts.size(); i++) {
-                if (!hasBracket && defParts.get(i).indexOf('=') != -1) {
-                    i--;
-                    break;
+                String part = defParts.get(i);
+                if (bracketDepth == 0) {
+                    int equalsIndex = part.indexOf('=');
+                    if (equalsIndex > 0 && !Util.isEscaped(part, equalsIndex)) {
+                        i--;
+                        break;
+                    }
                 }
                 value.append(" ");
-                if (hasBracket && defParts.get(i).endsWith("}")) {
-                    value.append(defParts.get(i), 0, defParts.get(i).length() - 1);
-                    break;
+                if (bracketDepth > 0) {
+                    int startBracketIndex = part.indexOf("={");
+                    if (startBracketIndex > 0 && !Util.isEscaped(part, startBracketIndex) && !Util.isEscaped(part, startBracketIndex + 1)) {
+                        bracketDepth++;
+                    }
+                    if (part.endsWith("}") && !Util.isEscaped(part, part.length() - 1)) {
+                        bracketDepth--;
+                        if (bracketDepth == 0) {
+                            value.append(part, 0, part.length() - 1);
+                            break;
+                        }
+                    }
                 }
-                value.append(defParts.get(i));
+                value.append(part);
             }
 
             if (clickAction != null) {
@@ -481,9 +498,71 @@ public class MineDownParser {
             }
             if (hoverAction != null) {
                 String valueStr = value.toString();
-                hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(
-                        hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
-                ).create());
+                if (!HAS_HOVER_CONTENT_SUPPORT) {
+                    hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(
+                            hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
+                    ).create());
+                } else if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
+                    hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentText(copy(false).urlDetection(false).parse(
+                           Util.wrap(valueStr, hoverTextWidth())
+                    ).create()));
+                } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
+                    String[] valueParts = valueStr.split(":", 2);
+                    try {
+                        String[] additionalParts = valueParts[1].split(" ", 2);
+                        if (!additionalParts[0].contains(":")) {
+                            additionalParts[0] = "minecraft:" + additionalParts[0];
+                        }
+                        hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentEntity(
+                                additionalParts[0], valueParts[0],
+                                additionalParts.length > 1 && additionalParts[1] != null ?
+                                        new TextComponent(copy(false).urlDetection(false).parse(additionalParts[1]).create()) : null
+                        ));
+                    } catch (Exception e) {
+                        if (!lenient()) {
+                            if (valueParts.length < 2) {
+                                throw new IllegalArgumentException("Invalid entity definition. Needs to be of format uuid:id or uuid:namespace:id!");
+                            }
+                            throw new IllegalArgumentException(e.getMessage());
+                        }
+                    }
+                } else if (hoverAction == HoverEvent.Action.SHOW_ITEM) {
+                    String[] valueParts = valueStr.split(" ", 2);
+                    String id = valueParts[0];
+                    if (!id.contains(":")) {
+                        id = "minecraft:" + id;
+                    }
+                    int count = 1;
+                    int countIndex = valueParts[0].indexOf('*');
+                    if (countIndex > 0 && countIndex + 1 < valueParts[0].length()) {
+                        try {
+                            count = Integer.parseInt(valueParts[0].substring(countIndex + 1));
+                            id = valueParts[0].substring(0, countIndex);
+                        } catch (NumberFormatException e) {
+                            if (!lenient()) {
+                                throw new IllegalArgumentException(e.getMessage());
+                            }
+                        }
+                    }
+                    ItemTag tag = null;
+                    if (valueParts.length > 1 && valueParts[1] != null) {
+                        String[] lines = valueParts[1].split("\n");
+                        List<BaseComponent[]> lore = new ArrayList<>();
+                        for (int l = 1; l < lines.length; l++) {
+                            lore.add(copy(false).urlDetection(false).parse(lines[l]).create());
+                        }
+                        tag = new ItemTag(
+                                new TextComponent(copy(false).urlDetection(false).parse(lines[0]).create()),
+                                new ArrayList<>(),
+                                lore,
+                                false
+                        );
+                    }
+
+                    hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentItem(
+                            id, count, tag
+                    ));
+                }
             }
         }
 

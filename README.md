@@ -36,17 +36,21 @@ You can define click and hover events with the commonly used MarkDown link synta
  Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
  
 #### Advanced Syntax
- Description    | Syntax                                 | More Info
- ---------------|----------------------------------------|----
- General syntax |` [Text](action=value)                 `| [ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
- Link           |` [Text](open_url=https://example.com) `|
- Color          |` [Text](color=red)                    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
- RGB Hex Color  |` [Text](color=#ff00ff)                `| Full hexadecimal format 
- RGB Hex Color  |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
- Formatting     |` [Text](format=underline,bold)        `|
- Font           |` [Text](font=custom_font)             `| Set a custom font from a resource pack
- Hover          |` [Text](hover=Hover Text)             `|
- Command        |` [Text](run_command=/command string)  `|
+ Description        | Syntax                                 | More Info
+ -------------------|----------------------------------------|----
+ General syntax     |` [Text](action=value)                 `| [ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
+ Link               |` [Text](open_url=https://example.com) `|
+ Color              |` [Text](color=red)                    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
+ RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
+ Formatting         |` [Text](format=underline,bold)        `|
+ Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
+ Run Command        |` [Text](run_command=/command string)  `| Run command on click
+ Suggest Command    |` [Text](suggest_command=/command)     `| Suggest a command on click
+ Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
+ Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
+ Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
+ Hover Item Info    |` [Text](show_item=stone*2 Name\nLore) `| Show item information, can use new lines to add lines to lore
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!

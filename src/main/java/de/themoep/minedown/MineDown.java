@@ -63,15 +63,19 @@ import java.util.Map;
  * <p>
  * <table>
  * <caption><strong> Advanced Syntax </strong></caption>
- * <tr><td> General syntax </td><td><tt> [Text](action=value)                 </tt></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
- * <tr><td> Link           </td><td><tt> [Text](open_url=https://example.com) </tt></td></tr>
- * <tr><td> Color          </td><td><tt> [Text](color=red)                    </tt></td></tr>
- * <tr><td> RGB Hex Color  </td><td><tt> [Text](color=#ff00ff)                </tt></td><td> Full hexadecimal format </td></tr>
- * <tr><td> RGB Hex Color  </td><td><tt> [Text](color=#f0f)                   </tt></td><td> Short format (equivalent to long one) </td></tr>
- * <tr><td> Formatting     </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
- * <tr><td> Font           </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
- * <tr><td> Hover          </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
- * <tr><td> Command        </td><td><tt> [Text](run_command=/command string)  </tt></td></tr>
+ * <tr><td> General syntax      </td><td><tt> [Text](action=value)                 </tt></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
+ * <tr><td> Link                </td><td><tt> [Text](open_url=https://example.com) </tt></td></tr>
+ * <tr><td> Color               </td><td><tt> [Text](color=red)                    </tt></td></tr>
+ * <tr><td> RGB Hex Color       </td><td><tt> [Text](color=#ff00ff)                </tt></td><td> Full hexadecimal format </td></tr>
+ * <tr><td> RGB Hex Color       </td><td><tt> [Text](color=#f0f)                   </tt></td><td> Short format (equivalent to long one) </td></tr>
+ * <tr><td> Formatting          </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
+ * <tr><td> Font                </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
+ * <tr><td> Run Command         </td><td><tt> [Text](run_command=/command string)  </tt></td></tr>
+ * <tr><td> Suggest Command     </td><td><tt> [Text](suggest_command=/command)     </tt></td></tr>
+ * <tr><td> Simple Hover        </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
+ * <tr><td> Hover Text          </td><td><tt> [Text](show_text=Hover Text)         </tt></td></tr>
+ * <tr><td> Hover Entity Info   </td><td><tt> [Text](show_entity=uuid:pig Name)    </tt></td></tr>
+ * <tr><td> Hover Item Info     </td><td><tt> [Text](show_item=stone*2 Name\nLore) </tt></td></tr>
  * </table>
  * <p>
  * All advanced settings can be chained/included in a event definition.
