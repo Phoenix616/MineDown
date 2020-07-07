@@ -12,6 +12,44 @@
 
     <description>A MarkDown inspired markup library for Minecraft chat components</description>
 
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://phoenix616.dev/licenses/mit</url>
+            <distribution>repo</distribution>
+            <comments>A permissive free software license</comments>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/Phoenix616/MineDown/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>phoenix616</id>
+            <name>Max Lee</name>
+            <email>max@themoep.de</email>
+            <url>https://phoenix616.dev</url>
+            <organization>Minebench</organization>
+            <organizationUrl>https://minebench.de</organizationUrl>
+            <roles>
+                <role>lead</role>
+                <role>developer</role>
+            </roles>
+            <timezone>UTC+01:00</timezone>
+            <properties>
+                <avatar>https://phoenix616.dev/favicon.ico</avatar>
+                <github>Phoenix616</github>
+                <twitter>https://twitter.com/the_moep</twitter>
+                <mastodon>https://social.tchncs.de/@the_moep</mastodon>
+                <matrix>@Moep:matrix.org</matrix>
+                <donate>https://tip.phoenix616.dev</donate>
+            </properties>
+        </developer>
+    </developers>
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

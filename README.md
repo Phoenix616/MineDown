@@ -1,4 +1,4 @@
-# Minedown
+# MineDown
 A library that adds the ability to use a MarkDown inspired markup to write Minecraft chat components!
 
 It provides a custom mark up syntax which is loosely based on MarkDown that adds the ability to use the full power of 
