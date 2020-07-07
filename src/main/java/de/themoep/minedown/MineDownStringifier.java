@@ -27,6 +27,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Content;
+import net.md_5.bungee.api.chat.hover.content.Entity;
+import net.md_5.bungee.api.chat.hover.content.Item;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -181,18 +185,18 @@ public class MineDownStringifier {
         return sb.toString();
     }
 
-    private StringBuilder stringify(List<HoverEvent.Content> contents) {
+    private StringBuilder stringify(List<Content> contents) {
         StringBuilder sb = new StringBuilder();
-        for (HoverEvent.Content content : contents) {
-            if (content instanceof HoverEvent.ContentText) {
-                Object value = ((HoverEvent.ContentText) content).getValue();
+        for (Content content : contents) {
+            if (content instanceof Text) {
+                Object value = ((Text) content).getValue();
                 if (value instanceof BaseComponent[]) {
                     sb.append(stringify((BaseComponent[]) value));
                 } else {
                     sb.append(value);
                 }
-            } else if (content instanceof HoverEvent.ContentEntity) {
-                HoverEvent.ContentEntity contentEntity = (HoverEvent.ContentEntity) content;
+            } else if (content instanceof Entity) {
+                Entity contentEntity = (Entity) content;
                 sb.append(contentEntity.getId());
                 if (contentEntity.getType() != null) {
                     sb.append(":").append(contentEntity.getType());
@@ -200,14 +204,14 @@ public class MineDownStringifier {
                 if (contentEntity.getName() != null) {
                     sb.append(" ").append(stringify(contentEntity.getName()));
                 }
-            } else if (content instanceof HoverEvent.ContentItem) {
-                HoverEvent.ContentItem contentItem = (HoverEvent.ContentItem) content;
+            } else if (content instanceof Item) {
+                Item contentItem = (Item) content;
                 sb.append(contentItem.getId());
                 if (contentItem.getCount() > 0) {
                     sb.append("*").append(contentItem.getCount());
                 }
                 if (contentItem.getTag() != null) {
-                    throw new UnsupportedOperationException("ItemTags cannot yet stringified yet! :(");
+                    sb.append(" ").append(contentItem.getTag().getNbt());
                 }
             }
         }

@@ -75,7 +75,7 @@ import java.util.Map;
  * <tr><td> Simple Hover        </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
  * <tr><td> Hover Text          </td><td><tt> [Text](show_text=Hover Text)         </tt></td></tr>
  * <tr><td> Hover Entity Info   </td><td><tt> [Text](show_entity=uuid:pig Name)    </tt></td></tr>
- * <tr><td> Hover Item Info     </td><td><tt> [Text](show_item=stone*2 Name\nLore) </tt></td></tr>
+ * <tr><td> Hover Item Info     </td><td><tt> [Text](show_item=stone*2 nbt...)     </tt></td></tr>
  * </table>
  * <p>
  * All advanced settings can be chained/included in a event definition.

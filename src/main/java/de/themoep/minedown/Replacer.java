@@ -25,9 +25,14 @@ package de.themoep.minedown;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.ItemTag;
 import net.md_5.bungee.api.chat.KeybindComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
+import net.md_5.bungee.api.chat.hover.content.Content;
+import net.md_5.bungee.api.chat.hover.content.Entity;
+import net.md_5.bungee.api.chat.hover.content.Item;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -276,37 +281,37 @@ public class Replacer {
         return returnList.toArray(new BaseComponent[0]);
     }
 
-    private List<HoverEvent.Content> replaceInContents(List<HoverEvent.Content> contents) {
-        List<HoverEvent.Content> replacedContents = new ArrayList<>();
-        for (HoverEvent.Content content : contents) {
-            if (content instanceof HoverEvent.ContentText) {
-                Object value = ((HoverEvent.ContentText) content).getValue();
+    private List<Content> replaceInContents(List<Content> contents) {
+        List<Content> replacedContents = new ArrayList<>();
+        for (Content content : contents) {
+            if (content instanceof Text) {
+                Object value = ((Text) content).getValue();
                 if (value instanceof BaseComponent[]) {
-                    replacedContents.add(new HoverEvent.ContentText(replaceIn((BaseComponent[]) value)));
+                    replacedContents.add(new Text(replaceIn((BaseComponent[]) value)));
                 } else if (value instanceof String) {
-                    replacedContents.add(new HoverEvent.ContentText(replaceIn((String) value)));
+                    replacedContents.add(new Text(replaceIn((String) value)));
                 } else {
                     throw new UnsupportedOperationException("Cannot replace in " + value.getClass() + "!");
                 }
-            } else if (content instanceof HoverEvent.ContentEntity) {
-                HoverEvent.ContentEntity contentEntity = (HoverEvent.ContentEntity) content;
-                String id = replaceIn(contentEntity.getId());
+            } else if (content instanceof Entity) {
+                Entity entity = (Entity) content;
+                String id = replaceIn(entity.getId());
                 String type;
-                if (contentEntity.getType() != null) {
-                    type = replaceIn(contentEntity.getType());
+                if (entity.getType() != null) {
+                    type = replaceIn(entity.getType());
                 } else {
                     type = "minecraft:pig"; // Meh
                 }
                 BaseComponent name = null;
-                if (contentEntity.getName() != null) {
-                    name = new TextComponent(replaceIn(TextComponent.toLegacyText(contentEntity.getName())));
+                if (entity.getName() != null) {
+                    name = new TextComponent(replaceIn(TextComponent.toLegacyText(entity.getName())));
                 }
-                replacedContents.add(new HoverEvent.ContentEntity(type, id, name));
-            } else if (content instanceof HoverEvent.ContentItem) {
-                HoverEvent.ContentItem contentItem = (HoverEvent.ContentItem) content;
-                String id = replaceIn(contentItem.getId());
-                // TODO: ItemTag replacements
-                replacedContents.add(new HoverEvent.ContentItem(id, contentItem.getCount(), contentItem.getTag()));
+                replacedContents.add(new Entity(type, id, name));
+            } else if (content instanceof Item) {
+                Item item = (Item) content;
+                String id = replaceIn(item.getId());
+                ItemTag itemTag = item.getTag() != null ? ItemTag.ofNbt(replaceIn(item.getTag().getNbt())) : null;
+                replacedContents.add(new Item(id, item.getCount(), itemTag));
             } else {
                 replacedContents.add(content); // TODO: Find a good way to clone this
             }

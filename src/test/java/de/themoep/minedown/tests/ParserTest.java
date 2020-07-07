@@ -87,8 +87,8 @@ public class ParserTest {
         System.out.println("testParsing");
         Assertions.assertAll(
                 () -> parse("[this](show_text=&bHi)"),
-                () -> parse("[this](show_item=stone*3 Ein &7Stein\n:D)"),
-                () -> parse("[this](show_item=minecraft:stone*3 Ein &7Stein\n&b:D)"),
+                () -> parse("[this](show_item=stone*3 {Name:\"Ein Stein\"}"),
+                () -> parse("[this](show_item=minecraft:stone*3 {Name:\"Ein Stein\"}"),
                 () -> parse("[this](show_entity=coool-uuid-lol:cow &bEine Kuh)"),
                 () -> parse("[this](show_entity=coool-uuid-lol:minecraft:cow &bEine Kuh)")
         );

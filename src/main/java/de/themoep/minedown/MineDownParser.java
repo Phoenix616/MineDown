@@ -29,6 +29,9 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.ItemTag;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Entity;
+import net.md_5.bungee.api.chat.hover.content.Item;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import java.awt.Color;
 import java.lang.reflect.Field;
@@ -503,7 +506,7 @@ public class MineDownParser {
                             hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
                     ).create());
                 } else if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
-                    hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentText(copy(false).urlDetection(false).parse(
+                    hoverEvent = new HoverEvent(hoverAction, new Text(copy(false).urlDetection(false).parse(
                            Util.wrap(valueStr, hoverTextWidth())
                     ).create()));
                 } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
@@ -513,7 +516,7 @@ public class MineDownParser {
                         if (!additionalParts[0].contains(":")) {
                             additionalParts[0] = "minecraft:" + additionalParts[0];
                         }
-                        hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentEntity(
+                        hoverEvent = new HoverEvent(hoverAction, new Entity(
                                 additionalParts[0], valueParts[0],
                                 additionalParts.length > 1 && additionalParts[1] != null ?
                                         new TextComponent(copy(false).urlDetection(false).parse(additionalParts[1]).create()) : null
@@ -546,20 +549,10 @@ public class MineDownParser {
                     }
                     ItemTag tag = null;
                     if (valueParts.length > 1 && valueParts[1] != null) {
-                        String[] lines = valueParts[1].split("\n");
-                        List<BaseComponent[]> lore = new ArrayList<>();
-                        for (int l = 1; l < lines.length; l++) {
-                            lore.add(copy(false).urlDetection(false).parse(lines[l]).create());
-                        }
-                        tag = new ItemTag(
-                                new TextComponent(copy(false).urlDetection(false).parse(lines[0]).create()),
-                                new ArrayList<>(),
-                                lore,
-                                false
-                        );
+                        tag = ItemTag.ofNbt(valueParts[1]);
                     }
 
-                    hoverEvent = new HoverEvent(hoverAction, new HoverEvent.ContentItem(
+                    hoverEvent = new HoverEvent(hoverAction, new Item(
                             id, count, tag
                     ));
                 }

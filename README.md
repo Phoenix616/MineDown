@@ -50,7 +50,7 @@ You can define click and hover events with the commonly used MarkDown link synta
  Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
  Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
  Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
- Hover Item Info    |` [Text](show_item=stone*2 Name\nLore) `| Show item information, can use new lines to add lines to lore
+ Hover Item Info    |` [Text](show_item=stone*2 nbt...)     `| Show item information, additional information needs to be provided as a string of the nbt in json
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!

@@ -8,12 +8,14 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.ItemTag;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Entity;
+import net.md_5.bungee.api.chat.hover.content.Item;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Color;
-import java.util.ArrayList;
 
 public class StringifyTest {
     
@@ -36,23 +38,18 @@ public class StringifyTest {
                         .append("Test ").underlined(true).color(ChatColor.of(new Color(0, 255, 128)))
                         .append("link")
                         .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://example.com"))
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new HoverEvent.ContentText(new ComponentBuilder("Hover text").color(ChatColor.BLUE).create())))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder("Hover text").color(ChatColor.BLUE).create())))
                         .color(ChatColor.of(new Color(255, 0, 0)))
                         .append(". Test Text.").retain(ComponentBuilder.FormatRetention.NONE)
                         .create()),
                 () -> stringify(new ComponentBuilder("")
                         .append("Entity")
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.ContentEntity("pig", "some-uuid", new TextComponent(new ComponentBuilder("Hover text").color(ChatColor.BLUE).create()))))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new Entity("pig", "some-uuid", new TextComponent(new ComponentBuilder("Hover text").color(ChatColor.BLUE).create()))))
                         .color(ChatColor.of(new Color(255, 0, 0)))
                         .create()),
                 () -> stringify(new ComponentBuilder("")
                         .append("Entity")
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ContentItem("stone", 3, /*new ItemTag(
-                                new TextComponent(new ComponentBuilder("Hover text").color(ChatColor.BLUE).create()),
-                                new ArrayList<>(),
-                                new ArrayList<>(),
-                                false
-                        )*/null)))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new Item("stone", 3, ItemTag.ofNbt("{Name:\"Name\"}"))))
                         .color(ChatColor.of(new Color(255, 0, 0)))
                         .create())
         );
