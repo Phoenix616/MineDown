@@ -182,25 +182,44 @@ public class MineDownParser {
                 if (code >= 'A' && code <= 'Z') {
                     code += 32;
                 }
+                boolean isLegacyHex = code == 'x';
+                if (isLegacyHex) {
+                    i = i + 2;
+                }
                 ChatColor encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
                     char c1 = message.charAt(j);
                     // Check if we have reached another indicator char and have a color string that isn't just one char
-                    if (c1 == c && colorString.length() > 1) {
-                        try {
-                            encoded = parseColor(colorString.toString(), "", lenient(), backwardsCompatibility());
-                            filterOption = Option.SIMPLE_FORMATTING;
-                            i = j;
-                        } catch (IllegalArgumentException ignored) {
+                    if (c1 == c) {
+                        if (isLegacyHex) {
+                            continue;
+                        } else if (colorString.length() > 1) {
+                            try {
+                                encoded = parseColor(colorString.toString(), "", lenient(), backwardsCompatibility());
+                                filterOption = Option.SIMPLE_FORMATTING;
+                                i = j;
+                            } catch (IllegalArgumentException ignored) {
+                            }
+                            break;
                         }
+                    }
+                    if (!isLegacyHex && c1 != '_' && c1 != '#' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
                         break;
                     }
-                    if (c1 != '_' && c1 != '#' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
-                        break;
+                    if (!isLegacyHex || c1 != 'x') {
+                        colorString.append(c1);
+                        if (isLegacyHex && colorString.length() == 6) {
+                            try {
+                                encoded = parseColor("#" + colorString.toString(), "", lenient(), backwardsCompatibility());
+                                filterOption = Option.LEGACY_COLORS;
+                                i = j;
+                            } catch (IllegalArgumentException ignored) {
+                            }
+                            break;
+                        }
                     }
-                    colorString.append(c1);
                 }
                 if (encoded == null) {
                     encoded = ChatColor.getByChar(code);
