@@ -353,37 +353,35 @@ public class MineDownParser {
     }
 
     private void appendValue(ComponentBuilder.FormatRetention retention) {
-        if (value.length() > 0) {
-            if (builder == null) {
-                builder = new ComponentBuilder(value.toString());
-            } else {
-                builder.append(value.toString(), retention);
-            }
-            if (!backwardsCompatibility || HAS_FONT_SUPPORT) {
-                builder.font(font);
-            }
-            builder.color(color);
-            Util.applyFormat(builder, format);
-            if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
-                String v = value.toString();
-                if (!v.startsWith("http://") && !v.startsWith("https://")) {
-                    v = "http://" + v;
-                }
-                builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, v));
-                if (urlHoverText() != null && !urlHoverText().isEmpty()) {
-                    builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
-                    ));
-                }
-            }
-            if (clickEvent != null) {
-                builder.event(clickEvent);
-            }
-            if (hoverEvent != null) {
-                builder.event(hoverEvent);
-            }
-            value = new StringBuilder();
+        if (builder == null) {
+            builder = new ComponentBuilder(value.toString());
+        } else {
+            builder.append(value.toString(), retention);
         }
+        if (!backwardsCompatibility || HAS_FONT_SUPPORT) {
+            builder.font(font);
+        }
+        builder.color(color);
+        Util.applyFormat(builder, format);
+        if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
+            String v = value.toString();
+            if (!v.startsWith("http://") && !v.startsWith("https://")) {
+                v = "http://" + v;
+            }
+            builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, v));
+            if (urlHoverText() != null && !urlHoverText().isEmpty()) {
+                builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
+                ));
+            }
+        }
+        if (clickEvent != null) {
+            builder.event(clickEvent);
+        }
+        if (hoverEvent != null) {
+            builder.event(hoverEvent);
+        }
+        value = new StringBuilder();
     }
 
     /**
