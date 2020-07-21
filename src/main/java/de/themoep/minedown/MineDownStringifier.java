@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -136,7 +137,7 @@ public class MineDownStringifier {
                     if (!preferSimpleEvents()) {
                         sbi.append(COLOR_PREFIX);
                     }
-                    sbi.append(component.getColor().getName().toLowerCase());
+                    sbi.append(component.getColor().getName().toLowerCase(Locale.ROOT));
                     definitions.add(sbi.toString());
                 }
                 if (formattingInEventDefinition()) {
@@ -144,7 +145,7 @@ public class MineDownStringifier {
                     if (!preferSimpleEvents) {
                         sbi.append(FORMAT_PREFIX);
                     }
-                    sbi.append(Util.getFormats(component, true).stream().map(c -> c.getName().toLowerCase()).collect(Collectors.joining(" ")));
+                    sbi.append(Util.getFormats(component, true).stream().map(c -> c.getName().toLowerCase(Locale.ROOT)).collect(Collectors.joining(" ")));
                     definitions.add(sbi.toString());
                 }
                 if (HAS_FONT_SUPPORT && component.getFontRaw() != null) {
@@ -154,7 +155,7 @@ public class MineDownStringifier {
                     if (preferSimpleEvents() && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
                         definitions.add(component.getClickEvent().getValue());
                     } else {
-                        definitions.add(component.getClickEvent().getAction().toString().toLowerCase() + "=" + component.getClickEvent().getValue());
+                        definitions.add(component.getClickEvent().getAction().toString().toLowerCase(Locale.ROOT) + "=" + component.getClickEvent().getValue());
                     }
                 }
                 if (component.getHoverEvent() != null) {
@@ -163,7 +164,7 @@ public class MineDownStringifier {
                             (component.getClickEvent() == null || component.getClickEvent().getAction() != ClickEvent.Action.OPEN_URL)) {
                         sbi.append(HOVER_PREFIX);
                     } else {
-                        sbi.append(component.getHoverEvent().getAction().toString().toLowerCase()).append('=');
+                        sbi.append(component.getHoverEvent().getAction().toString().toLowerCase(Locale.ROOT)).append('=');
                     }
                     if (HAS_HOVER_CONTENT_SUPPORT) {
                         sbi.append(copy().stringify(component.getHoverEvent().getContents()));

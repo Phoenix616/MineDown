@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -244,9 +245,9 @@ public class Replacer {
                     if (replaceComponent instanceof TextComponent) {
                         TextComponent textComponent = (TextComponent) replaceComponent;
                         String placeHolder = placeholderPrefix()
-                                + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase() : replacement.getKey())
+                                + (ignorePlaceholderCase() ? replacement.getKey().toLowerCase(Locale.ROOT) : replacement.getKey())
                                 + placeholderSuffix();
-                        String text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
+                        String text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase(Locale.ROOT) : textComponent.getText();
                         int index = text.indexOf(placeHolder);
                         if (index > -1) {
                             do {
@@ -264,7 +265,7 @@ public class Replacer {
                                 } else {
                                     textComponent.setText("");
                                 }
-                                text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase() : textComponent.getText();
+                                text = ignorePlaceholderCase() ? textComponent.getText().toLowerCase(Locale.ROOT) : textComponent.getText();
                                 newReplacedComponents.add(textComponent);
                             } while (!text.isEmpty() && (index = text.indexOf(placeHolder)) > -1);
                             continue;
@@ -328,10 +329,10 @@ public class Replacer {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
             String replValue = replacement.getValue() != null ? replacement.getValue() : "null";
             if (ignorePlaceholderCase()) {
-                String placeholder = placeholderPrefix() + replacement.getKey().toLowerCase() + placeholderSuffix();
+                String placeholder = placeholderPrefix() + replacement.getKey().toLowerCase(Locale.ROOT) + placeholderSuffix();
                 int nextStart = 0;
                 int startIndex;
-                while (nextStart < string.length() && (startIndex = string.toLowerCase().indexOf(placeholder, nextStart)) > -1) {
+                while (nextStart < string.length() && (startIndex = string.toLowerCase(Locale.ROOT).indexOf(placeholder, nextStart)) > -1) {
                     nextStart = startIndex + replValue.length();
                     string = string.substring(0, startIndex) + replValue + string.substring(startIndex + placeholder.length());
                 }

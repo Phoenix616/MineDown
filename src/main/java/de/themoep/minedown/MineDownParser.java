@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -420,11 +421,11 @@ public class MineDownParser {
                 continue;
             }
 
-            if (definition.toLowerCase().startsWith(FONT_PREFIX)) {
+            if (definition.toLowerCase(Locale.ROOT).startsWith(FONT_PREFIX)) {
                 font = definition.substring(FONT_PREFIX.length());
             }
 
-            if (definition.toLowerCase().startsWith(COLOR_PREFIX)) {
+            if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
                 color = parseColor(definition, COLOR_PREFIX, lenient(), backwardsCompatibility());
                 if (!lenient() && Util.isFormat(color)) {
                     throw new IllegalArgumentException(color + " is a format and not a color!");
@@ -433,7 +434,7 @@ public class MineDownParser {
                 continue;
             }
 
-            if (definition.toLowerCase().startsWith(FORMAT_PREFIX)) {
+            if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
                 for (String formatStr : definition.substring(FORMAT_PREFIX.length()).split(",")) {
                     ChatColor format = parseColor(formatStr, "", lenient(), backwardsCompatibility());
                     if (!lenient() && !Util.isFormat(format)) {
@@ -455,16 +456,16 @@ public class MineDownParser {
 
             ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.RUN_COMMAND : null;
             HoverEvent.Action hoverAction = null;
-            if (definition.toLowerCase().startsWith(HOVER_PREFIX)) {
+            if (definition.toLowerCase(Locale.ROOT).startsWith(HOVER_PREFIX)) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             String[] parts = definition.split("=", 2);
             try {
-                hoverAction = HoverEvent.Action.valueOf(parts[0].toUpperCase());
+                hoverAction = HoverEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
             }
             try {
-                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase());
+                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
             }
 
@@ -578,7 +579,7 @@ public class MineDownParser {
 
         if (clickEvent != null && hoverEvent == null) {
             hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder(clickEvent.getAction().toString().toLowerCase().replace('_', ' ')).color(ChatColor.BLUE)
+                    new ComponentBuilder(clickEvent.getAction().toString().toLowerCase(Locale.ROOT).replace('_', ' ')).color(ChatColor.BLUE)
                             .append(" " + clickEvent.getValue()).color(ChatColor.WHITE)
                             .create());
         }
@@ -693,7 +694,7 @@ public class MineDownParser {
                         color = Util.getClosestLegacy(new Color(Integer.parseInt(colorString.substring(1), 16)));
                     }
                 } else {
-                    color = ChatColor.valueOf(colorString.toUpperCase());
+                    color = ChatColor.valueOf(colorString.toUpperCase(Locale.ROOT));
                 }
             } catch (IllegalArgumentException e) {
                 if (!lenient) {
