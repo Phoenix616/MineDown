@@ -79,7 +79,7 @@ Make sure to relocate it into your plugin's package!
 <repositories>
     <repository>
         <id>minebench-repo</id>
-        <url>http://repo.minebench.de/</url>
+        <url>https://repo.minebench.de/</url>
     </repository>
 </repositories>
 ```
