@@ -57,7 +57,7 @@ All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
 
 ## How to use it
-The library's main API access is through the [MineDown.class](https://docs.minebench.de/minedown/de/themoep/minedown/MineDown.html) and its parse methods.
+The library's main API access is through the [MineDown.class](https://docs.minebench.de/minedown-adventure/de/themoep/minedown/adventure/MineDown.html) and its parse methods.
 
 E.g. you can use it like this in your Bukkit plugin:
 ```java
@@ -68,7 +68,7 @@ or with a static approach:
 BukkitAudiences.create(plugin).player(player).sendMessage(MineDown.parse(rawMessage, replacements));
 ```
 
-Take a look at the [MineDown JavaDocs](https://docs.minebench.de/minedown/) for more
+Take a look at the [MineDown JavaDocs](https://docs.minebench.de/minedown-adventure/) for more
 detailed info on the library and the included classes.
 
 ### Include it into your plugin
