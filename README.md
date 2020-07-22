@@ -5,7 +5,7 @@ It provides a custom mark up syntax which is loosely based on MarkDown that adds
 component messages with the same simplicity as legacy formatting codes. (Which it can still support!)
 It also includes a way to directly replace placeholders in the messages, both string based and component based ones!
 
-This requires BungeeCord's chat API so it will only work on **Spigot** or **BungeeCord**! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple implementation.
+See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple implementation.
 
 ## Syntax
 
@@ -85,6 +85,7 @@ Make sure to relocate it into your plugin's package!
 ```
 
 #### Artifact
+To be used with bungeecord-chat in BungeeCord and Spigot-based servers:
 ```xml
 <dependencies>
     <dependency>
@@ -95,6 +96,19 @@ Make sure to relocate it into your plugin's package!
     </dependency>
 </dependencies>
 ```
+
+For usage in any platform that is supported by [kyori-adventure](https://github.com/KyoriPowered/adventure):
+```xml
+<dependencies>
+    <dependency>
+        <groupId>de.themoep</groupId>
+        <artifactId>minedown-adventure</artifactId>
+        <version>1.6.1-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+</dependencies>
+```
+Please note that you need to provide an [adventure platform library](https://github.com/KyoriPowered/adventure-platform) yourself in that case.
 
 #### Relocation
 ```xml
