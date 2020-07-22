@@ -61,11 +61,11 @@ The library's main API access is through the [MineDown.class](https://docs.mineb
 
 E.g. you can use it like this in your Bukkit plugin:
 ```java
-BukkitPlatform.of(plugin).player(player).sendMessage(new MineDown(rawMessage).replace(replacements).toComponent());
+BukkitAudiences.create(plugin).player(player).sendMessage(new MineDown(rawMessage).replace(replacements).toComponent());
 ```
 or with a static approach:
 ```java
-BukkitPlatform.of(plugin).player(player).sendMessage(MineDown.parse(rawMessage, replacements));
+BukkitAudiences.create(plugin).player(player).sendMessage(MineDown.parse(rawMessage, replacements));
 ```
 
 Take a look at the [MineDown JavaDocs](https://docs.minebench.de/minedown/) for more
