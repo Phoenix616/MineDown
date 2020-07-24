@@ -99,7 +99,7 @@ public class Util {
     /**
      * Check whether a certain TextColor is formatting or not
      * @param format The TextColor to check
-     * @return <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
+     * @return <code>true</code> if it's a format, <code>false</code> if it's a color
      */
     public static boolean isFormat(TextColor format) {
         return false;

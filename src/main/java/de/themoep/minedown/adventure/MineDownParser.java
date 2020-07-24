@@ -574,7 +574,7 @@ public class MineDownParser {
      * @param colorString The string to parse
      * @param prefix      The color prefix e.g. ampersand (&amp;)
      * @param lenient     Whether or not to accept malformed strings
-     * @return The parsed color or <tt>null</tt> if lenient is true and no color was found
+     * @return The parsed color or <code>null</code> if lenient is true and no color was found
      */
     public static TextFormat parse(String colorString, String prefix, boolean lenient) {
         TextFormat format = null;
@@ -685,7 +685,7 @@ public class MineDownParser {
     /**
      * Check whether or not an option is enabled
      * @param option The option to check for
-     * @return <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
     public boolean isEnabled(Option option) {
         return enabledOptions().contains(option);
@@ -716,7 +716,7 @@ public class MineDownParser {
     /**
      * Check whether or not an option is filtered
      * @param option The option to check for
-     * @return <tt>true</tt> if it's enabled; <tt>false</tt> if not
+     * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
     public boolean isFiltered(Option option) {
         return filteredOptions().contains(option);
