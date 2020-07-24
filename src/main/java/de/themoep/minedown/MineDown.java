@@ -30,7 +30,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import java.util.Map;
 
 /**
- * <h1>MineDown</h1>
+ * <h2>MineDown</h2>
  * A MarkDown inspired markup for Minecraft chat components
  * <p>
  * This lets you convert string messages into chat components by using a custom mark up syntax
@@ -38,44 +38,44 @@ import java.util.Map;
  *
  * <table>
  * <caption><strong> Inline Formatting </strong></caption>
- * <tr><td> Color legacy  </td><td><tt> &amp;6Text           </tt></td><td> {@link ChatColor} codes </td></tr>
- * <tr><td> Color         </td><td><tt> &amp;gold&amp;Text   </tt></td><td> {@link ChatColor} codes </td></tr>
- * <tr><td> RGB Hex Color </td><td><tt> &amp;ff00ff&amp;Text </tt></td><td> Full hexadecimal format  </td></tr>
- * <tr><td> RGB Hex Color </td><td><tt> &amp;f0f&amp;Text    </tt></td><td> Short format (equivalent to long one)  </td></tr>
- * <tr><td> Bold          </td><td><tt> **Text**             </tt></td></tr>
- * <tr><td> Italic        </td><td><tt> ##Text##             </tt></td></tr>
- * <tr><td> Underlined    </td><td><tt> __Text__             </tt></td></tr>
- * <tr><td> Strikethrough </td><td><tt> ~~Text~~             </tt></td></tr>
- * <tr><td> Obfuscated    </td><td><tt> ??Text??             </tt></td></tr>
+ * <tr><td> Color legacy  </td><td><code> &amp;6Text           </code></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> Color         </td><td><code> &amp;gold&amp;Text   </code></td><td> {@link ChatColor} codes </td></tr>
+ * <tr><td> RGB Hex Color </td><td><code> &amp;ff00ff&amp;Text </code></td><td> Full hexadecimal format  </td></tr>
+ * <tr><td> RGB Hex Color </td><td><code> &amp;f0f&amp;Text    </code></td><td> Short format (equivalent to long one)  </td></tr>
+ * <tr><td> Bold          </td><td><code> **Text**             </code></td></tr>
+ * <tr><td> Italic        </td><td><code> ##Text##             </code></td></tr>
+ * <tr><td> Underlined    </td><td><code> __Text__             </code></td></tr>
+ * <tr><td> Strikethrough </td><td><code> ~~Text~~             </code></td></tr>
+ * <tr><td> Obfuscated    </td><td><code> ??Text??             </code></td></tr>
  * </table>
  *
- * <h2>Events</h2>
+ * <h3>Events</h3>
  * You can define click and hover events with the commonly used MarkDown link syntax.
  * <p>
  * <table>
  * <caption><strong> Simple Syntax </strong></caption>
- * <tr><td> General syntax                 </td><td><tt> [Text](text-color text-formatting... link hover text) </tt></td></tr>
- * <tr><td> Simple Link                    </td><td><tt> [Text](https://example.com)                           </tt></td></tr>
- * <tr><td> Simple Command                 </td><td><tt> [Text](/command to run)                               </tt></td></tr>
- * <tr><td> Link + Hover                   </td><td><tt> [Text](https://example.com Hover Text)                </tt></td></tr>
- * <tr><td> Text formatting + Link + Hover </td><td><tt> [Text](blue underline https://example.com Hover Text) </tt></td></tr>
+ * <tr><td> General syntax                 </td><td><code> [Text](text-color text-formatting... link hover text) </code></td></tr>
+ * <tr><td> Simple Link                    </td><td><code> [Text](https://example.com)                           </code></td></tr>
+ * <tr><td> Simple Command                 </td><td><code> [Text](/command to run)                               </code></td></tr>
+ * <tr><td> Link + Hover                   </td><td><code> [Text](https://example.com Hover Text)                </code></td></tr>
+ * <tr><td> Text formatting + Link + Hover </td><td><code> [Text](blue underline https://example.com Hover Text) </code></td></tr>
  * </table>
  * <p>
  * <table>
  * <caption><strong> Advanced Syntax </strong></caption>
- * <tr><td> General syntax      </td><td><tt> [Text](action=value)                 </tt></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
- * <tr><td> Link                </td><td><tt> [Text](open_url=https://example.com) </tt></td></tr>
- * <tr><td> Color               </td><td><tt> [Text](color=red)                    </tt></td></tr>
- * <tr><td> RGB Hex Color       </td><td><tt> [Text](color=#ff00ff)                </tt></td><td> Full hexadecimal format </td></tr>
- * <tr><td> RGB Hex Color       </td><td><tt> [Text](color=#f0f)                   </tt></td><td> Short format (equivalent to long one) </td></tr>
- * <tr><td> Formatting          </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
- * <tr><td> Font                </td><td><tt> [Text](format=underline,bold)        </tt></td></tr>
- * <tr><td> Run Command         </td><td><tt> [Text](run_command=/command string)  </tt></td></tr>
- * <tr><td> Suggest Command     </td><td><tt> [Text](suggest_command=/command)     </tt></td></tr>
- * <tr><td> Simple Hover        </td><td><tt> [Text](hover=Hover Text)             </tt></td></tr>
- * <tr><td> Hover Text          </td><td><tt> [Text](show_text=Hover Text)         </tt></td></tr>
- * <tr><td> Hover Entity Info   </td><td><tt> [Text](show_entity=uuid:pig Name)    </tt></td></tr>
- * <tr><td> Hover Item Info     </td><td><tt> [Text](show_item=stone*2 nbt...)     </tt></td></tr>
+ * <tr><td> General syntax      </td><td><code> [Text](action=value)                 </code></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
+ * <tr><td> Link                </td><td><code> [Text](open_url=https://example.com) </code></td></tr>
+ * <tr><td> Color               </td><td><code> [Text](color=red)                    </code></td></tr>
+ * <tr><td> RGB Hex Color       </td><td><code> [Text](color=#ff00ff)                </code></td><td> Full hexadecimal format </td></tr>
+ * <tr><td> RGB Hex Color       </td><td><code> [Text](color=#f0f)                   </code></td><td> Short format (equivalent to long one) </td></tr>
+ * <tr><td> Formatting          </td><td><code> [Text](format=underline,bold)        </code></td></tr>
+ * <tr><td> Font                </td><td><code> [Text](format=underline,bold)        </code></td></tr>
+ * <tr><td> Run Command         </td><td><code> [Text](run_command=/command string)  </code></td></tr>
+ * <tr><td> Suggest Command     </td><td><code> [Text](suggest_command=/command)     </code></td></tr>
+ * <tr><td> Simple Hover        </td><td><code> [Text](hover=Hover Text)             </code></td></tr>
+ * <tr><td> Hover Text          </td><td><code> [Text](show_text=Hover Text)         </code></td></tr>
+ * <tr><td> Hover Entity Info   </td><td><code> [Text](show_entity=uuid:pig Name)    </code></td></tr>
+ * <tr><td> Hover Item Info     </td><td><code> [Text](show_item=stone*2 nbt...)     </code></td></tr>
  * </table>
  * <p>
  * All advanced settings can be chained/included in a event definition.
@@ -432,7 +432,7 @@ public class MineDown {
     /**
      * Get the ChatColor format from a MineDown string
      * @param c The character
-     * @return  The ChatColor of that format or <tt>null</tt> it none was found
+     * @return  The ChatColor of that format or <code>null</code> it none was found
      */
     public static ChatColor getFormatFromChar(char c) {
         switch (c) {

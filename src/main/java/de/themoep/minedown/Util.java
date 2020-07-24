@@ -136,7 +136,7 @@ public class Util {
     /**
      * Check whether a certain ChatColor is formatting or not
      * @param format The ChatColor to check
-     * @return <tt>true</tt> if it's a format, <tt>false</tt> if it's a color
+     * @return <code>true</code> if it's a format, <code>false</code> if it's a color
      */
     public static boolean isFormat(ChatColor format) {
         return !MineDown.getFormatString(format).isEmpty();
@@ -332,7 +332,7 @@ public class Util {
      * @param clazz     The class to check
      * @param method    The method to check for
      * @param parameter Method parameter types
-     * @return <tt>true</tt> if the class has the method, <tt>false</tt> if not
+     * @return <code>true</code> if the class has the method, <code>false</code> if not
      */
     public static boolean hasMethod(Class<?> clazz, String method, Class<?>... parameter) {
         try {
