@@ -38,11 +38,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +60,12 @@ public class Replacer {
     /**
      * A cache of compiled replacement patterns
      */
-    private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+    private static final Map<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * The creator of the patterns for the pattern cache
+     */
+    private static final Function<String, Pattern> PATTERN_CREATOR = p -> Pattern.compile(p, Pattern.LITERAL);
 
     /**
      * The map of placeholders with their string replacements
@@ -338,10 +344,7 @@ public class Replacer {
                 }
             } else {
                 String placeholder = placeholderPrefix() + replacement.getKey() + placeholderSuffix();
-                Pattern pattern = PATTERN_CACHE.get(placeholder);
-                if (pattern == null) {
-                    PATTERN_CACHE.put(placeholder, pattern = Pattern.compile(placeholder, Pattern.LITERAL));
-                }
+                Pattern pattern = PATTERN_CACHE.computeIfAbsent(placeholder, PATTERN_CREATOR);
                 string = pattern.matcher(string).replaceAll(Matcher.quoteReplacement(replValue));
             }
         }
