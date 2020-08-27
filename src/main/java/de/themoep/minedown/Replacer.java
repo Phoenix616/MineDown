@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -148,7 +149,7 @@ public class Replacer {
      */
     public Replacer replace(Map<String, ?> replacements) {
         if (replacements != null && !replacements.isEmpty()) {
-            Object any = replacements.values().stream().findAny().orElse(null);
+            Object any = replacements.values().stream().filter(Objects::nonNull).findAny().orElse(null);
             if (any instanceof String) {
                 replacements().putAll((Map<String, String>) replacements);
             } else if (any != null && any.getClass().isArray() && BaseComponent.class.isAssignableFrom(any.getClass().getComponentType())) {
