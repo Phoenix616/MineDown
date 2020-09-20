@@ -450,7 +450,7 @@ public class MineDownParser {
                         if (!additionalParts[0].contains(":")) {
                             additionalParts[0] = "minecraft:" + additionalParts[0];
                         }
-                        hoverEvent = HoverEvent.showEntity(new HoverEvent.ShowEntity(
+                        hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.of(
                                 Key.of(additionalParts[0]), UUID.fromString(valueParts[0]),
                                 additionalParts.length > 1 && additionalParts[1] != null ?
                                         copy(false).urlDetection(false).parse(additionalParts[1]).build() : null
@@ -487,7 +487,7 @@ public class MineDownParser {
                     }
 
                     try {
-                        hoverEvent = HoverEvent.showItem(new HoverEvent.ShowItem(
+                        hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.of(
                                 Key.of(id), count, tag
                         ));
                     } catch (Exception e) {

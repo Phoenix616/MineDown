@@ -220,7 +220,7 @@ public class Replacer {
             } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ENTITY) {
                 HoverEvent.ShowEntity showEntity = (HoverEvent.ShowEntity) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showEntity(
-                        new HoverEvent.ShowEntity(
+                        HoverEvent.ShowEntity.of(
                                 Key.of(replaceIn(showEntity.type().asString())),
                                 showEntity.id(),
                                 replaceIn(showEntity.name())
@@ -229,7 +229,7 @@ public class Replacer {
             } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ITEM) {
                 HoverEvent.ShowItem showItem = (HoverEvent.ShowItem) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showItem(
-                        new HoverEvent.ShowItem(
+                        HoverEvent.ShowItem.of(
                                 Key.of(replaceIn(showItem.item().asString())),
                                 showItem.count()
                         )
