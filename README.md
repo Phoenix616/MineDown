@@ -37,21 +37,21 @@ You can define click and hover events with the commonly used MarkDown link synta
  Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
  
 #### Advanced Syntax
- Description        | Syntax                                 | More Info
- -------------------|----------------------------------------|----
- General syntax     |` [Text](action=value)                 `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
- Link               |` [Text](open_url=https://example.com) `|
- Color              |` [Text](color=red)                    `|
- RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
- RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
- Formatting         |` [Text](format=underline,bold)        `|
- Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
- Run Command        |` [Text](run_command=/command string)  `| Run command on click
- Suggest Command    |` [Text](run_command=/command string)  `| Suggest a command on click
- Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
- Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
- Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
- Hover Item Info    |` [Text](show_item=stone*2 nbt...)     `| Show item information, additional information needs to be provided as a string of the nbt in json
+ Description        | Syntax                                     | More Info
+ -------------------|--------------------------------------------|----
+ General syntax     |` [Text](action=value)                     `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
+ Link               |` [Text](open_url=https://example.com)     `|
+ Color              |` [Text](color=red)                        `|
+ RGB Hex Color      |` [Text](color=#ff00ff)                    `| Full hexadecimal format
+ RGB Hex Color      |` [Text](color=#f0f)                       `| Short format (equivalent to long one)
+ Formatting         |` [Text](format=underline,bold)            `|
+ Font               |` [Text](font=custom_font)                 `| Set a custom font from a resource pack
+ Run Command        |` [Text](run_command=/command string)      `| Run command on click
+ Suggest Command    |` [Text](suggest_command=/command string)  `| Suggest a command on click
+ Simple Hover       |` [Text](hover=Hover Text)                 `| Show hover text
+ Hover Text         |` [Text](show_text=Hover Text)             `| Show hover text
+ Hover Entity Info  |` [Text](show_entity=uuid:pig Name)        `| Show entity information.
+ Hover Item Info    |` [Text](show_item=stone*2 nbt...)         `| Show item information, additional information needs to be provided as a string of the nbt in json
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
