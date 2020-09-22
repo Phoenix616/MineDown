@@ -177,13 +177,13 @@ public class MineDownParser {
                     char c1 = message.charAt(j);
                     if (c1 == c) {
                         try {
-                            encoded = NamedTextColor.NAMES.value(colorString.toString().toLowerCase(Locale.ROOT));
+                            encoded = parse(colorString.toString(), "", lenient());
                             i = j;
                         } catch (IllegalArgumentException ignored) {
                         }
                         break;
                     }
-                    if (c1 != '_' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z')) {
+                    if (c1 != '_' && c1 != '#' && (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
                         break;
                     }
                     colorString.append(c1);
@@ -584,13 +584,17 @@ public class MineDownParser {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
         } else {
-            format = NamedTextColor.NAMES.value(colorString.substring(prefix.length()).toLowerCase(Locale.ROOT));
-            if (format == null) {
-                try {
-                    format = TextDecoration.valueOf(colorString.substring(prefix.length()).toUpperCase(Locale.ROOT));
-                } catch (IllegalArgumentException e2) {
-                    if (!lenient) {
-                        throw e2;
+            if (colorString.charAt(prefix.length()) == '#') {
+                format = TextColor.fromCSSHexString(colorString.substring(prefix.length()));
+            } else {
+                format = NamedTextColor.NAMES.value(colorString.substring(prefix.length()).toLowerCase(Locale.ROOT));
+                if (format == null) {
+                    try {
+                        format = TextDecoration.valueOf(colorString.substring(prefix.length()).toUpperCase(Locale.ROOT));
+                    } catch (IllegalArgumentException e2) {
+                        if (!lenient) {
+                            throw e2;
+                        }
                     }
                 }
             }
