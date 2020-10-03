@@ -328,6 +328,20 @@ public class Util {
     }
 
     /**
+     * Check if a certain class exists. See {@link Class#forName(String)}
+     * @param className The class name to check
+     * @return <code>true</code> if the class exists, <code>false</code> if not
+     */
+    public static boolean hasClass(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException classDoesntExist) {
+            return false;
+        }
+    }
+
+    /**
      * Check if a class has a certain method. See {@link Class#getMethod(String, Class[])}
      * @param clazz     The class to check
      * @param method    The method to check for

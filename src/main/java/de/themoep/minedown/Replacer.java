@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
  */
 public class Replacer {
 
+    private static final boolean HAS_KEYBIND_SUPPORT = Util.hasClass("net.md_5.bungee.api.chat.KeybindComponent");
     private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
     private static final Method HOVER_GET_VALUE = Util.getMethod(HoverEvent.class, "getValue");
 
@@ -204,7 +205,7 @@ public class Replacer {
         // String replacements:
         for (int i = 0; i < components.size(); i++) {
             BaseComponent component = components.get(i).duplicate();
-            if (component instanceof KeybindComponent) {
+            if (HAS_KEYBIND_SUPPORT && component instanceof KeybindComponent) {
                 ((KeybindComponent) component).setKeybind(replaceIn(((KeybindComponent) component).getKeybind()));
             }
             if (component instanceof TextComponent) {
