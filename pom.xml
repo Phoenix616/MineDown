@@ -6,7 +6,7 @@
 
     <groupId>de.themoep</groupId>
     <artifactId>minedown-adventure</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.2-SNAPSHOT</version>
 
     <name>MineDown</name>
 
@@ -20,8 +20,8 @@
 
     <repositories>
         <repository>
-            <id>bungee-repo</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>sonatype-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 

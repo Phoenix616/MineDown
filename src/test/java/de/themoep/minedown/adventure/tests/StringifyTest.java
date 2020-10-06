@@ -60,6 +60,9 @@ public class StringifyTest {
                         .clickEvent(ClickEvent.of(ClickEvent.Action.OPEN_URL, "https://example.com"))
                         .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.builder("Hover text").color(NamedTextColor.BLUE).build()))
                         .append(". Test Text.").style(Style.empty())
+                        .build()),
+                () -> stringify(TextComponent.builder("Test insertion")
+                        .insertion("Insert text")
                         .build())
         );
     }

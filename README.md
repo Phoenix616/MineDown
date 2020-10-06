@@ -25,7 +25,8 @@ messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/tree/ky
  Obfuscated    |` ??Text??      `| 
 
 ### Events ###
-You can define click and hover events with the commonly used MarkDown link syntax.
+You can define click and hover events with the commonly used MarkDown link syntax
+as well as specify formatting, font and colors that way.
 
 #### Simple Syntax
  Description                    | Syntax
@@ -35,6 +36,7 @@ You can define click and hover events with the commonly used MarkDown link synta
  Simple Command                 |` [Text](/command to run)                                  `
  Link + Hover                   |` [Text](https://example.com Hover Text)                   `
  Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
+
  
 #### Advanced Syntax
  Description        | Syntax                                     | More Info
@@ -52,6 +54,7 @@ You can define click and hover events with the commonly used MarkDown link synta
  Hover Text         |` [Text](show_text=Hover Text)             `| Show hover text
  Hover Entity Info  |` [Text](show_entity=uuid:pig Name)        `| Show entity information.
  Hover Item Info    |` [Text](show_item=stone*2 nbt...)         `| Show item information, additional information needs to be provided as a string of the nbt in json
+ Insertion          |` [Text](insert=insert into input)     `| Insert into input on shift click, can be combined with other events
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
@@ -91,7 +94,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.6.1-SNAPSHOT</version>
+        <version>1.6.2-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>

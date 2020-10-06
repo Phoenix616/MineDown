@@ -22,11 +22,13 @@ package de.themoep.minedown.adventure;
  * SOFTWARE.
  */
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -38,6 +40,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
 
 public class MineDownStringifier {
 
@@ -71,10 +79,6 @@ public class MineDownStringifier {
      */
     private char colorChar = '&';
 
-    public static final String COLOR_PREFIX = "color=";
-    public static final String FORMAT_PREFIX = "format=";
-    public static final String HOVER_PREFIX = "hover=";
-
     private StringBuilder value = new StringBuilder();
 
     private TextColor color = null;
@@ -106,7 +110,9 @@ public class MineDownStringifier {
             appendText(sb, component);
             return sb.toString();
         }
-        if (component.clickEvent() != null || component.hoverEvent() != null) {
+        boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT)
+                || component.insertion() != null  || component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent;
+        if (hasEvent) {
             sb.append('[');
             if (!formattingInEventDefinition()) {
                 appendFormat(sb, component);
@@ -127,7 +133,7 @@ public class MineDownStringifier {
             sb.append(copy().stringify(component.children()));
         }
 
-        if (component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent) {
+        if (hasEvent) {
             clickEvent = component.clickEvent();
             hoverEvent = component.hoverEvent();
             if (!formattingInEventDefinition()) {
@@ -157,6 +163,21 @@ public class MineDownStringifier {
                         .map(e -> e.getKey().name().toLowerCase(Locale.ROOT))
                         .collect(Collectors.joining(" ")));
                 definitions.add(sbi.toString());
+            }
+            if (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT) {
+                Key font = component.style().font();
+                if (font.namespace().equals("minecraft")) {
+                    definitions.add(FONT_PREFIX + font.value());
+                } else {
+                    definitions.add(FONT_PREFIX + font);
+                }
+            }
+            if (component.insertion() != null) {
+                if (component.insertion().contains(" ")) {
+                    definitions.add(INSERTION_PREFIX + "{" + component.insertion() + "}");
+                } else {
+                    definitions.add(INSERTION_PREFIX + component.insertion());
+                }
             }
             if (component.clickEvent() != null) {
                 if (preferSimpleEvents() && component.clickEvent().action() == ClickEvent.Action.OPEN_URL) {

@@ -229,7 +229,7 @@ public class Util {
     public static NamedTextColor getClosestLegacy(Color color) {
         NamedTextColor closest = null;
         double smallestDistance = Double.MAX_VALUE;
-        for (NamedTextColor legacy : NamedTextColor.values()) {
+        for (NamedTextColor legacy : NamedTextColor.NAMES.values()) {
             double distance = distance(color, new Color(legacy.value()));
             if (distance < smallestDistance) {
                 closest = legacy;
