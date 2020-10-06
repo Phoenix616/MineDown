@@ -23,7 +23,7 @@ public class StringifyTest {
         String stringified = MineDown.stringify(components);
         System.out.print(ComponentSerializer.toString(components) + "\n" + stringified + "\n" + ComponentSerializer.toString(MineDown.parse(stringified)) + "\n\n");
         if (!stringified.equals(target)) {
-            throw new IllegalArgumentException("Stringified message doesn't match target");
+            throw new IllegalArgumentException("Stringified message doesn't match target '" + target + "'");
         }
     }
     
@@ -54,7 +54,10 @@ public class StringifyTest {
                         .append("Entity")
                         .event(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new Item("stone", 3, ItemTag.ofNbt("{Name:\"Name\"}"))))
                         .color(ChatColor.of(new Color(255, 0, 0)))
-                        .create(), "[Entity](#ff0000 show_item=stone*3 {Name:\"Name\"})")
+                        .create(), "[Entity](#ff0000 show_item=stone*3 {Name:\"Name\"})"),
+                () -> stringify(new ComponentBuilder("Test insertion")
+                        .insertion("Insert text")
+                        .create(), "[Test insertion](white insert={Insert text})")
         );
     }
 }

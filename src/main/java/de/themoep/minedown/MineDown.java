@@ -82,6 +82,12 @@ import java.util.Map;
  * You can't however add multiple different colors or click and hover actions!
  */
 public class MineDown {
+    public static final String FONT_PREFIX = "font=";
+    public static final String COLOR_PREFIX = "color=";
+    public static final String FORMAT_PREFIX = "format=";
+    public static final String HOVER_PREFIX = "hover=";
+    public static final String INSERTION_PREFIX = "insert=";
+
     private String message;
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();

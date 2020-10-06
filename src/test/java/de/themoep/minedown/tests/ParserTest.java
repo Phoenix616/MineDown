@@ -79,6 +79,10 @@ public class ParserTest {
                 () -> parse(
                         "Test inner escaping [\\]](gray)",
                         "{\"text\":\"\",\"extra\":[{\"text\":\"Test inner escaping \"},{\"text\":\"]\",\"color\":\"gray\"},{\"text\":\"\"}]}"
+                ),
+                () -> parse(
+                        "[Test insertion](insert={text to insert} color=red)",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"Test insertion\",\"color\":\"red\",\"insertion\":\"text to insert\"},{\"text\":\"\"}]}"
                 )
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));

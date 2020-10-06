@@ -43,9 +43,16 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.themoep.minedown.MineDown.COLOR_PREFIX;
+import static de.themoep.minedown.MineDown.FONT_PREFIX;
+import static de.themoep.minedown.MineDown.FORMAT_PREFIX;
+import static de.themoep.minedown.MineDown.HOVER_PREFIX;
+import static de.themoep.minedown.MineDown.INSERTION_PREFIX;
+
 public class MineDownStringifier {
 
     private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(BaseComponent.class, "getFontRaw");
+    private static final boolean HAS_INSERTION_SUPPORT = Util.hasMethod(BaseComponent.class, "getInsertion");
     private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
     private static final Method HOVER_GET_VALUE = Util.getMethod(HoverEvent.class, "getValue");
 
@@ -79,11 +86,6 @@ public class MineDownStringifier {
      */
     private char colorChar = '&';
 
-    public static final String FONT_PREFIX = "font=";
-    public static final String COLOR_PREFIX = "color=";
-    public static final String FORMAT_PREFIX = "format=";
-    public static final String HOVER_PREFIX = "hover=";
-
     private StringBuilder value = new StringBuilder();
 
     private ChatColor color = null;
@@ -103,7 +105,9 @@ public class MineDownStringifier {
                 appendText(sb, component);
                 continue;
             }
-            if (component.getClickEvent() != null || component.getHoverEvent() != null) {
+            boolean hasEvent = component.getFontRaw() != null || component.getInsertion() != null
+                    || component.getClickEvent() != clickEvent || component.getHoverEvent() != hoverEvent;
+            if (hasEvent) {
                 sb.append('[');
                 if (!formattingInEventDefinition()) {
                     appendFormat(sb, component);
@@ -124,7 +128,7 @@ public class MineDownStringifier {
                 sb.append(copy().stringify(component.getExtra().toArray(new BaseComponent[0])));
             }
 
-            if (component.getClickEvent() != clickEvent || component.getHoverEvent() != hoverEvent) {
+            if (hasEvent) {
                 clickEvent = component.getClickEvent();
                 hoverEvent = component.getHoverEvent();
                 if (!formattingInEventDefinition()) {
@@ -150,6 +154,13 @@ public class MineDownStringifier {
                 }
                 if (HAS_FONT_SUPPORT && component.getFontRaw() != null) {
                     definitions.add(FONT_PREFIX + component.getFontRaw());
+                }
+                if (HAS_INSERTION_SUPPORT && component.getInsertion() != null) {
+                    if (component.getInsertion().contains(" ")) {
+                        definitions.add(INSERTION_PREFIX + "{" + component.getInsertion() + "}");
+                    } else {
+                        definitions.add(INSERTION_PREFIX + component.getInsertion());
+                    }
                 }
                 if (component.getClickEvent() != null) {
                     if (preferSimpleEvents() && component.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {

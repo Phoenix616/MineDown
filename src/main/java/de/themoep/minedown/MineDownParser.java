@@ -42,14 +42,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static de.themoep.minedown.MineDown.COLOR_PREFIX;
+import static de.themoep.minedown.MineDown.FONT_PREFIX;
+import static de.themoep.minedown.MineDown.FORMAT_PREFIX;
+import static de.themoep.minedown.MineDown.HOVER_PREFIX;
+import static de.themoep.minedown.MineDown.INSERTION_PREFIX;
 
 public class MineDownParser {
 
     private static final boolean HAS_APPEND_SUPPORT = Util.hasMethod(ComponentBuilder.class, "append", BaseComponent[].class);
     private static final boolean HAS_RGB_SUPPORT = Util.hasMethod(ChatColor.class, "of", String.class);
     private static final boolean HAS_FONT_SUPPORT = Util.hasMethod(ComponentBuilder.class, "font", String.class);
+    private static final boolean HAS_INSERTION_SUPPORT = Util.hasMethod(ComponentBuilder.class, "insertion", String.class);
     private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
 
     /**
@@ -77,7 +85,7 @@ public class MineDownParser {
     private boolean lenient = false;
 
     /**
-     * Should the parser try to detect if RGB/font support is available?
+     * Should the parser try to detect if RGB/font/insertion support is available?
      */
     private boolean backwardsCompatibility = true;
 
@@ -105,14 +113,10 @@ public class MineDownParser {
 
     public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
 
-    public static final String FONT_PREFIX = "font=";
-    public static final String COLOR_PREFIX = "color=";
-    public static final String FORMAT_PREFIX = "format=";
-    public static final String HOVER_PREFIX = "hover=";
-
     private ComponentBuilder builder;
     private StringBuilder value;
     private String font;
+    private String insertion;
     private ChatColor color;
     private Set<ChatColor> format;
     private ClickEvent clickEvent;
@@ -362,6 +366,9 @@ public class MineDownParser {
         if (!backwardsCompatibility || HAS_FONT_SUPPORT) {
             builder.font(font);
         }
+        if (!backwardsCompatibility || HAS_INSERTION_SUPPORT) {
+            builder.insertion(insertion);
+        }
         builder.color(color);
         Util.applyFormat(builder, format);
         if (urlDetection() && URL_PATTERN.matcher(value).matches()) {
@@ -401,6 +408,7 @@ public class MineDownParser {
             defParts.add("");
         }
         String font = null;
+        String insertion = null;
         ChatColor color = null;
         Set<ChatColor> formats = new HashSet<>();
         ClickEvent clickEvent = null;
@@ -408,8 +416,8 @@ public class MineDownParser {
 
         int formatEnd = -1;
 
-        for (int i = 0; i < defParts.size(); i++) {
-            String definition = defParts.get(i);
+        for (AtomicInteger i = new AtomicInteger(0); i.get() < defParts.size(); i.incrementAndGet()) {
+            String definition = defParts.get(i.get());
             ChatColor parsed = parseColor(definition, "", true, backwardsCompatibility());
             if (parsed != null) {
                 if (Util.isFormat(parsed)) {
@@ -417,12 +425,18 @@ public class MineDownParser {
                 } else {
                     color = parsed;
                 }
-                formatEnd = i;
+                formatEnd = i.get();
                 continue;
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FONT_PREFIX)) {
                 font = definition.substring(FONT_PREFIX.length());
+                continue;
+            }
+
+            if (definition.toLowerCase(Locale.ROOT).startsWith(INSERTION_PREFIX)) {
+                insertion = getValue(i, definition.substring(INSERTION_PREFIX.length()), defParts, true);
+                continue;
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
@@ -430,7 +444,7 @@ public class MineDownParser {
                 if (!lenient() && Util.isFormat(color)) {
                     throw new IllegalArgumentException(color + " is a format and not a color!");
                 }
-                formatEnd = i;
+                formatEnd = i.get();
                 continue;
             }
 
@@ -442,11 +456,11 @@ public class MineDownParser {
                     }
                     formats.add(format);
                 }
-                formatEnd = i;
+                formatEnd = i.get();
                 continue;
             }
 
-            if (i == formatEnd + 1 && URL_PATTERN.matcher(definition).matches()) {
+            if (i.get() == formatEnd + 1 && URL_PATTERN.matcher(definition).matches()) {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
                 }
@@ -469,56 +483,16 @@ public class MineDownParser {
             } catch (IllegalArgumentException ignored) {
             }
 
-            int bracketDepth = parts.length > 1 && parts[1].startsWith("{") && (clickAction != null || hoverAction != null) ? 1 : 0;
-
-            StringBuilder value = new StringBuilder();
-            if (parts.length > 1 && clickAction != null || hoverAction != null) {
-                if (bracketDepth > 0) {
-                    value.append(parts[1].substring(1));
-                } else {
-                    value.append(parts[1]);
-                }
-            } else {
-                value.append(definition);
-            }
-
-            for (i = i + 1; i < defParts.size(); i++) {
-                String part = defParts.get(i);
-                if (bracketDepth == 0) {
-                    int equalsIndex = part.indexOf('=');
-                    if (equalsIndex > 0 && !Util.isEscaped(part, equalsIndex)) {
-                        i--;
-                        break;
-                    }
-                }
-                value.append(" ");
-                if (bracketDepth > 0) {
-                    int startBracketIndex = part.indexOf("={");
-                    if (startBracketIndex > 0 && !Util.isEscaped(part, startBracketIndex) && !Util.isEscaped(part, startBracketIndex + 1)) {
-                        bracketDepth++;
-                    }
-                    if (part.endsWith("}") && !Util.isEscaped(part, part.length() - 1)) {
-                        bracketDepth--;
-                        if (bracketDepth == 0) {
-                            value.append(part, 0, part.length() - 1);
-                            break;
-                        }
-                    }
-                }
-                value.append(part);
-            }
-
+            String valueStr = getValue(i, parts.length > 1 ? parts[1] : "", defParts, clickAction != null || hoverAction != null);
             if (clickAction != null) {
-                String v = value.toString();
-                if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !v.startsWith("http://") && !v.startsWith("https://")) {
-                    v = "http://" + v;
+                if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
+                    valueStr = "http://" + valueStr;
                 }
-                clickEvent = new ClickEvent(clickAction, v);
+                clickEvent = new ClickEvent(clickAction, valueStr);
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
-                String valueStr = value.toString();
                 if (!HAS_HOVER_CONTENT_SUPPORT) {
                     hoverEvent = new HoverEvent(hoverAction, copy(false).urlDetection(false).parse(
                             hoverAction == HoverEvent.Action.SHOW_TEXT ? Util.wrap(valueStr, hoverTextWidth()) : valueStr
@@ -587,11 +561,55 @@ public class MineDownParser {
         return copy()
                 .urlDetection(false)
                 .font(font)
+                .insertion(insertion)
                 .color(color)
                 .format(formats)
                 .clickEvent(clickEvent)
                 .hoverEvent(hoverEvent)
                 .parse(text);
+    }
+
+    private String getValue(AtomicInteger i, String firstPart, List<String> defParts, boolean hasAction) {
+        int bracketDepth = !firstPart.isEmpty() && firstPart.startsWith("{") && hasAction ? 1 : 0;
+
+        StringBuilder value = new StringBuilder();
+        if (!firstPart.isEmpty() && hasAction) {
+            if (bracketDepth > 0) {
+                value.append(firstPart.substring(1));
+            } else {
+                value.append(firstPart);
+            }
+        } else {
+            value.append(defParts.get(i.get()));
+        }
+
+        for (i.incrementAndGet(); i.get() < defParts.size(); i.incrementAndGet()) {
+            String part = defParts.get(i.get());
+            if (bracketDepth == 0) {
+                int equalsIndex = part.indexOf('=');
+                if (equalsIndex > 0 && !Util.isEscaped(part, equalsIndex)) {
+                    i.decrementAndGet();
+                    break;
+                }
+            }
+            value.append(" ");
+            if (bracketDepth > 0) {
+                int startBracketIndex = part.indexOf("={");
+                if (startBracketIndex > 0 && !Util.isEscaped(part, startBracketIndex) && !Util.isEscaped(part, startBracketIndex + 1)) {
+                    bracketDepth++;
+                }
+                if (part.endsWith("}") && !Util.isEscaped(part, part.length() - 1)) {
+                    bracketDepth--;
+                    if (bracketDepth == 0) {
+                        value.append(part, 0, part.length() - 1);
+                        break;
+                    }
+                }
+            }
+            value.append(part);
+        }
+
+        return value.toString();
     }
 
     protected ComponentBuilder builder() {
@@ -619,6 +637,15 @@ public class MineDownParser {
 
     protected String font() {
         return this.font;
+    }
+
+    private MineDownParser insertion(String insertion) {
+        this.insertion = insertion;
+        return this;
+    }
+
+    protected String insertion() {
+        return this.insertion;
     }
 
     protected MineDownParser color(ChatColor color) {
@@ -750,6 +777,7 @@ public class MineDownParser {
             format(from.format());
             color(from.color());
             font(from.font());
+            insertion(from.insertion());
             clickEvent(from.clickEvent());
             hoverEvent(from.hoverEvent());
         }
@@ -764,6 +792,7 @@ public class MineDownParser {
         builder = null;
         value = new StringBuilder();
         font = null;
+        insertion = null;
         color = null;
         format = new HashSet<>();
         clickEvent = null;
