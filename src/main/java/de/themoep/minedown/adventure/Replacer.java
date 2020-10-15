@@ -194,7 +194,7 @@ public class Replacer {
      * @return A copy of the array with the placeholders replaced
      */
     public Component replaceIn(Component component) {
-        TextComponent.Builder builder = TextComponent.builder();
+        TextComponent.Builder builder = Component.text();
 
         if (component instanceof KeybindComponent) {
             component = ((KeybindComponent) component).keybind(replaceIn(((KeybindComponent) component).keybind()));
@@ -207,7 +207,7 @@ public class Replacer {
             component = ((TranslatableComponent) component).args(replaceIn(((TranslatableComponent) component).args()));
         }
         if (component.clickEvent() != null) {
-            component = component.clickEvent(ClickEvent.of(
+            component = component.clickEvent(ClickEvent.clickEvent(
                     component.clickEvent().action(),
                     replaceIn(component.clickEvent().value())
             ));
@@ -221,7 +221,7 @@ public class Replacer {
                 HoverEvent.ShowEntity showEntity = (HoverEvent.ShowEntity) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showEntity(
                         HoverEvent.ShowEntity.of(
-                                Key.of(replaceIn(showEntity.type().asString())),
+                                Key.key(replaceIn(showEntity.type().asString())),
                                 showEntity.id(),
                                 replaceIn(showEntity.name())
                         )
@@ -230,7 +230,7 @@ public class Replacer {
                 HoverEvent.ShowItem showItem = (HoverEvent.ShowItem) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showItem(
                         HoverEvent.ShowItem.of(
-                                Key.of(replaceIn(showItem.item().asString())),
+                                Key.key(replaceIn(showItem.item().asString())),
                                 showItem.count()
                         )
                 ));
@@ -256,7 +256,7 @@ public class Replacer {
                     int index = text.indexOf(placeHolder);
                     if (index > -1) {
                         do {
-                            TextComponent.Builder startBuilder = TextComponent.builder().mergeStyle(textComponent);
+                            TextComponent.Builder startBuilder = Component.text().mergeStyle(textComponent);
                             if (index > 0) {
                                 startBuilder.content(textComponent.content().substring(0, index));
                             }

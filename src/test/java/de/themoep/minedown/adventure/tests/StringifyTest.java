@@ -24,11 +24,9 @@ package de.themoep.minedown.adventure.tests;
 
 import de.themoep.minedown.adventure.MineDown;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
@@ -47,23 +45,23 @@ public class StringifyTest {
     @Test
     public void testStringify() {
         Assertions.assertAll(
-                () -> stringify(TextComponent.builder()
-                        .append("Test ")
-                        .append("link").decoration(TextDecoration.UNDERLINED, true).color(NamedTextColor.BLUE)
-                        .clickEvent(ClickEvent.of(ClickEvent.Action.OPEN_URL, "https://example.com"))
-                        .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.builder("Hover text").color(NamedTextColor.BLUE).build()))
-                        .append(". Test Text.").style(Style.empty())
+                () -> stringify(Component.text()
+                        .append(Component.text("Test "))
+                        .append(Component.text("link", NamedTextColor.BLUE, TextDecoration.UNDERLINED))
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://example.com"))
+                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Hover text", NamedTextColor.BLUE)))
+                        .append(Component.text(". Test Text."))
                         .build()),
-                () -> stringify(TextComponent.builder()
-                        .append("Test ").decoration(TextDecoration.UNDERLINED, true).color(NamedTextColor.BLUE)
-                        .append("link")
-                        .clickEvent(ClickEvent.of(ClickEvent.Action.OPEN_URL, "https://example.com"))
-                        .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.builder("Hover text").color(NamedTextColor.BLUE).build()))
-                        .append(". Test Text.").style(Style.empty())
+                () -> stringify(Component.text()
+                        .append(Component.text("Test ", NamedTextColor.BLUE, TextDecoration.UNDERLINED))
+                        .append(Component.text("link")
+                                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, "https://example.com"))
+                                .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Component.text("Hover text", NamedTextColor.BLUE)))
+                        )
+                        .append(Component.text(". Test Text."))
                         .build()),
-                () -> stringify(TextComponent.builder("Test insertion")
-                        .insertion("Insert text")
-                        .build())
+                () -> stringify(Component.text("Test insertion")
+                        .insertion("Insert text"))
         );
     }
 }

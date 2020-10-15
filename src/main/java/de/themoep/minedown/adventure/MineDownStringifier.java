@@ -31,6 +31,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextFormat;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -237,16 +238,22 @@ public class MineDownStringifier {
         if (this.color != color) {
             this.color = color;
             if (useLegacyColors()) {
-                try {
-                    char colorChar = Util.getLegacyFormatChar(color);
-                    sb.append(colorChar()).append(colorChar);
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e.getMessage());
+                if (color == null) {
+                    sb.append(colorChar()).append(Util.TextControl.RESET.getChar());
+                } else {
+                    try {
+                        char colorChar = Util.getLegacyFormatChar(color);
+                        sb.append(colorChar()).append(colorChar);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
             } else if (color instanceof NamedTextColor) {
                 sb.append(colorChar()).append(((NamedTextColor) color).toString()).append(colorChar());
-            } else {
+            } else if (color != null) {
                 sb.append(colorChar()).append(color.asHexString()).append(colorChar());
+            } else {
+                sb.append(colorChar()).append(Util.TextControl.RESET.name()).append(colorChar());
             }
         }
     }

@@ -24,8 +24,8 @@ package de.themoep.minedown.adventure;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -271,14 +271,14 @@ public class MineDownParser {
         }
         appendValue();
         if (builder == null) {
-            builder = TextComponent.builder();
+            builder = Component.text();
         }
         return builder;
     }
 
     private void append(ComponentBuilder builder) {
         if (this.builder == null) {
-            this.builder = TextComponent.builder().append(builder);
+            this.builder = Component.text().append(builder);
         } else {
             this.builder.append(builder);
         }
@@ -290,11 +290,13 @@ public class MineDownParser {
 
     private void appendValue(Style style) {
         if (builder == null) {
-            builder = TextComponent.builder(value.toString());
+            builder = Component.text().append(Component.text(value.toString()));
         } else {
-            builder.append(value.toString()).style(style);
+            builder.append(Component.text(value.toString())).style(style);
         }
-        builder.font(Key.key(font));
+        if (font != null) {
+            builder.font(Key.key(font));
+        }
         builder.insertion(insertion);
         builder.color(color);
         Util.applyFormat(builder, format);
@@ -303,9 +305,9 @@ public class MineDownParser {
             if (!v.startsWith("http://") && !v.startsWith("https://")) {
                 v = "http://" + v;
             }
-            builder.clickEvent(ClickEvent.of(ClickEvent.Action.OPEN_URL, v));
+            builder.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, v));
             if (urlHoverText() != null && !urlHoverText().isEmpty()) {
-                builder.hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
+                builder.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
                 ));
             }
@@ -404,7 +406,7 @@ public class MineDownParser {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
                 }
-                clickEvent = ClickEvent.of(ClickEvent.Action.OPEN_URL, definition);
+                clickEvent = ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, definition);
                 continue;
             }
 
@@ -429,13 +431,13 @@ public class MineDownParser {
                 if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
                     valueStr = "http://" + valueStr;
                 }
-                clickEvent = ClickEvent.of(clickAction, valueStr);
+                clickEvent = ClickEvent.clickEvent(clickAction, valueStr);
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
                 if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
-                    hoverEvent = HoverEvent.of(hoverAction, copy(false).urlDetection(false).parse(Util.wrap(valueStr, hoverTextWidth())).build());
+                    hoverEvent = HoverEvent.hoverEvent(hoverAction, copy(false).urlDetection(false).parse(Util.wrap(valueStr, hoverTextWidth())).build());
                 } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
                     String[] valueParts = valueStr.split(":", 2);
                     try {
@@ -444,7 +446,7 @@ public class MineDownParser {
                             additionalParts[0] = "minecraft:" + additionalParts[0];
                         }
                         hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.of(
-                                Key.of(additionalParts[0]), UUID.fromString(valueParts[0]),
+                                Key.key(additionalParts[0]), UUID.fromString(valueParts[0]),
                                 additionalParts.length > 1 && additionalParts[1] != null ?
                                         copy(false).urlDetection(false).parse(additionalParts[1]).build() : null
                         ));
@@ -481,7 +483,7 @@ public class MineDownParser {
 
                     try {
                         hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.of(
-                                Key.of(id), count, tag
+                                Key.key(id), count, tag
                         ));
                     } catch (Exception e) {
                         if (!lenient()) {
@@ -493,9 +495,11 @@ public class MineDownParser {
         }
 
         if (clickEvent != null && hoverEvent == null) {
-            hoverEvent = HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
-                    TextComponent.builder(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')).color(NamedTextColor.BLUE)
-                            .append(" " + clickEvent.action()).color(NamedTextColor.WHITE)
+            hoverEvent = HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Component.text()
+                            .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
+                            .color(NamedTextColor.BLUE)
+                            .append(Component.text(" " + clickEvent.action())).color(NamedTextColor.WHITE)
                             .build());
         }
 
