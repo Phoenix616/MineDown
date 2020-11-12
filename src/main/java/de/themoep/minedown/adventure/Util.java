@@ -216,19 +216,23 @@ public class Util {
     public static Component rgbColorsToLegacy(Component components) {
         return Component.text().append(components).mapChildrenDeep(buildableComponent
                 -> buildableComponent.color() != null
-                        ? (BuildableComponent) buildableComponent.color(getClosestLegacy(new Color(buildableComponent.color().value())))
+                        ? (BuildableComponent) buildableComponent.color(getClosestLegacy(buildableComponent.color()))
                         : buildableComponent
         ).build();
     }
 
     /**
      * Get the legacy color closest to a certain RGB color
-     * @param color The color to get teh closest legacy color for
+     * @param textColor The color to get the closest legacy color for
      * @return The closest legacy color
      */
-    public static NamedTextColor getClosestLegacy(Color color) {
+    public static NamedTextColor getClosestLegacy(TextColor textColor) {
+        if (textColor instanceof NamedTextColor) {
+            return (NamedTextColor) textColor;
+        }
         NamedTextColor closest = null;
         double smallestDistance = Double.MAX_VALUE;
+        Color color = new Color(textColor.value());
         for (NamedTextColor legacy : NamedTextColor.NAMES.values()) {
             double distance = distance(color, new Color(legacy.value()));
             if (distance < smallestDistance) {
@@ -318,7 +322,7 @@ public class Util {
                 case ITALIC: return 'o';
             }
         } else if (format instanceof TextColor) {
-            return getLegacyFormatChar(getClosestLegacy(new Color(((TextColor) format).value())));
+            return getLegacyFormatChar(getClosestLegacy((TextColor) format));
         }
         throw new IllegalArgumentException(format + " is not supported!");
     }
