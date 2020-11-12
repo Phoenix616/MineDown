@@ -50,7 +50,7 @@ public class ParserTest {
         System.out.println("testParsing");
         Assertions.assertAll(
                 () -> parse("##&eTest## [&blue&b__this__](https://example.com **Hover ??text??**) ~~string~~!"),
-                () -> parse("##&eTest## [__this \\&6 \\that__](blue /example command hover=**Hover ??text??**) ~~string~~!"),
+                () -> parse("&e##Test## [__this \\&6 \\that__](blue /example command hover=**Hover ??text??**) ~~string~~!"),
                 () -> parse("[TestLink](https://example.com) [Testcommand](/command test  )"),
                 () -> parse("&b&lTest [this](color=green format=bold,italic https://example.com Hover & text) string!"),
                 () -> parse("&bTest [this](color=green format=bold,italic suggest_command=/example command hover=Hover text) string!"),
