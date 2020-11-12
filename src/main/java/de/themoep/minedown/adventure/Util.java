@@ -22,6 +22,7 @@ package de.themoep.minedown.adventure;
  * SOFTWARE.
  */
 
+import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -215,7 +216,7 @@ public class Util {
     public static Component rgbColorsToLegacy(Component components) {
         return Component.text().append(components).mapChildrenDeep(buildableComponent
                 -> buildableComponent.color() != null
-                        ? Component.text().append(buildableComponent.color(getClosestLegacy(new Color(buildableComponent.color().value())))).build()
+                        ? (BuildableComponent) buildableComponent.color(getClosestLegacy(new Color(buildableComponent.color().value())))
                         : buildableComponent
         ).build();
     }
