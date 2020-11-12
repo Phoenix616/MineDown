@@ -295,15 +295,7 @@ public class MineDownParser {
     }
 
     private void appendValue() {
-        appendValue(Style.empty());
-    }
-
-    private void appendValue(Style style) {
-        if (builder == null) {
-            builder = Component.text(value.toString()).toBuilder();
-        } else {
-            builder.append(Component.text(value.toString())).style(style);
-        }
+        ComponentBuilder builder = Component.text(value.toString()).toBuilder();
         if (font != null) {
             builder.font(Key.key(font));
         }
@@ -327,6 +319,11 @@ public class MineDownParser {
         }
         if (hoverEvent != null) {
             builder.hoverEvent(hoverEvent);
+        }
+        if (this.builder == null) {
+            this.builder = Component.text().append(builder);
+        } else {
+            this.builder.append(builder);
         }
         value = new StringBuilder();
     }
