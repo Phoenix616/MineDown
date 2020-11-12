@@ -119,6 +119,7 @@ public class MineDownParser {
     private String insertion;
     private ChatColor color;
     private Set<ChatColor> format;
+    private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
     private HoverEvent hoverEvent;
 
@@ -245,11 +246,14 @@ public class MineDownParser {
                                 appendValue();
                             }
                             color = encoded;
-                            format = new HashSet<>();
+                            if (formattingIsLegacy()) {
+                                format = new HashSet<>();
+                            }
                         } else {
                             if (value.length() > 0) {
                                 appendValue();
                             }
+                            formattingIsLegacy = true;
                             format.add(encoded);
                         }
                     }
@@ -278,6 +282,7 @@ public class MineDownParser {
                 if (!isFiltered(Option.SIMPLE_FORMATTING)) {
                     formats.add(MineDown.getFormatFromChar(c));
                 }
+                formattingIsLegacy = false;
                 appendValue();
                 append(copy(true).format(formats).parse(message.substring(i + 2, endIndex)));
                 i = endIndex + 1;
@@ -666,6 +671,15 @@ public class MineDownParser {
         return this.format;
     }
 
+    protected MineDownParser formattingIsLegacy(boolean formattingIsLegacy) {
+        this.formattingIsLegacy = formattingIsLegacy;
+        return this;
+    }
+
+    protected boolean formattingIsLegacy() {
+        return formattingIsLegacy;
+    }
+
     protected MineDownParser clickEvent(ClickEvent clickEvent) {
         this.clickEvent = clickEvent;
         return this;
@@ -775,6 +789,7 @@ public class MineDownParser {
         colorChar(from.colorChar());
         if (formatting) {
             format(from.format());
+            formattingIsLegacy(from.formattingIsLegacy());
             color(from.color());
             font(from.font());
             insertion(from.insertion());
