@@ -142,7 +142,7 @@ public class Replacer {
             Object any = replacements.values().stream().filter(Objects::nonNull).findAny().orElse(null);
             if (any instanceof String) {
                 replacements().putAll((Map<String, String>) replacements);
-            } else if (any != null && any.getClass().isArray() && Component.class.isAssignableFrom(any.getClass().getComponentType())) {
+            } else if (any instanceof Component) {
                 componentReplacements().putAll((Map<String, Component>) replacements);
             } else {
                 for (Map.Entry<String, ?> entry : replacements.entrySet()) {
