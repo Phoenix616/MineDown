@@ -29,8 +29,9 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -298,7 +299,7 @@ public class Util {
 
     /**
      * Get the legacy color closest to a certain RGB color
-     * @param color The color to get teh closest legacy color for
+     * @param color The color to get the closest legacy color for
      * @return The closest legacy color
      */
     public static ChatColor getClosestLegacy(Color color) {
@@ -325,6 +326,177 @@ public class Util {
             return 0;
         }
         return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getGreen() - c2.getGreen(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2));
+    }
+
+    /*
+     * createRainbow is adapted from the net.kyori.adventure.text.minimessage.fancy.Rainbow class
+     * in adventure-text-minimessage, licensed under the MIT License.
+     *
+     * Copyright (c) 2018-2020 KyoriPowered
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+    /**
+     * Generate a rainbow with a certain length and phase
+     * @param length    The length of the rainbow
+     * @param phase     The phase of the rainbow.
+     * @param rgb       Whether or not to use RGB colors
+     * @return the colors in the rainbow
+     */
+    public static List<ChatColor> createRainbow(int length, int phase, boolean rgb) {
+        List<ChatColor> colors = new ArrayList<>();
+
+        float fPhase = phase / 10f;
+
+        float center = 128;
+        float width = 127;
+        double frequency = Math.PI * 2 / length;
+
+        for (int i = 0; i < length; i++) {
+            Color color = new Color(
+                    (int) (Math.sin(frequency * i + 2 + fPhase) * width + center),
+                    (int) (Math.sin(frequency * i + 0 + fPhase) * width + center),
+                    (int) (Math.sin(frequency * i + 4 + fPhase) * width + center)
+            );
+            if (rgb) {
+                colors.add(ChatColor.of(color));
+            } else {
+                ChatColor chatColor = getClosestLegacy(color);
+                if (colors.isEmpty() || chatColor != colors.get(colors.size() - 1)) {
+                    colors.add(chatColor);
+                }
+            }
+        }
+        return colors;
+    }
+
+    /*
+     * createGradient is adapted from the net.kyori.adventure.text.minimessage.fancy.Gradient class
+     * in adventure-text-minimessage, licensed under the MIT License.
+     *
+     * Copyright (c) 2018-2020 KyoriPowered
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+    /**
+     * Generate a gradient with certain colors
+     * @param length    The length of the gradient
+     * @param gradient    The colors of the gradient.
+     * @param rgb       Whether or not to use RGB colors
+     * @return the colors in the gradient
+     */
+    public static List<ChatColor> createGradient(int length, List<ChatColor> gradient, boolean rgb) {
+        List<ChatColor> colors = new ArrayList<>();
+        if (gradient.size() < 2 || length < 2) {
+            if (gradient.isEmpty()) {
+                return gradient;
+            }
+            return Collections.singletonList(gradient.get(0));
+        }
+
+        float fPhase = 0;
+
+        float sectorLength = (float) (length - 1) / (gradient.size() - 1);
+        float factorStep = 1.0f / (sectorLength);
+
+        int index = 0;
+
+        int colorIndex = 0;
+
+        for (int i = 0; i < length; i++) {
+
+            if (factorStep * index > 1) {
+                colorIndex++;
+                index = 0;
+            }
+
+            float factor = factorStep * (index++ + fPhase);
+            // loop around if needed
+            if (factor > 1) {
+                factor = 1 - (factor - 1);
+            }
+
+            Color color = interpolate(
+                    getColor(gradient.get(colorIndex), rgb),
+                    getColor(gradient.get(Math.min(gradient.size() - 1, colorIndex + 1)), rgb),
+                    factor
+            );
+
+            if (color != null) {
+                if (rgb) {
+                    colors.add(ChatColor.of(color));
+                } else {
+                    ChatColor chatColor = getClosestLegacy(color);
+                    if (colors.isEmpty() || chatColor != colors.get(colors.size() - 1)) {
+                        colors.add(chatColor);
+                    }
+                }
+            }
+        }
+
+        return colors;
+    }
+
+    private static Color getColor(ChatColor color, boolean rgb) {
+        if (legacyColors.containsKey(color)) {
+            return legacyColors.get(color);
+        }
+
+        if (color.getName().startsWith("#")) {
+            Color c = new Color(Integer.parseInt(color.getName().substring(1), 16));
+            if (rgb) {
+                return c;
+            } else {
+                return legacyColors.get(getClosestLegacy(c));
+            }
+        } else if (rgb) {
+            return color.getColor();
+        }
+
+        return null;
+    }
+
+    private static Color interpolate(Color color1, Color color2, float factor) {
+        if (color1 == null || color2 == null) {
+            return null;
+        }
+        return new Color(
+                Math.round(color1.getRed() + factor * (color2.getRed() - color1.getRed())),
+                Math.round(color1.getGreen() + factor * (color2.getGreen() - color1.getGreen())),
+                Math.round(color1.getBlue() + factor * (color2.getBlue() - color1.getBlue()))
+        );
     }
 
     /**

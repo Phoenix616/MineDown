@@ -114,6 +114,49 @@ public class ParserTest {
                 )
         );
     }
+
+    @Test
+    public void testParseGradient() {
+        System.out.println("testParseGradient");
+        Assertions.assertAll(
+                () -> parse("[Test Gradient](#fff-#000) &7:D",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#ffffff\"},{\"text\":\"e\",\"color\":\"#eaeaea\"},{\"text\":\"s\",\"color\":\"#d5d5d5\"},{\"text\":\"t\",\"color\":\"#bfbfbf\"},{\"text\":\" \",\"color\":\"#aaaaaa\"},{\"text\":\"G\",\"color\":\"#959595\"},{\"text\":\"r\",\"color\":\"#808080\"},{\"text\":\"a\",\"color\":\"#6a6a6a\"},{\"text\":\"d\",\"color\":\"#555555\"},{\"text\":\"i\",\"color\":\"#404040\"},{\"text\":\"e\",\"color\":\"#2a2a2a\"},{\"text\":\"n\",\"color\":\"#151515\"},{\"text\":\"t\",\"color\":\"#000000\"}]},{\"text\":\" \"},{\"text\":\":D\",\"color\":\"gray\"}]}"
+                ),
+                () -> parse("[Test Gradient](#fff-#666666-#555555) &7:D", "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#ffffff\"},{\"text\":\"e\",\"color\":\"#e6e6e6\"},{\"text\":\"s\",\"color\":\"#cccccc\"},{\"text\":\"t\",\"color\":\"#b3b3b3\"},{\"text\":\" \",\"color\":\"#999999\"},{\"text\":\"G\",\"color\":\"#7f7f7f\"},{\"text\":\"r\",\"color\":\"#666666\"},{\"text\":\"a\",\"color\":\"#666666\"},{\"text\":\"d\",\"color\":\"#636363\"},{\"text\":\"i\",\"color\":\"#606060\"},{\"text\":\"e\",\"color\":\"#5e5e5e\"},{\"text\":\"n\",\"color\":\"#5b5b5b\"},{\"text\":\"t\",\"color\":\"#585858\"}]},{\"text\":\" \"},{\"text\":\":D\",\"color\":\"gray\"}]}"
+                ),
+                () -> parse("[Test Gradient](#fff-#000 Hover message) &7:D",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#ffffff\"},{\"text\":\"e\",\"color\":\"#eaeaea\"},{\"text\":\"s\",\"color\":\"#d5d5d5\"},{\"text\":\"t\",\"color\":\"#bfbfbf\"},{\"text\":\" \",\"color\":\"#aaaaaa\"},{\"text\":\"G\",\"color\":\"#959595\"},{\"text\":\"r\",\"color\":\"#808080\"},{\"text\":\"a\",\"color\":\"#6a6a6a\"},{\"text\":\"d\",\"color\":\"#555555\"},{\"text\":\"i\",\"color\":\"#404040\"},{\"text\":\"e\",\"color\":\"#2a2a2a\"},{\"text\":\"n\",\"color\":\"#151515\"},{\"text\":\"t\",\"color\":\"#000000\"}],\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Hover message\"}]}},{\"text\":\" \"},{\"text\":\":D\",\"color\":\"gray\"}]}"
+                ),
+                () -> parse("[Test Gradient](color=#fff,#000 format=bold,italic Hover message) &7:D",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"bold\":true,\"italic\":true,\"extra\":[{\"text\":\"T\",\"color\":\"#ffffff\"},{\"text\":\"e\",\"color\":\"#eaeaea\"},{\"text\":\"s\",\"color\":\"#d5d5d5\"},{\"text\":\"t\",\"color\":\"#bfbfbf\"},{\"text\":\" \",\"color\":\"#aaaaaa\"},{\"text\":\"G\",\"color\":\"#959595\"},{\"text\":\"r\",\"color\":\"#808080\"},{\"text\":\"a\",\"color\":\"#6a6a6a\"},{\"text\":\"d\",\"color\":\"#555555\"},{\"text\":\"i\",\"color\":\"#404040\"},{\"text\":\"e\",\"color\":\"#2a2a2a\"},{\"text\":\"n\",\"color\":\"#151515\"},{\"text\":\"t\",\"color\":\"#000000\"}],\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Hover message\"}]}},{\"text\":\" \"},{\"text\":\":D\",\"color\":\"gray\"}]}"
+                ),
+                () -> parse("&#fff-#000&Test Gradient&7No Gradient",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#ffffff\"},{\"text\":\"e\",\"color\":\"#eaeaea\"},{\"text\":\"s\",\"color\":\"#d5d5d5\"},{\"text\":\"t\",\"color\":\"#bfbfbf\"},{\"text\":\" \",\"color\":\"#aaaaaa\"},{\"text\":\"G\",\"color\":\"#959595\"},{\"text\":\"r\",\"color\":\"#808080\"},{\"text\":\"a\",\"color\":\"#6a6a6a\"},{\"text\":\"d\",\"color\":\"#555555\"},{\"text\":\"i\",\"color\":\"#404040\"},{\"text\":\"e\",\"color\":\"#2a2a2a\"},{\"text\":\"n\",\"color\":\"#151515\"},{\"text\":\"t\",\"color\":\"#000000\"}]},{\"text\":\"No Gradient\",\"color\":\"gray\"}]}"
+                )
+        );
+    }
+
+    @Test
+    public void testParseRainbow() {
+        System.out.println("testParseRainbow");
+        Assertions.assertAll(
+                () -> parse("[Test Rainbow](color=rainbow)",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#f3801f\"},{\"text\":\"e\",\"color\":\"#c9bf03\"},{\"text\":\"s\",\"color\":\"#8bed08\"},{\"text\":\"t\",\"color\":\"#4bff2c\"},{\"text\":\" \",\"color\":\"#18ed68\"},{\"text\":\"R\",\"color\":\"#01bfa9\"},{\"text\":\"a\",\"color\":\"#0c80e0\"},{\"text\":\"i\",\"color\":\"#3640fc\"},{\"text\":\"n\",\"color\":\"#7412f7\"},{\"text\":\"b\",\"color\":\"#b401d3\"},{\"text\":\"o\",\"color\":\"#e71297\"},{\"text\":\"w\",\"color\":\"#fe4056\"}]},{\"text\":\"\"}]}"
+                ),
+                () -> parse("[Test Rainbow](rainbow)",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#f3801f\"},{\"text\":\"e\",\"color\":\"#c9bf03\"},{\"text\":\"s\",\"color\":\"#8bed08\"},{\"text\":\"t\",\"color\":\"#4bff2c\"},{\"text\":\" \",\"color\":\"#18ed68\"},{\"text\":\"R\",\"color\":\"#01bfa9\"},{\"text\":\"a\",\"color\":\"#0c80e0\"},{\"text\":\"i\",\"color\":\"#3640fc\"},{\"text\":\"n\",\"color\":\"#7412f7\"},{\"text\":\"b\",\"color\":\"#b401d3\"},{\"text\":\"o\",\"color\":\"#e71297\"},{\"text\":\"w\",\"color\":\"#fe4056\"}]},{\"text\":\"\"}]}"
+                ),
+                () -> parse("[Test Rainbow](rainbow:25)",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#03cc9b\"},{\"text\":\"e\",\"color\":\"#078ed5\"},{\"text\":\"s\",\"color\":\"#2a4df9\"},{\"text\":\"t\",\"color\":\"#651afc\"},{\"text\":\" \",\"color\":\"#a601dd\"},{\"text\":\"R\",\"color\":\"#de0ba6\"},{\"text\":\"a\",\"color\":\"#fc3364\"},{\"text\":\"i\",\"color\":\"#f8712a\"},{\"text\":\"n\",\"color\":\"#d5b206\"},{\"text\":\"b\",\"color\":\"#9ae503\"},{\"text\":\"o\",\"color\":\"#59fe22\"},{\"text\":\"w\",\"color\":\"#21f459\"}]},{\"text\":\"\"}]}"
+                ),
+                () -> parse("[Test Rainbow](rainbow:240)",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\"},{\"text\":\"\",\"extra\":[{\"text\":\"T\",\"color\":\"#e00ca2\"},{\"text\":\"e\",\"color\":\"#fc3760\"},{\"text\":\"s\",\"color\":\"#f77527\"},{\"text\":\"t\",\"color\":\"#d2b505\"},{\"text\":\" \",\"color\":\"#96e804\"},{\"text\":\"R\",\"color\":\"#55fe25\"},{\"text\":\"a\",\"color\":\"#1ff35d\"},{\"text\":\"i\",\"color\":\"#03c89f\"},{\"text\":\"n\",\"color\":\"#088ad8\"},{\"text\":\"b\",\"color\":\"#2d4afa\"},{\"text\":\"o\",\"color\":\"#6917fb\"},{\"text\":\"w\",\"color\":\"#aa01da\"}]},{\"text\":\"\"}]}"
+                ),
+                () -> parse("&Rainbow&Rainbow&7 Test",
+                        "{\"text\":\"\",\"extra\":[{\"text\":\"\",\"extra\":[{\"text\":\"R\",\"color\":\"#f3801f\"},{\"text\":\"a\",\"color\":\"#9ee303\"},{\"text\":\"i\",\"color\":\"#32fb44\"},{\"text\":\"n\",\"color\":\"#01b7b2\"},{\"text\":\"b\",\"color\":\"#2e48fa\"},{\"text\":\"o\",\"color\":\"#9904e6\"},{\"text\":\"w\",\"color\":\"#f11c84\"}]},{\"text\":\" Test\",\"color\":\"gray\"}]}"
+                )
+        );
+    }
     
     @Test
     public void testReplacing() {

@@ -10,17 +10,20 @@ See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple im
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax          | More Info
- --------------|-----------------|---------------------------------------------------------------------
- Color legacy  |` &6Text        `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Color         |` &gold&Text    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
- RGB Hex Color |` &#ff00ff&Text `| Full hexadecimal format 
- RGB Hex Color |` &#f0f&Text    `| Short format (equivalent to long one)
- Bold          |` **Text**      `| 
- Italic        |` ##Text##      `| 
- Underlined    |` __Text__      `| 
- Strikethrough |` ~~Text~~      `| 
- Obfuscated    |` ??Text??      `| 
+ Description   | Syntax             | More Info
+ --------------|--------------------|---------------------------------------------------------------------
+ Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format 
+ RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)
+ Gradient      |` &#f0f-#000&Text  `| Inline gradients
+ Rainbow       |` &rainbow&Text    `| Inline Rainbow
+ Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase
+ Bold          |` **Text**         `| 
+ Italic        |` ##Text##         `| 
+ Underlined    |` __Text__         `| 
+ Strikethrough |` ~~Text~~         `| 
+ Obfuscated    |` ??Text??         `| 
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax
@@ -33,7 +36,10 @@ as well as specify formatting, font and colors that way.
  Simple Link                    |` [Text](https://example.com)                           `
  Simple Command                 |` [Text](/command to run)                               `
  Link + Hover                   |` [Text](https://example.com Hover Text)                `
- Text formatting                |` [Text](blue underline)                             `
+ Text formatting                |` [Text](blue underline)                                `
+ Gradient                       |` [Text](#fff-#000)                                     `
+ Rainbow                        |` [Text](rainbow)                                       `
+ Phased Rainbow                 |` [Text](rainbow:20)                                       `
  Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
  
 #### Advanced Syntax
@@ -44,6 +50,10 @@ as well as specify formatting, font and colors that way.
  Color              |` [Text](color=red)                    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
  RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
  RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
+ RGB Color Gradient |` [Text](color=#fff-#000)              `| Gradient of two colors. (Supports all color forms)
+ RGB Color Gradient |` [Text](color=#fff-#333-#222)         `| Gradient of three colors.
+ RGB Rainbow        |` [Text](color=rainbow)                `| An RGB rainbow.
+ Phased RGB Rainbow |` [Text](color=rainbow:50)             `| An RGB rainbow with a specific phase.
  Formatting         |` [Text](format=underline,bold)        `|
  Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
  Run Command        |` [Text](run_command=/command string)  `| Run command on click
