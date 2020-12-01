@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 public class Replacer {
 
     private static final boolean HAS_KEYBIND_SUPPORT = Util.hasClass("net.md_5.bungee.api.chat.KeybindComponent");
+    private static final boolean HAS_INSERTION_SUPPORT = Util.hasMethod(BaseComponent.class, "getInsertion");
     private static final boolean HAS_HOVER_CONTENT_SUPPORT = Util.hasMethod(HoverEvent.class, "getContents");
     private static final Method HOVER_GET_VALUE = Util.getMethod(HoverEvent.class, "getValue");
 
@@ -214,6 +215,9 @@ public class Replacer {
             if (component instanceof TranslatableComponent) {
                 ((TranslatableComponent) component).setTranslate(replaceIn(((TranslatableComponent) component).getTranslate()));
                 ((TranslatableComponent) component).setWith(Arrays.asList(replaceIn(((TranslatableComponent) component).getWith())));
+            }
+            if (HAS_INSERTION_SUPPORT && component.getInsertion() != null) {
+                component.setInsertion(replaceIn(component.getInsertion()));
             }
             if (component.getClickEvent() != null) {
                 component.setClickEvent(new ClickEvent(
