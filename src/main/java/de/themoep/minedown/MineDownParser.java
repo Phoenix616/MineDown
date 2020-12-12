@@ -498,10 +498,15 @@ public class MineDownParser {
             } else if (!definition.contains("=")) {
                 List<ChatColor> parsed = parseColor(definition, "", true, backwardsCompatibility());
                 if (parsed != null && !parsed.isEmpty()) {
-                    if (parsed.size() == 1 && Util.isFormat(parsed.get(0))) {
-                        formats.add(parsed.get(0));
-                    } else {
-                        colors = parsed;
+                    for (ChatColor color : parsed) {
+                        if (Util.isFormat(color)) {
+                            formats.add(color);
+                        } else {
+                            if (colors == null) {
+                                colors = new ArrayList<>();
+                            }
+                            colors.add(color);
+                        }
                     }
                     formatEnd = i.get();
                     continue;
