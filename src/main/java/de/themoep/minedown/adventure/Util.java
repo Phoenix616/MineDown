@@ -33,6 +33,7 @@ import net.kyori.adventure.text.format.TextFormat;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -325,6 +326,139 @@ public class Util {
             return getLegacyFormatChar(getClosestLegacy((TextColor) format));
         }
         throw new IllegalArgumentException(format + " is not supported!");
+    }    /*
+     * createRainbow is adapted from the net.kyori.adventure.text.minimessage.fancy.Rainbow class
+     * in adventure-text-minimessage, licensed under the MIT License.
+     *
+     * Copyright (c) 2018-2020 KyoriPowered
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+    /**
+     * Generate a rainbow with a certain length and phase
+     * @param length    The length of the rainbow
+     * @param phase     The phase of the rainbow.
+     * @return the colors in the rainbow
+     */
+    public static List<TextColor> createRainbow(int length, int phase) {
+        List<TextColor> colors = new ArrayList<>();
+
+        float fPhase = phase / 10f;
+
+        float center = 128;
+        float width = 127;
+        double frequency = Math.PI * 2 / length;
+
+        for (int i = 0; i < length; i++) {
+            colors.add(TextColor.color(
+                    (int) (Math.sin(frequency * i + 2 + fPhase) * width + center),
+                    (int) (Math.sin(frequency * i + 0 + fPhase) * width + center),
+                    (int) (Math.sin(frequency * i + 4 + fPhase) * width + center)
+            ));
+    }
+        return colors;
+    }
+
+    /*
+     * createGradient is adapted from the net.kyori.adventure.text.minimessage.fancy.Gradient class
+     * in adventure-text-minimessage, licensed under the MIT License.
+     *
+     * Copyright (c) 2018-2020 KyoriPowered
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in all
+     * copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     * SOFTWARE.
+     */
+    /**
+     * Generate a gradient with certain colors
+     * @param length    The length of the gradient
+     * @param gradient    The colors of the gradient.
+     * @return the colors in the gradient
+     */
+    public static List<TextColor> createGradient(int length, List<TextColor> gradient) {
+        List<TextColor> colors = new ArrayList<>();
+        if (gradient.size() < 2 || length < 2) {
+            if (gradient.isEmpty()) {
+                return gradient;
+            }
+            return Collections.singletonList(gradient.get(0));
+        }
+
+        float fPhase = 0;
+
+        float sectorLength = (float) (length - 1) / (gradient.size() - 1);
+        float factorStep = 1.0f / (sectorLength);
+
+        int index = 0;
+
+        int colorIndex = 0;
+
+        for (int i = 0; i < length; i++) {
+
+            if (factorStep * index > 1) {
+                colorIndex++;
+                index = 0;
+            }
+
+            float factor = factorStep * (index++ + fPhase);
+            // loop around if needed
+            if (factor > 1) {
+                factor = 1 - (factor - 1);
+            }
+
+            TextColor color = interpolate(
+                    gradient.get(colorIndex),
+                    gradient.get(Math.min(gradient.size() - 1, colorIndex + 1)),
+                    factor
+            );
+
+            if (color != null) {
+                colors.add(color);
+            }
+        }
+
+        return colors;
+    }
+
+    private static TextColor interpolate(TextColor color1, TextColor color2, float factor) {
+        if (color1 == null || color2 == null) {
+            return null;
+        }
+        return TextColor.color(
+                Math.round(color1.red() + factor * (color2.red() - color1.red())),
+                Math.round(color1.green() + factor * (color2.green() - color1.green())),
+                Math.round(color1.blue() + factor * (color2.blue() - color1.blue()))
+        );
     }
 
     public enum TextControl implements TextFormat {

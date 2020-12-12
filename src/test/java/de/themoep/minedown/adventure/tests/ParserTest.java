@@ -79,6 +79,30 @@ public class ParserTest {
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));
     }
+
+    @Test
+    public void testParseGradient() {
+        System.out.println("testParseGradient");
+        Assertions.assertAll(
+                () -> parse("[Test Gradient](#fff-#000) &7:D"),
+                () -> parse("[Test Gradient](#fff-#666666-#555555) &7:D"),
+                () -> parse("[Test Gradient](#fff-#000 Hover message) &7:D"),
+                () -> parse("[Test Gradient](color=#fff,#000 format=bold,italic Hover message) &7:D"),
+                () -> parse("&#fff-#000&Test Gradient&7No Gradient")
+        );
+    }
+
+    @Test
+    public void testParseRainbow() {
+        System.out.println("testParseRainbow");
+        Assertions.assertAll(
+                () -> parse("[Test Rainbow](color=rainbow)"),
+                () -> parse("[Test Rainbow](rainbow)"),
+                () -> parse("[Test Rainbow](rainbow:25)"),
+                () -> parse("[Test Rainbow](rainbow:240)"),
+                () -> parse("&Rainbow&Rainbow&7 Test")
+        );
+    }
     
     @Test
     public void testReplacing() {

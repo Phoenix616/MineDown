@@ -12,17 +12,20 @@ messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/tree/ky
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax          | More Info
- --------------|-----------------|---------------------------------------------------------------------
- Color legacy  |` &6Text        `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Color         |` &gold&Text    `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- RGB Hex Color |` &#ff00ff&Text `| Full hexadecimal format 
- RGB Hex Color |` &#f0f&Text    `| Short format (equivalent to long one)
- Bold          |` **Text**      `| 
- Italic        |` ##Text##      `| 
- Underlined    |` __Text__      `| 
- Strikethrough |` ~~Text~~      `| 
- Obfuscated    |` ??Text??      `| 
+ Description   | Syntax             | More Info
+ --------------|--------------------|---------------------------------------------------------------------
+ Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ Color         |` &gold&Text       `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
+ RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format 
+ RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)
+ Gradient      |` &#f0f-#000&Text  `| Inline gradients
+ Rainbow       |` &rainbow&Text    `| Inline Rainbow
+ Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase
+ Bold          |` **Text**         `| 
+ Italic        |` ##Text##         `| 
+ Underlined    |` __Text__         `| 
+ Strikethrough |` ~~Text~~         `| 
+ Obfuscated    |` ??Text??         `| 
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax
@@ -35,6 +38,10 @@ as well as specify formatting, font and colors that way.
  Simple Link                    |` [Text](https://example.com)                              `
  Simple Command                 |` [Text](/command to run)                                  `
  Link + Hover                   |` [Text](https://example.com Hover Text)                   `
+ Text formatting                |` [Text](blue underline)                                   `
+ Gradient                       |` [Text](#fff-#000)                                        `
+ Rainbow                        |` [Text](rainbow)                                          `
+ Phased Rainbow                 |` [Text](rainbow:20)                                       `
  Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
 
  
@@ -42,18 +49,22 @@ as well as specify formatting, font and colors that way.
  Description        | Syntax                                     | More Info
  -------------------|--------------------------------------------|----
  General syntax     |` [Text](action=value)                     `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
- Link               |` [Text](open_url=https://example.com)     `|
- Color              |` [Text](color=red)                        `|
- RGB Hex Color      |` [Text](color=#ff00ff)                    `| Full hexadecimal format
- RGB Hex Color      |` [Text](color=#f0f)                       `| Short format (equivalent to long one)
- Formatting         |` [Text](format=underline,bold)            `|
- Font               |` [Text](font=custom_font)                 `| Set a custom font from a resource pack
- Run Command        |` [Text](run_command=/command string)      `| Run command on click
- Suggest Command    |` [Text](suggest_command=/command string)  `| Suggest a command on click
- Simple Hover       |` [Text](hover=Hover Text)                 `| Show hover text
- Hover Text         |` [Text](show_text=Hover Text)             `| Show hover text
- Hover Entity Info  |` [Text](show_entity=uuid:pig Name)        `| Show entity information.
- Hover Item Info    |` [Text](show_item=stone*2 nbt...)         `| Show item information, additional information needs to be provided as a string of the nbt in json
+ Link               |` [Text](open_url=https://example.com) `|
+ Color              |` [Text](color=red)                    `|
+ RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
+ RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
+ RGB Color Gradient |` [Text](color=#fff-#000)              `| Gradient of two colors. (Supports all color forms)
+ RGB Color Gradient |` [Text](color=#fff-#333-#222)         `| Gradient of three colors.
+ RGB Rainbow        |` [Text](color=rainbow)                `| An RGB rainbow.
+ Phased RGB Rainbow |` [Text](color=rainbow:50)             `| An RGB rainbow with a specific phase.
+ Formatting         |` [Text](format=underline,bold)        `|
+ Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
+ Run Command        |` [Text](run_command=/command string)  `| Run command on click
+ Suggest Command    |` [Text](suggest_command=/command)     `| Suggest a command on click
+ Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
+ Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
+ Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
+ Hover Item Info    |` [Text](show_item=stone*2 nbt...)     `| Show item information, additional information needs to be provided as a string of the nbt in json
  Insertion          |` [Text](insert=insert into input)     `| Insert into input on shift click, can be combined with other events
  
 All advanced settings can be chained/included in a event definition.
@@ -94,7 +105,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.7.0-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
