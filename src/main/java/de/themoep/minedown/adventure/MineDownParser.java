@@ -185,7 +185,8 @@ public class MineDownParser {
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
                     char c1 = message.charAt(j);
-                    if (c1 == c && colorString.length() > 1) { String colorStr = colorString.toString();
+                    if (c1 == c && colorString.length() > 1) {
+                        String colorStr = colorString.toString();
                         rainbowPhase = parseRainbow(colorStr, "", lenient());
                         if (rainbowPhase == null && !colorStr.contains("=")) {
                             try {
@@ -230,6 +231,7 @@ public class MineDownParser {
                                     appendValue();
                                 }
                                 colors(new ArrayList<>());
+                                colors().add((TextColor) singleFormat);
                                 if (formattingIsLegacy()) {
                                     format(new HashSet<>());
                                 }
@@ -398,12 +400,6 @@ public class MineDownParser {
             }
         } else {
             builder(builder);
-        }
-
-        if (builder() == null) {
-            builder(Component.text().append(builder));
-        } else {
-            builder().append(builder);
         }
         value(new StringBuilder());
     }
