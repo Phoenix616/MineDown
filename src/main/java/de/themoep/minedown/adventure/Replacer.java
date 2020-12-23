@@ -207,7 +207,7 @@ public class Replacer {
             component = ((TranslatableComponent) component).args(replaceIn(((TranslatableComponent) component).args()));
         }
         if (component.insertion() != null) {
-            component.insertion(replaceIn(component.insertion()));
+            component = component.insertion(replaceIn(component.insertion()));
         }
         if (component.clickEvent() != null) {
             component = component.clickEvent(ClickEvent.clickEvent(
