@@ -590,7 +590,7 @@ public class MineDownParser {
                     Component.text()
                             .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
                             .color(NamedTextColor.BLUE)
-                            .append(Component.text(" " + clickEvent.action())).color(NamedTextColor.WHITE)
+                            .append(Component.text(" " + clickEvent.value())).color(NamedTextColor.WHITE)
                             .build());
         }
 
