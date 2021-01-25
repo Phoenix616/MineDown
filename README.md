@@ -103,7 +103,7 @@ To be used with bungeecord-chat in BungeeCord and Spigot-based servers:
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.7.0-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
@@ -115,7 +115,7 @@ For usage in any platform that is supported by [kyori-adventure](https://github.
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.7.0-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
