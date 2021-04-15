@@ -93,6 +93,7 @@ public class MineDown {
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();
     private Component components = null;
+    private boolean replaceFirst = false;
     
     /**
      * Create a new MineDown builder with a certain message
@@ -127,7 +128,11 @@ public class MineDown {
      */
     public Component toComponent() {
         if (components() == null) {
-            components = replacer().replaceIn(parser().parse(message()).build());
+            if (replaceFirst()) {
+                components = parser().parse(replacer().replaceIn(message())).build();
+            } else {
+                components = replacer().replaceIn(parser().parse(message()).build());
+            }
         }
         return components();
     }
@@ -137,6 +142,29 @@ public class MineDown {
      */
     private void reset() {
         components = null;
+    }
+
+    /**
+     * Set whether or not replacements should be replaced before or after the components are created.
+     * When replacing first it will not replace any placeholders with component replacement values!
+     * Default is after. (replaceFirst = false)
+     * @param replaceFirst  Whether or not to replace first or parse first
+     * @return              The MineDown instance
+     */
+    public MineDown replaceFirst(boolean replaceFirst) {
+        reset();
+        this.replaceFirst = replaceFirst;
+        return this;
+    }
+
+    /**
+     * Get whether or not replacements should be replaced before or after the components are created.
+     * When replacing first it will not replace any placeholders with component replacement values!
+     * Default is after. (replaceFirst = false)
+     * @return Whether or not to replace first or parse first
+     */
+    public boolean replaceFirst() {
+        return replaceFirst;
     }
     
     /**
