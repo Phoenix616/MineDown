@@ -29,6 +29,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -200,7 +201,18 @@ public class Replacer {
             component = ((KeybindComponent) component).keybind(replaceIn(((KeybindComponent) component).keybind()));
         }
         if (component instanceof TextComponent) {
-            component = ((TextComponent) component).content(replaceIn(((TextComponent) component).content()));
+            String replaced = replaceIn(((TextComponent) component).content());
+            if (replaced.indexOf('§') != -1) {
+                // replacement contain legacy code, parse to components and append them as children
+                Component replacedComponent = LegacyComponentSerializer.legacySection().deserialize(replaced);
+                component = ((TextComponent) component).content("");
+                List<Component> children = new ArrayList<>();
+                children.add(replacedComponent);
+                children.addAll(component.children());
+                component = component.children(children);
+            } else {
+                component = ((TextComponent) component).content(replaced);
+            }
         }
         if (component instanceof TranslatableComponent) {
             component = ((TranslatableComponent) component).key(replaceIn(((TranslatableComponent) component).key()));
