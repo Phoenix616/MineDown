@@ -349,11 +349,7 @@ public class MineDownParser {
             builder = Component.text();
         } else {
             // Single color mode
-            if (builder() == null) {
-                builder = Component.text(value().toString()).toBuilder();
-            } else {
-                builder = builder().append(Component.text(value().toString()));
-            }
+            builder = Component.text(value().toString()).toBuilder();
             if (applicableColors.size() == 1) {
                 builder.color(applicableColors.get(0));
             }
@@ -393,13 +389,11 @@ public class MineDownParser {
                 );
             }
             builder.append(component);
-            if (builder() == null) {
-                builder(builder);
-            } else {
-                builder().append(builder);
-            }
-        } else {
+        }
+        if (builder() == null) {
             builder(builder);
+        } else {
+            builder().append(builder);
         }
         value(new StringBuilder());
     }
