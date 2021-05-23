@@ -150,8 +150,12 @@ public class MineDown {
      * Default is after. (replaceFirst = false)
      * @param replaceFirst  Whether or not to replace first or parse first
      * @return              The MineDown instance
+     * @throws IllegalStateException If trying to replace components
      */
     public MineDown replaceFirst(boolean replaceFirst) {
+        if (!replacer().componentReplacements().isEmpty()) {
+            throw new IllegalStateException("Cannot turn on replaceFirst if trying to replace Components!");
+        }
         reset();
         this.replaceFirst = replaceFirst;
         return this;
@@ -182,8 +186,12 @@ public class MineDown {
      * Add a map with placeholders and values that should get replaced in the message
      * @param replacements  The replacements mapped placeholder to value
      * @return              The MineDown instance
+     * @throws IllegalStateException If trying to replace Components in replaceFirst mode
      */
     public MineDown replace(Map<String, ?> replacements) {
+        if (replaceFirst() && replacements.values().stream().anyMatch(o -> o instanceof Component)) {
+            throw new IllegalStateException("Cannot replace Components when replaceFirst is enabled!");
+        }
         reset();
         replacer().replace(replacements);
         return this;
@@ -194,8 +202,12 @@ public class MineDown {
      * @param placeholder   The placeholder to replace
      * @param replacement   The replacement component
      * @return              The Replacer instance
+     * @throws IllegalStateException If in replaceFirst mode
      */
     public MineDown replace(String placeholder, Component replacement) {
+        if (replaceFirst()) {
+            throw new IllegalStateException("Cannot replace Components when replaceFirst is enabled!");
+        }
         reset();
         replacer().replace(placeholder, replacement);
         return this;
