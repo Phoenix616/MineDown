@@ -128,7 +128,11 @@ public class MineDown {
     public BaseComponent[] toComponent() {
         if (baseComponents() == null) {
             if (replaceFirst()) {
-                baseComponents = parser().parse(replacer().replaceIn(message())).create();
+                Replacer componentReplacer = new Replacer();
+                for (Map.Entry<String, BaseComponent[]> entry : replacer().componentReplacements().entrySet()) {
+                    componentReplacer.replace(entry.getKey(), stringify(entry.getValue()));
+                }
+                baseComponents = parser().parse(componentReplacer.replaceIn(replacer().replaceIn(message()))).create();
             } else {
                 baseComponents = replacer().replaceIn(parser().parse(message()).create());
             }
@@ -149,12 +153,8 @@ public class MineDown {
      * Default is after. (replaceFirst = false)
      * @param replaceFirst  Whether or not to replace first or parse first
      * @return              The MineDown instance
-     * @throws IllegalStateException If trying to replace components
      */
     public MineDown replaceFirst(boolean replaceFirst) {
-        if (!replacer().componentReplacements().isEmpty()) {
-            throw new IllegalStateException("Cannot turn on replaceFirst if trying to replace components!");
-        }
         reset();
         this.replaceFirst = replaceFirst;
         return this;
@@ -185,12 +185,8 @@ public class MineDown {
      * Add a map with placeholders and values that should get replaced in the message
      * @param replacements  The replacements mapped placeholder to value
      * @return              The MineDown instance
-     * @throws IllegalStateException If trying to replace components in replaceFirst mode
      */
     public MineDown replace(Map<String, ?> replacements) {
-        if (replaceFirst() && replacements.values().stream().anyMatch(o -> o != null && o.getClass().isArray() && BaseComponent.class.isAssignableFrom(o.getClass().getComponentType()))) {
-            throw new IllegalStateException("Cannot replace components when replaceFirst is enabled!");
-        }
         reset();
         replacer().replace(replacements);
         return this;
@@ -201,12 +197,8 @@ public class MineDown {
      * @param placeholder   The placeholder to replace
      * @param replacement   The replacement components
      * @return              The Replacer instance
-     * @throws IllegalStateException If in replaceFirst mode
      */
     public MineDown replace(String placeholder, BaseComponent... replacement) {
-        if (replaceFirst()) {
-            throw new IllegalStateException("Cannot replace cComponents when replaceFirst is enabled!");
-        }
         reset();
         replacer().replace(placeholder,replacement);
         return this;
