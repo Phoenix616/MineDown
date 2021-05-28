@@ -358,8 +358,21 @@ public class Util {
      * @param phase     The phase of the rainbow.
      * @param rgb       Whether or not to use RGB colors
      * @return the colors in the rainbow
+     * @deprecated Use {@link #createRainbow(long, int, boolean)}
      */
+    @Deprecated
     public static List<ChatColor> createRainbow(int length, int phase, boolean rgb) {
+        return createRainbow((long) length, phase, rgb);
+    }
+
+    /**
+     * Generate a rainbow with a certain length and phase
+     * @param length    The length of the rainbow
+     * @param phase     The phase of the rainbow.
+     * @param rgb       Whether or not to use RGB colors
+     * @return the colors in the rainbow
+     */
+    public static List<ChatColor> createRainbow(long length, int phase, boolean rgb) {
         List<ChatColor> colors = new ArrayList<>();
 
         float fPhase = phase / 10f;
@@ -416,8 +429,21 @@ public class Util {
      * @param gradient    The colors of the gradient.
      * @param rgb       Whether or not to use RGB colors
      * @return the colors in the gradient
+     * @deprecated Use {@link #createRainbow(long, int, boolean)}
      */
+    @Deprecated
     public static List<ChatColor> createGradient(int length, List<ChatColor> gradient, boolean rgb) {
+        return createGradient((long) length, gradient, rgb);
+    }
+
+    /**
+     * Generate a gradient with certain colors
+     * @param length    The length of the gradient
+     * @param gradient    The colors of the gradient.
+     * @param rgb       Whether or not to use RGB colors
+     * @return the colors in the gradient
+     */
+    public static List<ChatColor> createGradient(long length, List<ChatColor> gradient, boolean rgb) {
         List<ChatColor> colors = new ArrayList<>();
         if (gradient.size() < 2 || length < 2) {
             if (gradient.isEmpty()) {
@@ -431,11 +457,11 @@ public class Util {
         float sectorLength = (float) (length - 1) / (gradient.size() - 1);
         float factorStep = 1.0f / (sectorLength);
 
-        int index = 0;
+        long index = 0;
 
         int colorIndex = 0;
 
-        for (int i = 0; i < length; i++) {
+        for (long i = 0; i < length; i++) {
 
             if (factorStep * index > 1) {
                 colorIndex++;

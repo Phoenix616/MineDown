@@ -41,6 +41,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -389,12 +390,15 @@ public class MineDownParser {
     private void appendValue() {
         ComponentBuilder builder;
         List<ChatColor> applicableColors;
+        long valueCodepointLength = value().length();
         if (rainbowPhase != null) {
             // Rainbow colors
-            applicableColors = Util.createRainbow(value.length(), rainbowPhase, HAS_RGB_SUPPORT);
+            valueCodepointLength = value().codePoints().count();
+            applicableColors = Util.createRainbow(valueCodepointLength, rainbowPhase, HAS_RGB_SUPPORT);
         } else if (colors != null) {
             if (colors.size() > 1) {
-                applicableColors = Util.createGradient(value.length(), colors, HAS_RGB_SUPPORT);
+                valueCodepointLength = value().codePoints().count();
+                applicableColors = Util.createGradient(valueCodepointLength, colors, HAS_RGB_SUPPORT);
             } else {
                 applicableColors = new ArrayList<>(colors);
             }
@@ -444,12 +448,22 @@ public class MineDownParser {
         }
 
         if (applicableColors.size() > 1) {
-            int stepLength = (int) Math.round((double) value.length() / applicableColors.size());
+            int stepLength = (int) Math.round((double) valueCodepointLength / applicableColors.size());
             TextComponent component = new TextComponent();
-            for (int i = 0; i < applicableColors.size(); i++) {
-                TextComponent c = new TextComponent(value.substring(i * stepLength, Math.min(value.length(), (i + 1) * stepLength)));
-                c.setColor(applicableColors.get(i));
-                component.addExtra(c);
+
+            StringBuilder sb = new StringBuilder();
+            int colorIndex = 0;
+            int steps = 0;
+
+            for (PrimitiveIterator.OfInt it = value().codePoints().iterator(); it.hasNext(); ) {
+                sb.appendCodePoint(it.next());
+                if (++steps == stepLength) {
+                    steps = 0;
+                    TextComponent c = new TextComponent(sb.toString());
+                    c.setColor(applicableColors.get(colorIndex++));
+                    component.addExtra(c);
+                    sb = new StringBuilder();
+                }
             }
             builder.append(component);
             if (this.builder == null) {
