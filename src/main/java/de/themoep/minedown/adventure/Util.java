@@ -217,7 +217,7 @@ public class Util {
     public static Component rgbColorsToLegacy(Component components) {
         return Component.text().append(components).mapChildrenDeep(buildableComponent
                 -> buildableComponent.color() != null
-                        ? (BuildableComponent) buildableComponent.color(getClosestLegacy(buildableComponent.color()))
+                        ? (BuildableComponent) buildableComponent.color(NamedTextColor.nearestTo(buildableComponent.color()))
                         : buildableComponent
         ).build();
     }
@@ -226,21 +226,11 @@ public class Util {
      * Get the legacy color closest to a certain RGB color
      * @param textColor The color to get the closest legacy color for
      * @return The closest legacy color
+     * @deprecated Use {@link NamedTextColor#nearestTo(TextColor)}
      */
+    @Deprecated
     public static NamedTextColor getClosestLegacy(TextColor textColor) {
-        if (textColor instanceof NamedTextColor) {
-            return (NamedTextColor) textColor;
-        }
-        NamedTextColor closest = null;
-        double smallestDistance = Double.MAX_VALUE;
-        Color color = new Color(textColor.value());
-        for (NamedTextColor legacy : NamedTextColor.NAMES.values()) {
-            double distance = distance(color, new Color(legacy.value()));
-            if (distance < smallestDistance) {
-                closest = legacy;
-            }
-        }
-        return closest;
+        return textColor != null ? NamedTextColor.nearestTo(textColor) : null;
     }
 
     /**
@@ -248,7 +238,9 @@ public class Util {
      * @param c1 Color A
      * @param c2 Color B
      * @return The distance or 0 if they are equal
+     * @deprecated Doesn't use perceived brightness (HSV) but simply takes the distance between RGB. Do not rely on this, I twill look ugly!
      */
+    @Deprecated
     public static double distance(Color c1, Color c2) {
         if (c1.getRGB() == c2.getRGB()) {
             return 0;
@@ -323,7 +315,7 @@ public class Util {
                 case ITALIC: return 'o';
             }
         } else if (format instanceof TextColor) {
-            return getLegacyFormatChar(getClosestLegacy((TextColor) format));
+            return getLegacyFormatChar(NamedTextColor.nearestTo((TextColor) format));
         }
         throw new IllegalArgumentException(format + " is not supported!");
     }    /*
