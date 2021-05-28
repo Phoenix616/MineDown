@@ -39,12 +39,15 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.PrimitiveIterator;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
@@ -331,12 +334,15 @@ public class MineDownParser {
     private void appendValue() {
         ComponentBuilder<?, ?> builder;
         List<TextColor> applicableColors;
+        long valueCodepointLength = value().length();
         if (rainbowPhase() != null) {
             // Rainbow colors
-            applicableColors = Util.createRainbow(value().length(), rainbowPhase());
+            valueCodepointLength = value().codePoints().count();
+            applicableColors = Util.createRainbow(valueCodepointLength, rainbowPhase());
         } else if (colors() != null) {
             if (colors().size() > 1) {
-                applicableColors = Util.createGradient(value().length(), colors());
+                valueCodepointLength = value().codePoints().count();
+                applicableColors = Util.createGradient(valueCodepointLength, colors());
             } else {
                 applicableColors = new ArrayList<>(colors);
             }
@@ -380,13 +386,20 @@ public class MineDownParser {
         }
 
         if (applicableColors.size() > 1) {
-            int stepLength = (int) Math.round((double) value().length() / applicableColors.size());
+            int stepLength = (int) Math.round((double) valueCodepointLength / applicableColors.size());
             ComponentBuilder<?, ?> component = Component.empty().toBuilder();
-            for (int i = 0; i < applicableColors.size(); i++) {
-                component.append(
-                        Component.text(value().substring(i * stepLength, Math.min(value.length(), (i + 1) * stepLength)))
-                                .color(applicableColors.get(i))
-                );
+
+            StringBuilder sb = new StringBuilder();
+            int colorIndex = 0;
+            int steps = 0;
+
+            for (PrimitiveIterator.OfInt it = value().codePoints().iterator(); it.hasNext(); ) {
+                sb.appendCodePoint(it.next());
+                if (++steps == stepLength) {
+                    steps = 0;
+                    component.append(Component.text(sb.toString()).color(applicableColors.get(colorIndex++)));
+                    sb = new StringBuilder();
+                }
             }
             builder.append(component);
         }

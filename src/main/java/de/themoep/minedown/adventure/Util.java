@@ -355,8 +355,20 @@ public class Util {
      * @param length    The length of the rainbow
      * @param phase     The phase of the rainbow.
      * @return the colors in the rainbow
+     * @deprecated Use {@link #createRainbow(long, int)}
      */
+    @Deprecated
     public static List<TextColor> createRainbow(int length, int phase) {
+        return createRainbow((long) length, phase);
+    }
+
+    /**
+     * Generate a rainbow with a certain length and phase
+     * @param length    The length of the rainbow
+     * @param phase     The phase of the rainbow.
+     * @return the colors in the rainbow
+     */
+    public static List<TextColor> createRainbow(long length, int phase) {
         List<TextColor> colors = new ArrayList<>();
 
         float fPhase = phase / 10f;
@@ -365,7 +377,7 @@ public class Util {
         float width = 127;
         double frequency = Math.PI * 2 / length;
 
-        for (int i = 0; i < length; i++) {
+        for (long i = 0; i < length; i++) {
             colors.add(TextColor.color(
                     (int) (Math.sin(frequency * i + 2 + fPhase) * width + center),
                     (int) (Math.sin(frequency * i + 0 + fPhase) * width + center),
@@ -404,8 +416,19 @@ public class Util {
      * @param length    The length of the gradient
      * @param gradient    The colors of the gradient.
      * @return the colors in the gradient
+     * @deprecated Use {@link #createGradient(long, List)}
      */
     public static List<TextColor> createGradient(int length, List<TextColor> gradient) {
+        return createGradient((long) length, gradient);
+    }
+
+    /**
+     * Generate a gradient with certain colors
+     * @param length    The length of the gradient
+     * @param gradient    The colors of the gradient.
+     * @return the colors in the gradient
+     */
+    public static List<TextColor> createGradient(long length, List<TextColor> gradient) {
         List<TextColor> colors = new ArrayList<>();
         if (gradient.size() < 2 || length < 2) {
             if (gradient.isEmpty()) {
@@ -419,11 +442,11 @@ public class Util {
         float sectorLength = (float) (length - 1) / (gradient.size() - 1);
         float factorStep = 1.0f / (sectorLength);
 
-        int index = 0;
+        long index = 0;
 
         int colorIndex = 0;
 
-        for (int i = 0; i < length; i++) {
+        for (long i = 0; i < length; i++) {
 
             if (factorStep * index > 1) {
                 colorIndex++;
