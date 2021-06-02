@@ -128,4 +128,11 @@ public class ParserTest {
                 )
         );
     }
+
+    @Test
+    public void testNegated() {
+        Assertions.assertAll(
+                () -> parse("&lBold [not bold](!bold) bold")
+        );
+    }
 }

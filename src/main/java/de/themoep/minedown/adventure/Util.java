@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,10 +80,25 @@ public class Util {
      * @param builder The ComponentBuilder
      * @param formats The collection of TextColor formats to apply
      * @return The component builder that was modified
+     * @deprecated Use {@link #applyFormat(ComponentBuilder, Map)}
      */
+    @Deprecated
     public static ComponentBuilder applyFormat(ComponentBuilder builder, Collection<TextDecoration> formats) {
         for (TextDecoration format : formats) {
             builder.decoration(format, true);
+        }
+        return builder;
+    }
+
+    /**
+     * Apply a collection of colors/formats to a component builder
+     * @param builder The ComponentBuilder
+     * @param formats The collection of TextColor formats to apply
+     * @return The component builder that was modified
+     */
+    public static ComponentBuilder applyFormat(ComponentBuilder builder, Map<TextDecoration, Boolean> formats) {
+        for (Map.Entry<TextDecoration, Boolean> e : formats.entrySet()) {
+            builder.decoration(e.getKey(), e.getValue());
         }
         return builder;
     }
@@ -410,6 +426,7 @@ public class Util {
      * @return the colors in the gradient
      * @deprecated Use {@link #createGradient(long, List)}
      */
+    @Deprecated
     public static List<TextColor> createGradient(int length, List<TextColor> gradient) {
         return createGradient((long) length, gradient);
     }

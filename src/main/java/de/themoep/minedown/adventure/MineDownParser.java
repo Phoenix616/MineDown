@@ -36,18 +36,18 @@ import net.kyori.adventure.text.format.TextFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
@@ -111,8 +111,8 @@ public class MineDownParser {
     private String font;
     private String insertion;
     private Integer rainbowPhase;
-    private List<TextColor> colors;
-    private Set<TextDecoration> format;
+    private Map<TextColor, Boolean> colors;
+    private Map<TextDecoration, Boolean> format;
     private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
     private HoverEvent hoverEvent;
@@ -183,7 +183,7 @@ public class MineDownParser {
                     code += 32;
                 }
                 Integer rainbowPhase = null;
-                List<TextFormat> encoded = null;
+                Map<TextFormat, Boolean> encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
@@ -192,11 +192,12 @@ public class MineDownParser {
                         String colorStr = colorString.toString();
                         rainbowPhase = parseRainbow(colorStr, "", lenient());
                         if (rainbowPhase == null && !colorStr.contains("=")) {
-                            try {
-                                encoded = parseFormat(colorStr, "", lenient());
+                            encoded = parseFormat(colorStr, "", true);
+                            if (encoded.isEmpty()) {
+                                encoded = null;
+                            } else {
                                 filterOption = Option.SIMPLE_FORMATTING;
                                 i = j;
-                            } catch (IllegalArgumentException ignored) {
                             }
                         } else {
                             filterOption = Option.SIMPLE_FORMATTING;
@@ -210,40 +211,40 @@ public class MineDownParser {
                     }
                     colorString.append(c1);
                 }
-                if (rainbowPhase == null && (encoded == null || encoded.isEmpty())) {
+                if (rainbowPhase == null && encoded == null) {
                     TextFormat format = Util.getFormatFromLegacy(code);
                     if (format != null) {
                         filterOption = Option.LEGACY_COLORS;
-                        encoded = new ArrayList<>();
-                        encoded.add(format);
+                        encoded = new LinkedHashMap<>();
+                        encoded.put(format, true);
                     }
                 }
 
                 if (rainbowPhase != null || encoded != null) {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
-                            TextFormat singleFormat = encoded.get(0);
-                            if (singleFormat == Util.TextControl.RESET) {
+                            Map.Entry<TextFormat, Boolean> single = encoded.entrySet().iterator().next();
+                            if (single.getKey() == Util.TextControl.RESET) {
                                 appendValue();
-                                colors(new ArrayList<>());
+                                colors(new LinkedHashMap<>());
                                 rainbowPhase(null);
                                 Util.applyFormat(builder(), format());
-                                format(new HashSet<>());
-                            } else if (singleFormat instanceof TextColor) {
+                                format(new HashMap<>());
+                            } else if (single.getKey() instanceof TextColor) {
                                 if (value().length() > 0) {
                                     appendValue();
                                 }
-                                colors(new ArrayList<>());
-                                colors().add((TextColor) singleFormat);
+                                colors(new LinkedHashMap<>());
+                                colors().put((TextColor) single.getKey(), single.getValue());
                                 if (formattingIsLegacy()) {
-                                    format(new HashSet<>());
+                                    format(new HashMap<>());
                                 }
-                            } else if (singleFormat instanceof TextDecoration) {
+                            } else if (single.getKey() instanceof TextDecoration) {
                                 if (value.length() > 0) {
                                     appendValue();
                                 }
                                 formattingIsLegacy(true);
-                                format().add((TextDecoration) singleFormat);
+                                format().put((TextDecoration) single.getKey(), single.getValue());
                             }
                         } else {
                             if (value().length() > 0) {
@@ -251,15 +252,18 @@ public class MineDownParser {
                             }
                             rainbowPhase(rainbowPhase);
                             if (encoded != null) {
-                                colors(encoded.stream()
-                                        .filter(f -> f instanceof TextColor)
-                                        .map(f -> (TextColor) f)
-                                        .collect(Collectors.toCollection(ArrayList::new)));
+                                Map<TextColor, Boolean> colors = new LinkedHashMap<>();
+                                for (Map.Entry<TextFormat, Boolean> e : encoded.entrySet()) {
+                                    if (e.getKey() instanceof TextColor) {
+                                        colors.put((TextColor) e.getKey(), e.getValue());
+                                    }
+                                }
+                                colors(colors);
                             } else {
                                 colors(null);
                             }
                             if (formattingIsLegacy()) {
-                                format(new HashSet<>());
+                                format(new HashMap<>());
                             }
                         }
                     }
@@ -284,9 +288,9 @@ public class MineDownParser {
                 // Simple formatting
             } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
-                Set<TextDecoration> formats = new HashSet<>(format());
+                Map<TextDecoration, Boolean> formats = new HashMap<>(format());
                 if (!isFiltered(Option.SIMPLE_FORMATTING)) {
-                    formats.add(MineDown.getFormatFromChar(c));
+                    formats.put(MineDown.getFormatFromChar(c), true);
                 }
                 formattingIsLegacy(false);
                 appendValue();
@@ -342,9 +346,12 @@ public class MineDownParser {
         } else if (colors() != null) {
             if (colors().size() > 1) {
                 valueCodepointLength = value().codePoints().count();
-                applicableColors = Util.createGradient(valueCodepointLength, colors());
+                applicableColors = Util.createGradient(
+                        valueCodepointLength,
+                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList())
+                );
             } else {
-                applicableColors = new ArrayList<>(colors);
+                applicableColors = new ArrayList<>(colors.keySet());
             }
         } else {
             applicableColors = new ArrayList<>();
@@ -427,10 +434,10 @@ public class MineDownParser {
             defParts.add("");
         }
         Integer rainbowPhase = null;
-        List<TextColor> colors = null;
+        Map<TextColor, Boolean> colors = null;
         String font = null;
         String insertion = null;
-        Set<TextDecoration> formats = new HashSet<>();
+        Map<TextDecoration, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
 
@@ -443,16 +450,16 @@ public class MineDownParser {
                 rainbowPhase(parsedRainbowPhase);
                 continue;
             } else if (!definition.contains("=")) {
-                List<TextFormat> parsed = parseFormat(definition, "", true);
+                Map<TextFormat, Boolean> parsed = parseFormat(definition, "", true);
                 if (parsed != null && !parsed.isEmpty()) {
-                    for (TextFormat format : parsed) {
-                        if (format instanceof TextColor) {
+                    for (Map.Entry<TextFormat, Boolean> e : parsed.entrySet()) {
+                        if (e.getKey() instanceof TextColor) {
                             if (colors == null) {
-                                colors = new ArrayList<>();
+                                colors = new LinkedHashMap<>();
                             }
-                            colors.add((TextColor) format);
-                        } else if (format instanceof TextDecoration) {
-                            formats.add((TextDecoration) format);
+                            colors.put((TextColor) e.getKey(), e.getValue());
+                        } else if (e.getKey() instanceof TextDecoration) {
+                            formats.put((TextDecoration) e.getKey(), e.getValue());
                         }
                     }
                     formatEnd = i.get();
@@ -473,13 +480,13 @@ public class MineDownParser {
             if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
                 rainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
                 if (rainbowPhase == null) {
-                    List<TextFormat> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
-                    colors = new ArrayList<>();
-                    for (TextFormat format : parsed) {
-                        if (format instanceof TextColor) {
-                            colors.add((TextColor) format);
+                    Map<TextFormat, Boolean> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
+                    colors = new LinkedHashMap<>();
+                    for (Map.Entry<TextFormat, Boolean> e : parsed.entrySet()) {
+                        if (e.getKey() instanceof TextColor) {
+                            colors.put((TextColor) e.getKey(), e.getValue());
                         } else if (!lenient()) {
-                            throw new IllegalArgumentException(format + "  is a format and not a color!");
+                            throw new IllegalArgumentException(e + "  is a format and not a color!");
                         }
                     }
                 }
@@ -488,12 +495,12 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
-                List<TextFormat> parsed = parseFormat(definition, FORMAT_PREFIX, lenient());
-                for (TextFormat format : parsed) {
-                    if (format instanceof TextDecoration) {
-                        formats.add((TextDecoration) format);
+                Map<TextFormat, Boolean> parsed = parseFormat(definition, FORMAT_PREFIX, lenient());
+                for (Map.Entry<TextFormat, Boolean> e : parsed.entrySet()) {
+                    if (e.getKey() instanceof TextDecoration) {
+                        formats.put((TextDecoration) e.getKey(), e.getValue());
                     } else if (!lenient()) {
-                        throw new IllegalArgumentException(format + " is a color and not a format!");
+                        throw new IllegalArgumentException(e + " is a color and not a format!");
                     }
                 }
                 formatEnd = i.get();
@@ -691,7 +698,7 @@ public class MineDownParser {
         return this.insertion;
     }
 
-    protected MineDownParser colors(List<TextColor> colors) {
+    protected MineDownParser colors(Map<TextColor, Boolean> colors) {
         this.colors = colors;
         return this;
     }
@@ -705,16 +712,16 @@ public class MineDownParser {
         return this.rainbowPhase;
     }
 
-    protected List<TextColor> colors() {
+    protected Map<TextColor, Boolean> colors() {
         return this.colors;
     }
 
-    protected MineDownParser format(Set<TextDecoration> format) {
+    protected MineDownParser format(Map<TextDecoration, Boolean> format) {
         this.format = format;
         return this;
     }
 
-    protected Set<TextDecoration> format() {
+    protected Map<TextDecoration, Boolean> format() {
         return this.format;
     }
 
@@ -767,16 +774,20 @@ public class MineDownParser {
      * @param lenient     Whether or not to accept malformed strings
      * @return The parsed color or <code>null</code> if lenient is true and no color was found
      */
-    public static List<TextFormat> parseFormat(String colorString, String prefix, boolean lenient) {
-        List<TextFormat> formats = new ArrayList<>();
+    public static Map<TextFormat, Boolean> parseFormat(String colorString, String prefix, boolean lenient) {
+        Map<TextFormat, Boolean> formats = new LinkedHashMap<>();
         if (prefix.length() + 1 == colorString.length()) {
             TextFormat format = Util.getFormatFromLegacy(colorString.charAt(prefix.length()));
             if (format == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
-            formats.add(format);
+            formats.put(format, true);
         } else {
             for (String part : colorString.substring(prefix.length()).split("[\\-,]")) {
+                boolean negated = part.charAt(0) == '!';
+                if (negated) {
+                    part = part.substring(1);
+                }
                 TextFormat format;
                 if (part.charAt(0) == '#') {
                     format = TextColor.fromCSSHexString(part);
@@ -793,7 +804,7 @@ public class MineDownParser {
                     }
                 }
                 if (format != null) {
-                    formats.add(format);
+                    formats.put(format, !negated);
                 }
             }
         }
@@ -863,7 +874,7 @@ public class MineDownParser {
         insertion = null;
         rainbowPhase = null;
         colors = null;
-        format = new HashSet<>();
+        format = new HashMap<>();
         clickEvent = null;
         hoverEvent = null;
         return this;
