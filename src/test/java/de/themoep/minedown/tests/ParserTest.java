@@ -219,4 +219,11 @@ public class ParserTest {
                 )
         );
     }
+
+    @Test
+    public void testNegated() {
+        Assertions.assertAll(
+                () -> parse("&lBold [not bold](!bold) bold", "{\"extra\":[{\"bold\":true,\"text\":\"Bold \"},{\"bold\":false,\"text\":\"not bold\"},{\"bold\":true,\"text\":\" bold\"}],\"text\":\"\"}")
+        );
+    }
 }

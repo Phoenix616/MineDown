@@ -38,14 +38,17 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static de.themoep.minedown.MineDown.COLOR_PREFIX;
 import static de.themoep.minedown.MineDown.FONT_PREFIX;
@@ -120,8 +123,8 @@ public class MineDownParser {
     private String font;
     private String insertion;
     private Integer rainbowPhase;
-    private List<ChatColor> colors;
-    private Set<ChatColor> format;
+    private Map<ChatColor, Boolean> colors;
+    private Map<ChatColor, Boolean> format;
     private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
     private HoverEvent hoverEvent;
@@ -196,7 +199,7 @@ public class MineDownParser {
                     i = i + 2;
                 }
                 Integer rainbowPhase = null;
-                List<ChatColor> encoded = null;
+                Map<ChatColor, Boolean> encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
@@ -209,11 +212,12 @@ public class MineDownParser {
                             String colorStr = colorString.toString();
                             rainbowPhase = parseRainbow(colorStr, "", lenient());
                             if (rainbowPhase == null && !colorStr.contains("=")) {
-                                try {
-                                    encoded = parseColor(colorStr, "", lenient(), backwardsCompatibility());
+                                encoded = parseColor(colorStr, "", true, backwardsCompatibility());
+                                if (encoded.isEmpty()) {
+                                    encoded = null;
+                                } else {
                                     filterOption = Option.SIMPLE_FORMATTING;
                                     i = j;
-                                } catch (IllegalArgumentException ignored) {
                                 }
                             } else {
                                 filterOption = Option.SIMPLE_FORMATTING;
@@ -229,51 +233,52 @@ public class MineDownParser {
                     if (!isLegacyHex || c1 != 'x') {
                         colorString.append(c1);
                         if (isLegacyHex && colorString.length() == 6) {
-                            try {
-                                encoded = parseColor("#" + colorString.toString(), "", lenient(), backwardsCompatibility());
+                            encoded = parseColor("#" + colorString.toString(), "", true, backwardsCompatibility());
+                            if (encoded.isEmpty()) {
+                                encoded = null;
+                            } else {
                                 filterOption = Option.LEGACY_COLORS;
                                 i = j;
-                            } catch (IllegalArgumentException ignored) {
                             }
                             break;
                         }
                     }
                 }
-                if (rainbowPhase == null && (encoded == null || encoded.isEmpty())) {
+                if (rainbowPhase == null && encoded == null) {
                     ChatColor byChar = ChatColor.getByChar(code);
                     if (byChar != null) {
                         filterOption = Option.LEGACY_COLORS;
-                        encoded = new ArrayList<>();
-                        encoded.add(byChar);
+                        encoded = new LinkedHashMap<>();
+                        encoded.put(byChar, true);
                     }
                 }
 
                 if (rainbowPhase != null || encoded != null) {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
-                            ChatColor singleColor = encoded.get(0);
-                            if (singleColor == ChatColor.RESET) {
+                            Map.Entry<ChatColor, Boolean> single = encoded.entrySet().iterator().next();
+                            if (single.getKey() == ChatColor.RESET) {
                                 appendValue();
-                                colors(new ArrayList<>());
+                                colors(new LinkedHashMap<>());
                                 rainbowPhase(null);
                                 Util.applyFormat(builder(), format());
-                                format(new HashSet<>());
-                            } else if (!Util.isFormat(singleColor)) {
+                                format(new HashMap<>());
+                            } else if (!Util.isFormat(single.getKey())) {
                                 if (value().length() > 0) {
                                     appendValue();
                                 }
-                                colors(new ArrayList<>());
-                                colors().add(singleColor);
+                                colors(new LinkedHashMap<>());
+                                colors().put(single.getKey(), single.getValue());
                                 rainbowPhase(null);
                                 if (formattingIsLegacy()) {
-                                    format(new HashSet<>());
+                                    format(new HashMap<>());
                                 }
                             } else {
                                 if (value().length() > 0) {
                                     appendValue();
                                 }
                                 formattingIsLegacy(true);
-                                format().add(singleColor);
+                                format().put(single.getKey(), single.getValue());
                             }
                         } else {
                             if (value().length() > 0) {
@@ -282,7 +287,7 @@ public class MineDownParser {
                             rainbowPhase(rainbowPhase);
                             colors(encoded);
                             if (formattingIsLegacy()) {
-                                format(new HashSet<>());
+                                format(new HashMap<>());
                             }
                         }
                     }
@@ -307,9 +312,9 @@ public class MineDownParser {
                 // Simple formatting
             } else if (isFormatting) {
                 int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
-                Set<ChatColor> formats = new HashSet<>(format());
+                Map<ChatColor, Boolean> formats = new HashMap<>(format());
                 if (!isFiltered(Option.SIMPLE_FORMATTING)) {
-                    formats.add(MineDown.getFormatFromChar(c));
+                    formats.put(MineDown.getFormatFromChar(c), true);
                 }
                 formattingIsLegacy(false);
                 appendValue();
@@ -398,9 +403,12 @@ public class MineDownParser {
         } else if (colors != null) {
             if (colors.size() > 1) {
                 valueCodepointLength = value().codePoints().count();
-                applicableColors = Util.createGradient(valueCodepointLength, colors, HAS_RGB_SUPPORT);
+                applicableColors = Util.createGradient(
+                        valueCodepointLength,
+                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
+                        HAS_RGB_SUPPORT);
             } else {
-                applicableColors = new ArrayList<>(colors);
+                applicableColors = new ArrayList<>(colors.keySet());
             }
         } else {
             applicableColors = new ArrayList<>();
@@ -495,8 +503,8 @@ public class MineDownParser {
         String font = null;
         String insertion = null;
         Integer rainbowPhase = null;
-        List<ChatColor> colors = null;
-        Set<ChatColor> formats = new HashSet<>();
+        Map<ChatColor, Boolean> colors = null;
+        Map<ChatColor, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
 
@@ -510,16 +518,16 @@ public class MineDownParser {
                 rainbowPhase = parsedRainbowPhase;
                 continue;
             } else if (!definition.contains("=")) {
-                List<ChatColor> parsed = parseColor(definition, "", true, backwardsCompatibility());
-                if (parsed != null && !parsed.isEmpty()) {
-                    for (ChatColor color : parsed) {
-                        if (Util.isFormat(color)) {
-                            formats.add(color);
+                Map<ChatColor, Boolean> parsed = parseColor(definition, "", true, backwardsCompatibility());
+                if (!parsed.isEmpty()) {
+                    for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                        if (Util.isFormat(e.getKey())) {
+                            formats.put(e.getKey(), e.getValue());
                         } else {
                             if (colors == null) {
-                                colors = new ArrayList<>();
+                                colors = new LinkedHashMap<>();
                             }
-                            colors.add(color);
+                            colors.put(e.getKey(), e.getValue());
                         }
                     }
                     formatEnd = i.get();
@@ -542,9 +550,9 @@ public class MineDownParser {
                 if (rainbowPhase == null) {
                     colors = parseColor(definition, COLOR_PREFIX, lenient(), backwardsCompatibility());
                     if (!lenient()) {
-                        for (ChatColor color : colors) {
-                            if (Util.isFormat(color)) {
-                                throw new IllegalArgumentException(color + " is a format and not a color!");
+                        for (Map.Entry<ChatColor, Boolean> e : colors.entrySet()) {
+                            if (Util.isFormat(e.getKey())) {
+                                throw new IllegalArgumentException(e + " is a format and not a color!");
                             }
                         }
                     }
@@ -554,13 +562,13 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
-                List<ChatColor> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
-                for (ChatColor format : parsed) {
-                    if (Util.isFormat(format)) {
-                        formats.add(format);
+                Map<ChatColor, Boolean> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
+                for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                    if (Util.isFormat(e.getKey())) {
+                        formats.put(e.getKey(), e.getValue());
                     } else {
                         if (!lenient()) {
-                            throw new IllegalArgumentException(format + " is a color and not a format!");
+                            throw new IllegalArgumentException(e + " is a color and not a format!");
                         }
                     }
                 }
@@ -766,21 +774,21 @@ public class MineDownParser {
         return this.rainbowPhase;
     }
 
-    protected MineDownParser colors(List<ChatColor> colors) {
+    protected MineDownParser colors(Map<ChatColor, Boolean> colors) {
         this.colors = colors;
         return this;
     }
 
-    protected List<ChatColor> colors() {
+    protected Map<ChatColor, Boolean> colors() {
         return this.colors;
     }
 
-    protected MineDownParser format(Set<ChatColor> format) {
+    protected MineDownParser format(Map<ChatColor, Boolean> format) {
         this.format = format;
         return this;
     }
 
-    protected Set<ChatColor> format() {
+    protected Map<ChatColor, Boolean> format() {
         return this.format;
     }
 
@@ -826,18 +834,22 @@ public class MineDownParser {
         return null;
     }
 
-    private static List<ChatColor> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
-        List<ChatColor> colors = new ArrayList<>();
+    private static Map<ChatColor, Boolean> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
+        Map<ChatColor, Boolean> colors = new LinkedHashMap<>();
         if (prefix.length() + 1 == colorString.length()) {
             ChatColor color = ChatColor.getByChar(colorString.charAt(prefix.length()));
             if (color == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
-            colors.add(color);
+            colors.put(color, true);
         } else {
             for (String part : colorString.substring(prefix.length()).split("[\\-,]")) {
+                boolean negated = part.charAt(0) == '!';
+                if (negated) {
+                    part = part.substring(1);
+                }
                 if (part.charAt(0) == '#') {
-                    if (part.length() == 4){
+                    if (part.length() == 4) {
                         StringBuilder sb = new StringBuilder("#");
                         for (int i = 1; i < 4; i++) {
                             sb.append(part.charAt(i)).append(part.charAt(i));
@@ -855,11 +867,11 @@ public class MineDownParser {
                         color = Util.getClosestLegacy(new Color(Integer.parseInt(part.substring(1), 16)));
                     }
                     if (color != null) {
-                        colors.add(color);
+                        colors.put(color, !negated);
                     }
                 } else {
                     try {
-                        colors.add(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)));
+                        colors.put(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)), !negated);
                     } catch (IllegalArgumentException e) {
                         if (!lenient) throw e;
                     }
@@ -932,7 +944,7 @@ public class MineDownParser {
         font = null;
         insertion = null;
         colors = null;
-        format = new HashSet<>();
+        format = new HashMap<>();
         clickEvent = null;
         hoverEvent = null;
         return this;

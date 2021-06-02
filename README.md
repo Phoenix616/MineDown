@@ -36,7 +36,7 @@ as well as specify formatting, font and colors that way.
  Simple Link                    |` [Text](https://example.com)                           `
  Simple Command                 |` [Text](/command to run)                               `
  Link + Hover                   |` [Text](https://example.com Hover Text)                `
- Text formatting                |` [Text](blue underline)                                `
+ Text formatting                |` [Text](blue underline !bold)                          `
  Gradient                       |` [Text](#fff-#000)                                     `
  Rainbow                        |` [Text](rainbow)                                       `
  Phased Rainbow                 |` [Text](rainbow:20)                                       `
@@ -54,7 +54,8 @@ as well as specify formatting, font and colors that way.
  RGB Color Gradient |` [Text](color=#fff-#333-#222)         `| Gradient of three colors.
  RGB Rainbow        |` [Text](color=rainbow)                `| An RGB rainbow.
  Phased RGB Rainbow |` [Text](color=rainbow:50)             `| An RGB rainbow with a specific phase.
- Formatting         |` [Text](format=underline,bold)        `|
+ Formatting         |` [Text](format=underline,bold)        `| Specify formatting
+ Disable Formatting |` [Text](format=!underline)            `| Disable the specific formatting with a ! prefix
  Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
  Run Command        |` [Text](run_command=/command string)  `| Run command on click
  Suggest Command    |` [Text](suggest_command=/command)     `| Suggest a command on click
@@ -103,7 +104,7 @@ To be used with bungeecord-chat in BungeeCord and Spigot-based servers:
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.7.1-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
@@ -115,7 +116,7 @@ For usage in any platform that is supported by [kyori-adventure](https://github.
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.7.1-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>

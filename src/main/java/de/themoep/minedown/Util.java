@@ -29,9 +29,9 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -97,28 +97,46 @@ public class Util {
      * @param builder The ComponentBuilder
      * @param formats The collection of ChatColor formats to apply
      * @return The component builder that was modified
+     * @deprecated Use {@link #applyFormat(BaseComponent, Collection)}
      */
-    public static ComponentBuilder applyFormat(ComponentBuilder builder, Collection<ChatColor> formats) {
+    @Deprecated
+    public static ComponentBuilder applyFormat(ComponentBuilder builder, Set<ChatColor> formats) {
+        Map<ChatColor, Boolean> formatMap = new HashMap<>();
         for (ChatColor format : formats) {
-            if (format == ChatColor.BOLD) {
-                builder.bold(true);
-            } else if (format == ChatColor.ITALIC) {
-                builder.italic(true);
-            } else if (format == ChatColor.UNDERLINE) {
-                builder.underlined(true);
-            } else if (format == ChatColor.STRIKETHROUGH) {
-                builder.strikethrough(true);
-            } else if (format == ChatColor.MAGIC) {
-                builder.obfuscated(true);
-            } else if (format == ChatColor.RESET) {
-                builder.bold(false);
-                builder.italic(false);
-                builder.underlined(false);
-                builder.strikethrough(false);
-                builder.obfuscated(false);
+            formatMap.put(format, true);
+        }
+        return applyFormat(builder, formatMap);
+    }
+
+    /**
+     * Apply a collection of colors/formats to a component builder
+     * @param builder The ComponentBuilder
+     * @param formats The collection of ChatColor formats to apply
+     * @return The component builder that was modified
+     */
+    public static ComponentBuilder applyFormat(ComponentBuilder builder, Map<ChatColor, Boolean> formats) {
+        for (Map.Entry<ChatColor, Boolean> e : formats.entrySet()) {
+            if (e.getKey() == ChatColor.BOLD) {
+                builder.bold(e.getValue());
+            } else if (e.getKey() == ChatColor.ITALIC) {
+                builder.italic(e.getValue());
+            } else if (e.getKey() == ChatColor.UNDERLINE) {
+                builder.underlined(e.getValue());
+            } else if (e.getKey() == ChatColor.STRIKETHROUGH) {
+                builder.strikethrough(e.getValue());
+            } else if (e.getKey() == ChatColor.MAGIC) {
+                builder.obfuscated(e.getValue());
+            } else if (e.getKey() == ChatColor.RESET) {
+                builder.bold(!e.getValue());
+                builder.italic(!e.getValue());
+                builder.underlined(!e.getValue());
+                builder.strikethrough(!e.getValue());
+                builder.obfuscated(!e.getValue());
                 builder.color(ChatColor.WHITE);
-            } else {
-                builder.color(format);
+            } else if (e.getValue()) {
+                builder.color(e.getKey());
+            } else if (builder.getCurrentComponent().getColor() == e.getKey()) {
+                builder.color(null);
             }
         }
         return builder;
