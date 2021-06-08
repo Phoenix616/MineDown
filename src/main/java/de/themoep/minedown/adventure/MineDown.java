@@ -93,7 +93,7 @@ public class MineDown {
     private final Replacer replacer = new Replacer();
     private final MineDownParser parser = new MineDownParser();
     private Component components = null;
-    private boolean replaceFirst = false;
+    private boolean replaceFirst = Boolean.getBoolean("de.themoep.minedown.adventure.replacefirst");
     
     /**
      * Create a new MineDown builder with a certain message
