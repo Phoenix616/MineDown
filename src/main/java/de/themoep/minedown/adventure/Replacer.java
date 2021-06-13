@@ -228,7 +228,7 @@ public class Replacer {
             ));
         }
         if (component.hoverEvent() != null) {
-            if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT ) {
+            if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT) {
                 component = component.hoverEvent(HoverEvent.showText(
                         replaceIn((Component) component.hoverEvent().value())
                 ));

@@ -468,29 +468,14 @@ public class Util {
                 factor = 1 - (factor - 1);
             }
 
-            TextColor color = interpolate(
+            colors.add(TextColor.lerp(
+                    factor,
                     gradient.get(colorIndex),
-                    gradient.get(Math.min(gradient.size() - 1, colorIndex + 1)),
-                    factor
-            );
-
-            if (color != null) {
-                colors.add(color);
-            }
+                    gradient.get(Math.min(gradient.size() - 1, colorIndex + 1))
+            ));
         }
 
         return colors;
-    }
-
-    private static TextColor interpolate(TextColor color1, TextColor color2, float factor) {
-        if (color1 == null || color2 == null) {
-            return null;
-        }
-        return TextColor.color(
-                Math.round(color1.red() + factor * (color2.red() - color1.red())),
-                Math.round(color1.green() + factor * (color2.green() - color1.green())),
-                Math.round(color1.blue() + factor * (color2.blue() - color1.blue()))
-        );
     }
 
     public enum TextControl implements TextFormat {

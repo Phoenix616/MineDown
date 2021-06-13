@@ -41,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.UUID;
@@ -348,7 +349,7 @@ public class MineDownParser {
                 valueCodepointLength = value().codePoints().count();
                 applicableColors = Util.createGradient(
                         valueCodepointLength,
-                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList())
+                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).filter(Objects::nonNull).collect(Collectors.toList())
                 );
             } else {
                 applicableColors = new ArrayList<>(colors.keySet());
