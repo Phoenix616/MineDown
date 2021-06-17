@@ -10,20 +10,20 @@ See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple im
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax             | More Info
- --------------|--------------------|---------------------------------------------------------------------
- Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)
- Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
- RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format 
- RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)
- Gradient      |` &#f0f-#000&Text  `| Inline gradients
- Rainbow       |` &rainbow&Text    `| Inline Rainbow
- Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase
- Bold          |` **Text**         `| 
- Italic        |` ##Text##         `| 
- Underlined    |` __Text__         `| 
- Strikethrough |` ~~Text~~         `| 
- Obfuscated    |` ??Text??         `| 
+ Description   | Syntax             | More Info                                                             | Preview
+ --------------|--------------------|-----------------------------------------------------------------------|-------------------------------------------
+ Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)  | ![](https://i.phoenix616.dev/gbJYVeql.png)
+ Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)       | ![](https://i.phoenix616.dev/gfgApGrn.png)
+ RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format                                               | ![](https://i.phoenix616.dev/glFV9zgw.png)
+ RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)                                 | ![](https://i.phoenix616.dev/gojZlSaN.png)
+ Gradient      |` &#f0f-#fff&Text  `| Inline gradients                                                      | ![](https://i.phoenix616.dev/giOQuXV6.png)
+ Rainbow       |` &rainbow&Text    `| Inline Rainbow                                                        | ![](https://i.phoenix616.dev/ggYaEWZt.png)
+ Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase                                           | ![](https://i.phoenix616.dev/gojDf1ZM.png)
+ Bold          |` **Text**         `|                                                                       | ![](https://i.phoenix616.dev/fYDs0soW.png)
+ Italic        |` ##Text##         `|                                                                       | ![](https://i.phoenix616.dev/gaLmjWZA.png)
+ Underlined    |` __Text__         `|                                                                       | ![](https://i.phoenix616.dev/gk6lbR0B.png)
+ Strikethrough |` ~~Text~~         `|                                                                       | ![](https://i.phoenix616.dev/gpc5zBr4.png)
+ Obfuscated    |` ??Text??         `|                                                                       | ![](https://i.phoenix616.dev/giRU4C9u.gif)
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax
