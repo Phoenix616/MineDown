@@ -237,6 +237,7 @@ public class MineDownParser {
                                 }
                                 colors(new LinkedHashMap<>());
                                 colors().put((TextColor) single.getKey(), single.getValue());
+                                rainbowPhase(null);
                                 if (formattingIsLegacy()) {
                                     format(new HashMap<>());
                                 }
