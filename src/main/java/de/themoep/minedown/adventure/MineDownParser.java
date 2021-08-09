@@ -226,7 +226,7 @@ public class MineDownParser {
                         if (encoded != null && encoded.size() == 1) {
                             Map.Entry<TextFormat, Boolean> single = encoded.entrySet().iterator().next();
                             if (single.getKey() == Util.TextControl.RESET) {
-                                if (builder() == null && (!format().isEmpty() || !colors().isEmpty())) {
+                                if (builder() == null && ((format() != null && !format().isEmpty()) || (colors() != null && !colors().isEmpty()))) {
                                     builder(Component.text());
                                 }
                                 appendValue();
@@ -235,7 +235,7 @@ public class MineDownParser {
                                 format(new HashMap<>());
                             } else if (single.getKey() instanceof TextColor) {
                                 if (value().length() > 0) {
-                                    if (builder() == null && !format().isEmpty()) {
+                                    if (builder() == null && format() != null && !format().isEmpty()) {
                                         builder(Component.text());
                                     }
                                     appendValue();
