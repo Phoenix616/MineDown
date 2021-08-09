@@ -226,13 +226,18 @@ public class MineDownParser {
                         if (encoded != null && encoded.size() == 1) {
                             Map.Entry<TextFormat, Boolean> single = encoded.entrySet().iterator().next();
                             if (single.getKey() == Util.TextControl.RESET) {
+                                if (builder() == null && (!format().isEmpty() || !colors().isEmpty())) {
+                                    builder(Component.text());
+                                }
                                 appendValue();
                                 colors(new LinkedHashMap<>());
                                 rainbowPhase(null);
-                                Util.applyFormat(builder(), format());
                                 format(new HashMap<>());
                             } else if (single.getKey() instanceof TextColor) {
                                 if (value().length() > 0) {
+                                    if (builder() == null && !format().isEmpty()) {
+                                        builder(Component.text());
+                                    }
                                     appendValue();
                                 }
                                 colors(new LinkedHashMap<>());
