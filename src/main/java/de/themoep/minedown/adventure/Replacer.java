@@ -23,12 +23,15 @@ package de.themoep.minedown.adventure;
  */
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.ArrayList;
@@ -270,21 +273,36 @@ public class Replacer {
                     String text = ignorePlaceholderCase() ? textComponent.content().toLowerCase(Locale.ROOT) : textComponent.content();
                     int index = text.indexOf(placeHolder);
                     if (index > -1) {
-                        do {
-                            TextComponent.Builder startBuilder = Component.text().mergeStyle(textComponent);
+                        while (true) {
+                            ComponentBuilder<?, ?> startBuilder;
                             if (index > 0) {
-                                startBuilder.content(textComponent.content().substring(0, index));
+                                startBuilder = Component.text().mergeStyle(textComponent);
+                                ((TextComponent.Builder) startBuilder).content(textComponent.content().substring(0, index));
+                                startBuilder.append(replacement.getValue());
+                            } else if (replacement.getValue() instanceof BuildableComponent){
+                                startBuilder = ((BuildableComponent<?, ?>) replacement.getValue()).toBuilder();
+                                // Merge replacement style onto the component's to properly apply the replacement styles over the component ones
+                                startBuilder.style(Style.style().merge(textComponent.style()).merge(replacement.getValue().style()).build());
+                            } else {
+                                startBuilder = Component.text().mergeStyle(textComponent);
+                                startBuilder.append(replacement.getValue());
                             }
-                            startBuilder.append(replacement.getValue());
                             newReplacedComponents.add(startBuilder.build());
 
-                            if (index + placeHolder.length() < textComponent.content().length()) {
-                                newReplacedComponents.add((textComponent = textComponent.content(textComponent.content().substring(index + placeHolder.length()))));
-                            } else {
-                                textComponent = textComponent.content("");
+                            if (index + placeHolder.length() >= textComponent.content().length()) {
+                                // Reached end of content string, break
+                                break;
                             }
+
+                            textComponent = textComponent.content(textComponent.content().substring(index + placeHolder.length()));
                             text = ignorePlaceholderCase() ? textComponent.content().toLowerCase(Locale.ROOT) : textComponent.content();
-                        } while (!text.isEmpty() && (index = text.indexOf(placeHolder)) > -1);
+
+                            if ((index = text.indexOf(placeHolder)) < 0) {
+                                // No further placeholder in text, add rest to newReplacedComponents
+                                newReplacedComponents.add(textComponent);
+                                break;
+                            }
+                        }
                         continue;
                     }
                 }
