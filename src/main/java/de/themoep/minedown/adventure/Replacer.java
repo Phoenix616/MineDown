@@ -289,15 +289,10 @@ public class Replacer {
                             }
                             newReplacedComponents.add(startBuilder.build());
 
-                            if (index + placeHolder.length() >= textComponent.content().length()) {
-                                // Reached end of content string, break
-                                break;
-                            }
-
                             textComponent = textComponent.content(textComponent.content().substring(index + placeHolder.length()));
                             text = ignorePlaceholderCase() ? textComponent.content().toLowerCase(Locale.ROOT) : textComponent.content();
 
-                            if ((index = text.indexOf(placeHolder)) < 0) {
+                            if (text.isEmpty() || (index = text.indexOf(placeHolder)) < 0) {
                                 // No further placeholder in text, add rest to newReplacedComponents
                                 newReplacedComponents.add(textComponent);
                                 break;
