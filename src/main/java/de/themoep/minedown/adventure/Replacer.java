@@ -23,6 +23,7 @@ package de.themoep.minedown.adventure;
  */
 
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
@@ -249,7 +250,8 @@ public class Replacer {
                 component = component.hoverEvent(HoverEvent.showItem(
                         HoverEvent.ShowItem.of(
                                 Key.key(replaceIn(showItem.item().asString())),
-                                showItem.count()
+                                showItem.count(),
+                                showItem.nbt() != null ? BinaryTagHolder.of(replaceIn(showItem.nbt().string())) : null
                         )
                 ));
             }
