@@ -206,7 +206,9 @@ public class Replacer {
         }
         if (component instanceof TextComponent) {
             String replaced = replaceIn(((TextComponent) component).content());
-            if (replaced.indexOf('§') != -1) {
+            int sectionIndex = replaced.indexOf('§');
+            if (sectionIndex > -1 && replaced.length() > sectionIndex + 1
+                    && Util.getFormatFromLegacy(replaced.toLowerCase(Locale.ROOT).charAt(sectionIndex + 1)) != null) {
                 // replacement contain legacy code, parse to components and append them as children
                 Component replacedComponent = LegacyComponentSerializer.legacySection().deserialize(replaced);
                 component = ((TextComponent) component).content("");
