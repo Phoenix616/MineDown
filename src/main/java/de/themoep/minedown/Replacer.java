@@ -22,6 +22,7 @@ package de.themoep.minedown;
  * SOFTWARE.
  */
 
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -38,6 +39,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -210,7 +212,20 @@ public class Replacer {
                 ((KeybindComponent) component).setKeybind(replaceIn(((KeybindComponent) component).getKeybind()));
             }
             if (component instanceof TextComponent) {
-                ((TextComponent) component).setText(replaceIn(((TextComponent) component).getText()));
+                String replaced = replaceIn(((TextComponent) component).getText());
+                int sectionIndex = replaced.indexOf(ChatColor.COLOR_CHAR);
+                if (sectionIndex > -1 && replaced.length() > sectionIndex + 1
+                        && ChatColor.getByChar(replaced.charAt(sectionIndex + 1)) != null) {
+                    // replacement contain legacy code, parse to components and append them as extra
+                    BaseComponent[] replacedComponent = TextComponent.fromLegacyText(replaced);
+                    ((TextComponent) component).setText("");
+                    List<BaseComponent> extra = new ArrayList<>();
+                    Collections.addAll(extra, replacedComponent);
+                    extra.addAll(component.getExtra());
+                    component.setExtra(extra);
+                } else {
+                    ((TextComponent) component).setText(replaced);
+                }
             }
             if (component instanceof TranslatableComponent) {
                 ((TranslatableComponent) component).setTranslate(replaceIn(((TranslatableComponent) component).getTranslate()));
