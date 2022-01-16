@@ -96,7 +96,7 @@ public class Replacer {
      * @return The string with all the placeholders replaced
      */
     public static String replaceIn(String message, String... replacements) {
-        return new Replacer().replace(replacements).replaceIn(message);
+        return new Replacer().replace(replacements).replaceStrings(message);
     }
 
     /**
@@ -205,7 +205,7 @@ public class Replacer {
             component = ((KeybindComponent) component).keybind(replaceIn(((KeybindComponent) component).keybind()));
         }
         if (component instanceof TextComponent) {
-            String replaced = replaceIn(((TextComponent) component).content());
+            String replaced = replaceStrings(((TextComponent) component).content());
             int sectionIndex = replaced.indexOf('§');
             if (sectionIndex > -1 && replaced.length() > sectionIndex + 1
                     && Util.getFormatFromLegacy(replaced.toLowerCase(Locale.ROOT).charAt(sectionIndex + 1)) != null) {
@@ -317,11 +317,24 @@ public class Replacer {
     }
 
     /**
-     * Replace the placeholders in a string. Does not replace component replacements!
+     * Replace the placeholders in a string.
      * @param string The String list to replace in
      * @return The string with the placeholders replaced
      */
     public String replaceIn(String string) {
+        Replacer replacer = copy();
+        for (Map.Entry<String, Component> entry : replacer.componentReplacements().entrySet()) {
+            replacer.replacements().putIfAbsent(entry.getKey(), LegacyComponentSerializer.legacySection().serialize(entry.getValue()));
+        }
+        return replacer.replaceStrings(string);
+    }
+
+    /**
+     * Replace the placeholders in a string. Does not replace component replacements!
+     * @param string The String list to replace in
+     * @return The string with the placeholders replaced
+     */
+    String replaceStrings(String string) {
         for (Map.Entry<String, String> replacement : replacements().entrySet()) {
             String replValue = replacement.getValue() != null ? replacement.getValue() : "null";
             if (ignorePlaceholderCase()) {

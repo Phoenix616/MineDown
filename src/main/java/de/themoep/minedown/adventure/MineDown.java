@@ -128,15 +128,11 @@ public class MineDown {
      */
     public Component toComponent() {
         if (components() == null) {
+            String message = message();
             if (replaceFirst()) {
-                Replacer componentReplacer = new Replacer();
-                for (Map.Entry<String, Component> entry : replacer().componentReplacements().entrySet()) {
-                    componentReplacer.replace(entry.getKey(), stringify(entry.getValue()));
-                }
-                components = parser().parse(componentReplacer.replaceIn(replacer().replaceIn(message()))).build();
-            } else {
-                components = replacer().replaceIn(parser().parse(message()).build());
+                message = replacer().replaceStrings(message);
             }
+            components = replacer().replaceIn(parser().parse(message).build());
         }
         return components();
     }
