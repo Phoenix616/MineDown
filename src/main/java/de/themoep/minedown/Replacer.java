@@ -221,11 +221,18 @@ public class Replacer {
                     ((TextComponent) component).setText("");
                     List<BaseComponent> extra = new ArrayList<>();
                     Collections.addAll(extra, replacedComponent);
-                    extra.addAll(component.getExtra());
+                    if (component.getExtra() != null) {
+                        Collections.addAll(extra, replaceIn(component.getExtra()));
+                    }
                     component.setExtra(extra);
                 } else {
                     ((TextComponent) component).setText(replaced);
+                    if (component.getExtra() != null) {
+                        component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
+                    }
                 }
+            } else if (component.getExtra() != null) {
+                component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
             }
             if (component instanceof TranslatableComponent) {
                 ((TranslatableComponent) component).setTranslate(replaceIn(((TranslatableComponent) component).getTranslate()));
@@ -256,9 +263,6 @@ public class Replacer {
                         e.printStackTrace();
                     }
                 }
-            }
-            if (component.getExtra() != null) {
-                component.setExtra(Arrays.asList(replaceIn(component.getExtra())));
             }
 
             // Component replacements
