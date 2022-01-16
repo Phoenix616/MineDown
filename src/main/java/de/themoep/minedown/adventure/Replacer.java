@@ -214,11 +214,13 @@ public class Replacer {
                 component = ((TextComponent) component).content("");
                 List<Component> children = new ArrayList<>();
                 children.add(replacedComponent);
-                children.addAll(component.children());
+                children.addAll(replaceIn(component.children()));
                 component = component.children(children);
             } else {
-                component = ((TextComponent) component).content(replaced);
+                component = ((TextComponent) component).content(replaced).children(replaceIn(component.children()));
             }
+        } else if (!component.children().isEmpty()) {
+            component = component.children(replaceIn(component.children()));
         }
         if (component instanceof TranslatableComponent) {
             component = ((TranslatableComponent) component).key(replaceIn(((TranslatableComponent) component).key()));
@@ -258,8 +260,6 @@ public class Replacer {
                 ));
             }
         }
-
-        component = component.children(replaceIn(component.children()));
 
         // Component replacements
         List<Component> replacedComponents = new ArrayList<>();
