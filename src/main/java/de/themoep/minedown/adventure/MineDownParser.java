@@ -328,6 +328,10 @@ public class MineDownParser {
         ComponentBuilder<?, ?> builder;
         List<TextColor> applicableColors;
         long valueCodepointLength = value().length();
+        // If the value is empty don't add anything
+        if (valueCodepointLength == 0) {
+            return;
+        }
         if (rainbowPhase() != null) {
             // Rainbow colors
             valueCodepointLength = value().codePoints().count();
