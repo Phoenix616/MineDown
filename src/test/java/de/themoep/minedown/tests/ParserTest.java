@@ -226,4 +226,16 @@ public class ParserTest {
                 () -> parse("&lBold [not bold](!bold) bold", "{\"extra\":[{\"bold\":true,\"text\":\"Bold \"},{\"bold\":false,\"text\":\"not bold\"},{\"bold\":true,\"text\":\" bold\"}],\"text\":\"\"}")
         );
     }
+
+    @Test
+    public void testParseNested() {
+        Assertions.assertAll(
+                () -> parse("[outer start [inner](green) outer end](aqua)",
+                        "{\"extra\":[{\"color\":\"aqua\",\"text\":\"outer start \"},{\"color\":\"green\",\"text\":\"inner\"},{\"color\":\"aqua\",\"text\":\" outer end\"}],\"text\":\"\"}"),
+                () -> parse("[outer start \\[[inner](green)\\] outer end](aqua)",
+                        "{\"extra\":[{\"color\":\"aqua\",\"text\":\"outer start [\"},{\"color\":\"green\",\"text\":\"inner\"},{\"color\":\"aqua\",\"text\":\"] outer end\"}],\"text\":\"\"}"),
+                () -> parse("[outer start [inner](green) outer end](aqua hover={[red hover](red)})",
+                        "{\"extra\":[{\"color\":\"aqua\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\"outer start \"},{\"color\":\"green\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\"inner\"},{\"color\":\"aqua\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\" outer end\"}],\"text\":\"\"}")
+        );
+    }
 }
