@@ -377,14 +377,18 @@ public class MineDownParser {
     private void appendValue() {
         ComponentBuilder builder;
         List<ChatColor> applicableColors;
-        long valueCodepointLength = value().length();
+        long valueCodepointLength = value.length();
+        // If the value is empty don't add anything
+        if (valueCodepointLength == 0) {
+            return;
+        }
         if (rainbowPhase != null) {
             // Rainbow colors
-            valueCodepointLength = value().codePoints().count();
+            valueCodepointLength = value.codePoints().count();
             applicableColors = Util.createRainbow(valueCodepointLength, rainbowPhase, HAS_RGB_SUPPORT);
         } else if (colors != null) {
             if (colors.size() > 1) {
-                valueCodepointLength = value().codePoints().count();
+                valueCodepointLength = value.codePoints().count();
                 applicableColors = Util.createGradient(
                         valueCodepointLength,
                         colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
@@ -445,7 +449,7 @@ public class MineDownParser {
             int colorIndex = 0;
             int steps = 0;
 
-            for (PrimitiveIterator.OfInt it = value().codePoints().iterator(); it.hasNext(); ) {
+            for (PrimitiveIterator.OfInt it = value.codePoints().iterator(); it.hasNext(); ) {
                 sb.appendCodePoint(it.next());
                 if (++steps == stepLength) {
                     steps = 0;
