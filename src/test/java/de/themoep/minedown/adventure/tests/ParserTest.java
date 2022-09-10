@@ -135,4 +135,13 @@ public class ParserTest {
                 () -> parse("&lBold [not bold](!bold) bold")
         );
     }
+
+    @Test
+    public void testParseNested() {
+        Assertions.assertAll(
+                () -> parse("[outer start [inner](green) outer end](aqua)"),
+                () -> parse("[outer start \\[[inner](green)\\] outer end](aqua)"),
+                () -> parse("[outer start [inner](green) outer end](aqua hover={[red hover](red)})")
+        );
+    }
 }

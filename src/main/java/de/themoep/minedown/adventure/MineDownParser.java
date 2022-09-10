@@ -137,30 +137,14 @@ public class MineDownParser {
             boolean isEscape = c == '\\' && i + 1 < message.length();
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
                     && i + 1 < message.length() && (c == '§' || c == colorChar());
-            boolean isEvent = false;
-            if (isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
-                int nextEventClose = Util.indexOfNotEscaped(message, "](", i + 1);
-                if (nextEventClose != -1 && nextEventClose + 2 < message.length()) {
-                    int nextDefClose = Util.indexOfNotEscaped(message, ")", i + 2);
-                    if (nextDefClose != -1) {
-                        int depth = 1;
-                        isEvent = true;
-                        boolean innerEscaped = false;
-                        for (int j = i + 1; j < nextEventClose; j++) {
-                            if (innerEscaped) {
-                                innerEscaped = false;
-                            } else if (message.charAt(j) == '\\') {
-                                innerEscaped = true;
-                            } else if (message.charAt(j) == '[') {
-                                depth++;
-                            } else if (message.charAt(j) == ']') {
-                                depth--;
-                            }
-                            if (depth == 0) {
-                                isEvent = false;
-                                break;
-                            }
-                        }
+            int eventEndIndex = -1;
+            String eventDefinition = "";
+            if (!escaped && isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
+                eventEndIndex = Util.getUnescapedEndIndex(message, '[', ']', i);
+                if (eventEndIndex != -1 && message.length() > eventEndIndex + 1 && message.charAt(eventEndIndex + 1) == '(') {
+                    int definitionClose = Util.getUnescapedEndIndex(message, '(', ')', eventEndIndex + 1);
+                    if (definitionClose != -1) {
+                        eventDefinition = message.substring(eventEndIndex + 2, definitionClose);
                     }
                 }
             }
@@ -280,16 +264,14 @@ public class MineDownParser {
                 continue;
 
                 // Events
-            } else if (isEvent) {
-                int index = Util.indexOfNotEscaped(message, "](", i + 1);
-                int endIndex = Util.indexOfNotEscaped(message, ")", index + 2);
+            } else if (eventEndIndex != -1 && !eventDefinition.isEmpty()) {
                 appendValue();
                 if (!isFiltered(Option.ADVANCED_FORMATTING)) {
-                    append(parseEvent(message.substring(i + 1, index), message.substring(index + 2, endIndex)));
+                    append(parseEvent(message.substring(i + 1, eventEndIndex), eventDefinition));
                 } else {
-                    append(copy(true).parse(message.substring(i + 1, index)));
+                    append(copy(true).parse(message.substring(i + 1, eventEndIndex)));
                 }
-                i = endIndex;
+                i = eventEndIndex + 2 + eventDefinition.length();
                 continue;
 
                 // Simple formatting

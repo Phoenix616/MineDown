@@ -184,6 +184,34 @@ public class Util {
     }
 
     /**
+     * Gets the proper end index of a certain definition on the same depth while ignoring escaped chars.
+     * @param string    The string to search
+     * @param startChar The start cahracter of the definition
+     * @param endChar   The end character of the definition
+     * @param fromIndex The index to start searching from (should be at the start char)
+     * @return The first end index of that group  or {@code -1} if not found
+     */
+    public static int getUnescapedEndIndex(String string, char startChar, char endChar, int fromIndex) {
+        int depth = 0;
+        boolean innerEscaped = false;
+        for (int i = fromIndex; i < string.length(); i++) {
+            if (innerEscaped) {
+                innerEscaped = false;
+            } else if (string.charAt(i) == '\\') {
+                innerEscaped = true;
+            } else if (string.charAt(i) == startChar) {
+                depth++;
+            } else if (string.charAt(i) == endChar) {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Wrap a string if it is longer than the line length and contains no new line.
      * Will try to wrap at spaces between words.
      * @param string        The string to wrap
