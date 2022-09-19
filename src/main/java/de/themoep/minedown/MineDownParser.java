@@ -149,7 +149,7 @@ public class MineDownParser {
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
                     && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
             int eventEndIndex = -1;
-            String eventDefinition = "";
+            String eventDefinition = null;
             if (!escaped && isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
                 eventEndIndex = Util.getUnescapedEndIndex(message, '[', ']', i);
                 if (eventEndIndex != -1 && message.length() > eventEndIndex + 1 && message.charAt(eventEndIndex + 1) == '(') {
@@ -281,9 +281,9 @@ public class MineDownParser {
                 continue;
 
                 // Events
-            } else if (eventEndIndex != -1 && !eventDefinition.isEmpty()) {
+            } else if (eventEndIndex != -1 && eventDefinition != null) {
                 appendValue();
-                if (!isFiltered(Option.ADVANCED_FORMATTING)) {
+                if (!isFiltered(Option.ADVANCED_FORMATTING) && !eventDefinition.isEmpty()) {
                     append(parseEvent(message.substring(i + 1, eventEndIndex), eventDefinition));
                 } else {
                     append(copy(true).parse(message.substring(i + 1, eventEndIndex)));
@@ -830,6 +830,9 @@ public class MineDownParser {
             colors.put(color, true);
         } else {
             for (String part : colorString.substring(prefix.length()).split("[\\-,]")) {
+                if (part.isEmpty()) {
+                    continue;
+                }
                 boolean negated = part.charAt(0) == '!';
                 if (negated) {
                     part = part.substring(1);

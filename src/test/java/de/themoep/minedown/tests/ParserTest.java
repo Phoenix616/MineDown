@@ -239,4 +239,11 @@ public class ParserTest {
                         "{\"extra\":[{\"color\":\"aqua\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\"outer start \"},{\"color\":\"green\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\"inner\"},{\"color\":\"aqua\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"color\":\"red\",\"text\":\"red hover\"}]},\"text\":\" outer end\"}],\"text\":\"\"}")
         );
     }
+
+    @Test
+    public void testEmptyEvent() {
+        Assertions.assertAll(
+                () -> parse("[test]()", "{\"text\":\"test\"}")
+        );
+    }
 }
