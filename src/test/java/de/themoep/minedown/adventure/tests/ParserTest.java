@@ -144,4 +144,11 @@ public class ParserTest {
                 () -> parse("[outer start [inner](green) outer end](aqua hover={[red hover](red)})")
         );
     }
+
+    @Test
+    public void testEmptyEvent() {
+        Assertions.assertAll(
+                () -> parse("[test]()")
+        );
+    }
 }
