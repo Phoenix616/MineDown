@@ -31,16 +31,16 @@ as well as specify formatting, font and colors that way.
 
 #### Simple Syntax
  Description                    | Syntax
- -------------------------------|---------------------------------------------------------
- General syntax                 |` [Text](text-color text-formatting... link hover text) `
- Simple Link                    |` [Text](https://example.com)                           `
- Simple Command                 |` [Text](/command to run)                               `
- Link + Hover                   |` [Text](https://example.com Hover Text)                `
- Text formatting                |` [Text](blue underline !bold)                          `
- Gradient                       |` [Text](#fff-#000)                                     `
- Rainbow                        |` [Text](rainbow)                                       `
- Phased Rainbow                 |` [Text](rainbow:20)                                       `
- Text formatting + Link + Hover |` [Text](#0000ff underline https://example.com Hover Text) `
+ -------------------------------|-------------------------------------------------------------
+ General syntax                 |` [Text](text-color text-formatting... link hover text)     `
+ Simple Link                    |` [Text](https://example.com)                               `
+ Simple Command                 |` [Text](/command to run)                                   `
+ Link + Hover                   |` [Text](https://example.com Hover Text)                    `
+ Text formatting                |` [Text](blue underlined !bold)                             `
+ Gradient                       |` [Text](#fff-#000)                                         `
+ Rainbow                        |` [Text](rainbow)                                           `
+ Phased Rainbow                 |` [Text](rainbow:20)                                        `
+ Text formatting + Link + Hover |` [Text](#0000ff underlined https://example.com Hover Text) `
  
 #### Advanced Syntax
  Description        | Syntax                                 | More Info
@@ -54,8 +54,8 @@ as well as specify formatting, font and colors that way.
  RGB Color Gradient |` [Text](color=#fff-#333-#222)         `| Gradient of three colors.
  RGB Rainbow        |` [Text](color=rainbow)                `| An RGB rainbow.
  Phased RGB Rainbow |` [Text](color=rainbow:50)             `| An RGB rainbow with a specific phase.
- Formatting         |` [Text](format=underline,bold)        `| Specify formatting
- Disable Formatting |` [Text](format=!underline)            `| Disable the specific formatting with a ! prefix
+ Formatting         |` [Text](format=underlined,bold)       `| Specify formatting
+ Disable Formatting |` [Text](format=!underlined)           `| Disable the specific formatting with a ! prefix
  Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
  Run Command        |` [Text](run_command=/command string)  `| Run command on click
  Suggest Command    |` [Text](suggest_command=/command)     `| Suggest a command on click
