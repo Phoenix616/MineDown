@@ -116,7 +116,7 @@ public class MineDownParser {
      */
     private int hoverTextWidth = 60;
 
-    public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*)?$");
+    public static final Pattern URL_PATTERN = Pattern.compile("^(?:(https?)://)?([-\\w_\\.]{1,}\\.[a-z]{2,18})(/\\S*)?$");
 
     private ComponentBuilder builder;
     private StringBuilder value;
