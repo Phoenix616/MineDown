@@ -86,6 +86,7 @@ public class ParserTest {
         Assertions.assertAll(
                 () -> parse("[Test Gradient](#fff-#000) &7:D"),
                 () -> parse("[Test Gradient](#fff-#666666-#555555) &7:D"),
+                () -> parse("[Test Gradient](#fff-#666666-#fff) &7:D"),
                 () -> parse("[Test Gradient](#fff-#000 Hover message) &7:D"),
                 () -> parse("[Test Gradient](color=#fff,#000 format=bold,italic Hover message) &7:D"),
                 () -> parse("&#fff-#000&Test Gradient&7No Gradient")
