@@ -23,38 +23,22 @@ package de.themoep.minedown;
  */
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.ItemTag;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Entity;
 import net.md_5.bungee.api.chat.hover.content.Item;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
-import java.awt.Color;
+import java.awt.*;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.PrimitiveIterator;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static de.themoep.minedown.MineDown.COLOR_PREFIX;
-import static de.themoep.minedown.MineDown.FONT_PREFIX;
-import static de.themoep.minedown.MineDown.FORMAT_PREFIX;
-import static de.themoep.minedown.MineDown.HOVER_PREFIX;
-import static de.themoep.minedown.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.MineDown.*;
 
 public class MineDownParser {
     private static final String RAINBOW = "rainbow";
@@ -123,7 +107,7 @@ public class MineDownParser {
     private String font;
     private String insertion;
     private Integer rainbowPhase;
-    private Map<ChatColor, Boolean> colors;
+    private List<Map.Entry<ChatColor, Boolean>> colors;
     private Map<ChatColor, Boolean> format;
     private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
@@ -135,6 +119,7 @@ public class MineDownParser {
 
     /**
      * Create a ComponentBuilder by parsing a {@link MineDown} message
+     *
      * @param message The message to parse
      * @return The parsed ComponentBuilder
      * @throws IllegalArgumentException Thrown when a parsing error occurs and lenient is set to false
@@ -147,7 +132,7 @@ public class MineDownParser {
 
             boolean isEscape = c == '\\' && i + 1 < message.length();
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
-                    && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+                                  && i + 1 < message.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
             int eventEndIndex = -1;
             String eventDefinition = null;
             if (!escaped && isEnabled(Option.ADVANCED_FORMATTING) && c == '[') {
@@ -160,8 +145,8 @@ public class MineDownParser {
                 }
             }
             boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
-                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)
-                    && message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2) != -1;
+                                   && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)
+                                   && message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2) != -1;
 
             if (escaped) {
                 escaped = false;
@@ -183,7 +168,7 @@ public class MineDownParser {
                     i = i + 2;
                 }
                 Integer rainbowPhase = null;
-                Map<ChatColor, Boolean> encoded = null;
+                List<Map.Entry<ChatColor, Boolean>> encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
@@ -211,7 +196,7 @@ public class MineDownParser {
                         }
                     }
                     if (!isLegacyHex && c1 != '_' && c1 != '#' && c1 != '-' && c1 != ',' && c1 != ':' &
-                            (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
+                                                                                            (c1 < 'A' || c1 > 'Z') && (c1 < 'a' || c1 > 'z') && (c1 < '0' || c1 > '9')) {
                         break;
                     }
                     if (!isLegacyHex || c1 != 'x') {
@@ -232,18 +217,18 @@ public class MineDownParser {
                     ChatColor byChar = ChatColor.getByChar(code);
                     if (byChar != null) {
                         filterOption = Option.LEGACY_COLORS;
-                        encoded = new LinkedHashMap<>();
-                        encoded.put(byChar, true);
+                        encoded = new ArrayList<>();
+                        encoded.add(new AbstractMap.SimpleEntry<>(byChar, true));
                     }
                 }
 
                 if (rainbowPhase != null || encoded != null) {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
-                            Map.Entry<ChatColor, Boolean> single = encoded.entrySet().iterator().next();
+                            Map.Entry<ChatColor, Boolean> single = encoded.iterator().next();
                             if (single.getKey() == ChatColor.RESET) {
                                 appendValue();
-                                colors(new LinkedHashMap<>());
+                                colors(new ArrayList<>());
                                 rainbowPhase(null);
                                 Util.applyFormat(builder(), format());
                                 format(new HashMap<>());
@@ -251,8 +236,8 @@ public class MineDownParser {
                                 if (value().length() > 0) {
                                     appendValue();
                                 }
-                                colors(new LinkedHashMap<>());
-                                colors().put(single.getKey(), single.getValue());
+                                colors(new ArrayList<>());
+                                colors().add(new AbstractMap.SimpleEntry<>(single.getKey(), single.getValue()));
                                 rainbowPhase(null);
                                 if (formattingIsLegacy()) {
                                     format(new HashMap<>());
@@ -391,10 +376,10 @@ public class MineDownParser {
                 valueCodepointLength = value.codePoints().count();
                 applicableColors = Util.createGradient(
                         valueCodepointLength,
-                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
+                        colors.stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
                         HAS_RGB_SUPPORT);
             } else {
-                applicableColors = new ArrayList<>(colors.keySet());
+                applicableColors = colors.stream().map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
             }
         } else {
             applicableColors = new ArrayList<>();
@@ -473,6 +458,7 @@ public class MineDownParser {
 
     /**
      * Parse a {@link MineDown} event string
+     *
      * @param text        The display text
      * @param definitions The event definition string
      * @return The parsed ComponentBuilder for this string
@@ -489,7 +475,7 @@ public class MineDownParser {
         String font = null;
         String insertion = null;
         Integer rainbowPhase = null;
-        Map<ChatColor, Boolean> colors = null;
+        List<Map.Entry<ChatColor, Boolean>> colors = null;
         Map<ChatColor, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
@@ -504,16 +490,16 @@ public class MineDownParser {
                 rainbowPhase = parsedRainbowPhase;
                 continue;
             } else if (!definition.contains("=")) {
-                Map<ChatColor, Boolean> parsed = parseColor(definition, "", true, backwardsCompatibility());
+                List<Map.Entry<ChatColor, Boolean>> parsed = parseColor(definition, "", true, backwardsCompatibility());
                 if (!parsed.isEmpty()) {
-                    for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                    for (Map.Entry<ChatColor, Boolean> e : parsed) {
                         if (Util.isFormat(e.getKey())) {
                             formats.put(e.getKey(), e.getValue());
                         } else {
                             if (colors == null) {
-                                colors = new LinkedHashMap<>();
+                                colors = new ArrayList<>();
                             }
-                            colors.put(e.getKey(), e.getValue());
+                            colors.add(new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue()));
                         }
                     }
                     formatEnd = i.get();
@@ -536,7 +522,7 @@ public class MineDownParser {
                 if (rainbowPhase == null) {
                     colors = parseColor(definition, COLOR_PREFIX, lenient(), backwardsCompatibility());
                     if (!lenient()) {
-                        for (Map.Entry<ChatColor, Boolean> e : colors.entrySet()) {
+                        for (Map.Entry<ChatColor, Boolean> e : colors) {
                             if (Util.isFormat(e.getKey())) {
                                 throw new IllegalArgumentException(e + " is a format and not a color!");
                             }
@@ -548,8 +534,8 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
-                Map<ChatColor, Boolean> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
-                for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                List<Map.Entry<ChatColor, Boolean>> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
+                for (Map.Entry<ChatColor, Boolean> e : parsed) {
                     if (Util.isFormat(e.getKey())) {
                         formats.put(e.getKey(), e.getValue());
                     } else {
@@ -601,7 +587,7 @@ public class MineDownParser {
                     ).create());
                 } else if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
                     hoverEvent = new HoverEvent(hoverAction, new Text(copy(false).urlDetection(false).parse(
-                           Util.wrap(valueStr, hoverTextWidth())
+                            Util.wrap(valueStr, hoverTextWidth())
                     ).create()));
                 } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
                     String[] valueParts = valueStr.split(":", 2);
@@ -760,12 +746,12 @@ public class MineDownParser {
         return this.rainbowPhase;
     }
 
-    protected MineDownParser colors(Map<ChatColor, Boolean> colors) {
+    protected MineDownParser colors(List<Map.Entry<ChatColor, Boolean>> colors) {
         this.colors = colors;
         return this;
     }
 
-    protected Map<ChatColor, Boolean> colors() {
+    protected List<Map.Entry<ChatColor, Boolean>> colors() {
         return this.colors;
     }
 
@@ -820,14 +806,14 @@ public class MineDownParser {
         return null;
     }
 
-    private static Map<ChatColor, Boolean> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
-        Map<ChatColor, Boolean> colors = new LinkedHashMap<>();
+    private static List<Map.Entry<ChatColor, Boolean>> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
+        List<Map.Entry<ChatColor, Boolean>> colors = new ArrayList<>();
         if (prefix.length() + 1 == colorString.length()) {
             ChatColor color = ChatColor.getByChar(colorString.charAt(prefix.length()));
             if (color == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
-            colors.put(color, true);
+            colors.add(new AbstractMap.SimpleEntry<>(color, true));
         } else {
             for (String part : colorString.substring(prefix.length()).split("[\\-,]")) {
                 if (part.isEmpty()) {
@@ -856,11 +842,11 @@ public class MineDownParser {
                         color = Util.getClosestLegacy(new Color(Integer.parseInt(part.substring(1), 16)));
                     }
                     if (color != null) {
-                        colors.put(color, !negated);
+                        colors.add(new AbstractMap.SimpleEntry<>(color, !negated));
                     }
                 } else {
                     try {
-                        colors.put(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)), !negated);
+                        colors.add(new AbstractMap.SimpleEntry<>(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)), !negated));
                     } catch (IllegalArgumentException e) {
                         if (!lenient) throw e;
                     }
@@ -872,6 +858,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's setting to a new instance
+     *
      * @return The new parser instance with all settings copied
      */
     public MineDownParser copy() {
@@ -880,6 +867,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's setting to a new instance
+     *
      * @param formatting Should the formatting be copied too?
      * @return The new parser instance with all settings copied
      */
@@ -889,6 +877,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
+     *
      * @param from The parser to copy from
      * @return This parser's instance
      */
@@ -898,6 +887,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
+     *
      * @param from       The parser to copy from
      * @param formatting Should the formatting be copied too?
      * @return This parser's instance
@@ -925,6 +915,7 @@ public class MineDownParser {
 
     /**
      * Reset the parser state to the start
+     *
      * @return The parser's instance
      */
     public MineDownParser reset() {
@@ -941,6 +932,7 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes (Default: true)
+     *
      * @return Whether or not to translate legacy color codes (Default: true)
      * @deprecated Use {@link #isEnabled(Option)} instead
      */
@@ -951,6 +943,7 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes
+     *
      * @return The parser
      * @deprecated Use {@link #enable(Option)} and {@link #disable(Option)} instead
      */
@@ -961,6 +954,7 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is enabled
+     *
      * @param option The option to check for
      * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
@@ -970,6 +964,7 @@ public class MineDownParser {
 
     /**
      * Enable an option.
+     *
      * @param option The option to enable
      * @return The parser instace
      */
@@ -982,6 +977,7 @@ public class MineDownParser {
      * Disable an option. Disabling an option will stop the parser from replacing
      * this option's chars in the string. Use {@link #filter(Option)} to completely
      * remove the characters used by this option from the message instead.
+     *
      * @param option The option to disable
      * @return The parser instace
      */
@@ -992,6 +988,7 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is filtered
+     *
      * @param option The option to check for
      * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
@@ -1002,6 +999,7 @@ public class MineDownParser {
     /**
      * Filter an option. This enables the parsing of an option and completely
      * removes the characters of this option from the string.
+     *
      * @param option The option to add to the filter
      * @return The parser instance
      */
@@ -1013,6 +1011,7 @@ public class MineDownParser {
 
     /**
      * Unfilter an option. Does not enable it!
+     *
      * @param option The option to remove from the filter
      * @return The parser instance
      */
@@ -1023,6 +1022,7 @@ public class MineDownParser {
 
     /**
      * Escape formatting in the string depending on this parser's options. This will escape backslashes too!
+     *
      * @param string The string to escape
      * @return The string with all formatting of this parser escaped
      */
@@ -1033,11 +1033,11 @@ public class MineDownParser {
 
             boolean isEscape = c == '\\';
             boolean isColorCode = isEnabled(Option.LEGACY_COLORS)
-                    && i + 1 < string.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
+                                  && i + 1 < string.length() && (c == ChatColor.COLOR_CHAR || c == colorChar());
             boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
-                    && c == '[';
+                              && c == '[';
             boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
-                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(string, i);
+                                   && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(string, i);
 
             if (isEscape || isColorCode || isEvent || isFormatting) {
                 value.append('\\');
@@ -1064,6 +1064,7 @@ public class MineDownParser {
 
     /**
      * Get The character to use as a special color code.
+     *
      * @return The color character (Default: ampersand &amp;)
      */
     public char colorChar() {
@@ -1072,6 +1073,7 @@ public class MineDownParser {
 
     /**
      * Set the character to use as a special color code.
+     *
      * @param colorChar The color char (Default: ampersand &amp;)
      * @return The MineDownParser instance
      */
@@ -1082,6 +1084,7 @@ public class MineDownParser {
 
     /**
      * Get all enabled options that will be used when parsing
+     *
      * @return a modifiable set of options
      */
     public Set<Option> enabledOptions() {
@@ -1090,6 +1093,7 @@ public class MineDownParser {
 
     /**
      * Set all enabled options that will be used when parsing at once, replaces any existing options
+     *
      * @param enabledOptions The enabled options
      * @return The MineDownParser instance
      */
@@ -1100,6 +1104,7 @@ public class MineDownParser {
 
     /**
      * Get all filtered options that will be parsed and then removed from the string
+     *
      * @return a modifiable set of options
      */
     public Set<Option> filteredOptions() {
@@ -1109,6 +1114,7 @@ public class MineDownParser {
     /**
      * Set all filtered options that will be parsed and then removed from the string at once,
      * replaces any existing options
+     *
      * @param filteredOptions The filtered options
      * @return The MineDownParser instance
      */
@@ -1119,6 +1125,7 @@ public class MineDownParser {
 
     /**
      * Get whether to accept malformed strings or not
+     *
      * @return whether or not the accept malformed strings (Default: false)
      */
     public boolean lenient() {
@@ -1127,6 +1134,7 @@ public class MineDownParser {
 
     /**
      * Set whether to accept malformed strings or not
+     *
      * @param lenient Set whether or not to accept malformed string (Default: false)
      * @return The MineDownParser instance
      */
@@ -1137,6 +1145,7 @@ public class MineDownParser {
 
     /**
      * Get whether the parser should try to detect if RGB/font support is available
+     *
      * @return whether the parser should try to detect if RGB/font support is available (Default: true)
      */
     public boolean backwardsCompatibility() {
@@ -1145,6 +1154,7 @@ public class MineDownParser {
 
     /**
      * Set whether the parser should try to detect if RGB/font support is available
+     *
      * @param backwardsCompatibility Set whether the parser should try to detect if RGB/font support is available (Default: true)
      * @return The MineDownParser instance
      */
@@ -1155,6 +1165,7 @@ public class MineDownParser {
 
     /**
      * Get whether or not urls in strings are detected and get events added to them?
+     *
      * @return whether or not urls are detected (Default: true)
      */
     public boolean urlDetection() {
@@ -1163,6 +1174,7 @@ public class MineDownParser {
 
     /**
      * Set whether or not to detect urls in strings and add events to them?
+     *
      * @param urlDetection Whether or not to detect urls in strings  (Default: true)
      * @return The MineDownParser instance
      */
@@ -1180,6 +1192,7 @@ public class MineDownParser {
 
     /**
      * Set the text to display when hovering over an URL. Has a %url% placeholder.
+     *
      * @param urlHoverText The url hover text
      * @return The MineDownParser instance
      */
@@ -1190,6 +1203,7 @@ public class MineDownParser {
 
     /**
      * Get whether or not to automatically add http to values of open_url when there doesn't exist any?
+     *
      * @return whether or not to automatically add http to values of open_url when there doesn't exist any? (Default: true)
      */
     public boolean autoAddUrlPrefix() {
@@ -1198,6 +1212,7 @@ public class MineDownParser {
 
     /**
      * Set whether or not to automatically add http to values of open_url when there doesn't exist any?
+     *
      * @param autoAddUrlPrefix Whether or not automatically add http to values of open_url when there doesn't exist any? (Default: true)
      * @return The MineDownParser instance
      */
@@ -1219,6 +1234,7 @@ public class MineDownParser {
      * Set the max width the hover text should have.
      * Minecraft itself will wrap after 60 characters.
      * Won't apply if the text already includes new lines.
+     *
      * @param hoverTextWidth The url hover text length
      * @return The MineDownParser instance
      */
