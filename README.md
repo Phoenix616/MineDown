@@ -12,8 +12,8 @@ See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple im
 ### Inline Formatting
  Description   | Syntax             | More Info                                                             | Preview
  --------------|--------------------|-----------------------------------------------------------------------|-------------------------------------------
- Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)  | ![](https://i.phoenix616.dev/gbJYVeql.png)
- Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)       | ![](https://i.phoenix616.dev/gfgApGrn.png)
+ Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.wiki/w/Formatting_codes)  | ![](https://i.phoenix616.dev/gbJYVeql.png)
+ Color         |` &gold&Text       `| [Color names](https://minecraft.wiki/w/Formatting_codes)       | ![](https://i.phoenix616.dev/gfgApGrn.png)
  RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format                                               | ![](https://i.phoenix616.dev/glFV9zgw.png)
  RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)                                 | ![](https://i.phoenix616.dev/gojZlSaN.png)
  Gradient      |` &#f0f-#fff&Text  `| Inline gradients                                                      | ![](https://i.phoenix616.dev/giOQuXV6.png)
@@ -47,7 +47,7 @@ as well as specify formatting, font and colors that way.
  -------------------|----------------------------------------|----
  General syntax     |` [Text](action=value)                 `| [ClickEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/ClickEvent.Action.html), [HoverEvent.Action](https://ci.md-5.net/job/BungeeCord/ws/chat/target/apidocs/net/md_5/bungee/api/chat/HoverEvent.Action.html)
  Link               |` [Text](open_url=https://example.com) `|
- Color              |` [Text](color=red)                    `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)
+ Color              |` [Text](color=red)                    `| [Color names](https://minecraft.wiki/w/Formatting_codes)
  RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
  RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
  RGB Color Gradient |` [Text](color=#fff-#000)              `| Gradient of two colors. (Supports all color forms)
