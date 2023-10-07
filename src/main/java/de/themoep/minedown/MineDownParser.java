@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -123,7 +123,7 @@ public class MineDownParser {
     private String font;
     private String insertion;
     private Integer rainbowPhase;
-    private Map<ChatColor, Boolean> colors;
+    private List<Map.Entry<ChatColor, Boolean>> colors;
     private Map<ChatColor, Boolean> format;
     private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
@@ -183,7 +183,7 @@ public class MineDownParser {
                     i = i + 2;
                 }
                 Integer rainbowPhase = null;
-                Map<ChatColor, Boolean> encoded = null;
+                List<Map.Entry<ChatColor, Boolean>> encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
@@ -232,18 +232,18 @@ public class MineDownParser {
                     ChatColor byChar = ChatColor.getByChar(code);
                     if (byChar != null) {
                         filterOption = Option.LEGACY_COLORS;
-                        encoded = new LinkedHashMap<>();
-                        encoded.put(byChar, true);
+                        encoded = new ArrayList<>();
+                        encoded.add(new AbstractMap.SimpleEntry<>(byChar, true));
                     }
                 }
 
                 if (rainbowPhase != null || encoded != null) {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
-                            Map.Entry<ChatColor, Boolean> single = encoded.entrySet().iterator().next();
+                            Map.Entry<ChatColor, Boolean> single = encoded.iterator().next();
                             if (single.getKey() == ChatColor.RESET) {
                                 appendValue();
-                                colors(new LinkedHashMap<>());
+                                colors(new ArrayList<>());
                                 rainbowPhase(null);
                                 Util.applyFormat(builder(), format());
                                 format(new HashMap<>());
@@ -251,8 +251,8 @@ public class MineDownParser {
                                 if (value().length() > 0) {
                                     appendValue();
                                 }
-                                colors(new LinkedHashMap<>());
-                                colors().put(single.getKey(), single.getValue());
+                                colors(new ArrayList<>());
+                                colors().add(new AbstractMap.SimpleEntry<>(single.getKey(), single.getValue()));
                                 rainbowPhase(null);
                                 if (formattingIsLegacy()) {
                                     format(new HashMap<>());
@@ -391,10 +391,10 @@ public class MineDownParser {
                 valueCodepointLength = value.codePoints().count();
                 applicableColors = Util.createGradient(
                         valueCodepointLength,
-                        colors.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
+                        colors.stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList()),
                         HAS_RGB_SUPPORT);
             } else {
-                applicableColors = new ArrayList<>(colors.keySet());
+                applicableColors = colors.stream().map(Map.Entry::getKey).collect(Collectors.toCollection(ArrayList::new));
             }
         } else {
             applicableColors = new ArrayList<>();
@@ -489,7 +489,7 @@ public class MineDownParser {
         String font = null;
         String insertion = null;
         Integer rainbowPhase = null;
-        Map<ChatColor, Boolean> colors = null;
+        List<Map.Entry<ChatColor, Boolean>> colors = null;
         Map<ChatColor, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
@@ -504,16 +504,16 @@ public class MineDownParser {
                 rainbowPhase = parsedRainbowPhase;
                 continue;
             } else if (!definition.contains("=")) {
-                Map<ChatColor, Boolean> parsed = parseColor(definition, "", true, backwardsCompatibility());
+                List<Map.Entry<ChatColor, Boolean>> parsed = parseColor(definition, "", true, backwardsCompatibility());
                 if (!parsed.isEmpty()) {
-                    for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                    for (Map.Entry<ChatColor, Boolean> e : parsed) {
                         if (Util.isFormat(e.getKey())) {
                             formats.put(e.getKey(), e.getValue());
                         } else {
                             if (colors == null) {
-                                colors = new LinkedHashMap<>();
+                                colors = new ArrayList<>();
                             }
-                            colors.put(e.getKey(), e.getValue());
+                            colors.add(new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue()));
                         }
                     }
                     formatEnd = i.get();
@@ -536,7 +536,7 @@ public class MineDownParser {
                 if (rainbowPhase == null) {
                     colors = parseColor(definition, COLOR_PREFIX, lenient(), backwardsCompatibility());
                     if (!lenient()) {
-                        for (Map.Entry<ChatColor, Boolean> e : colors.entrySet()) {
+                        for (Map.Entry<ChatColor, Boolean> e : colors) {
                             if (Util.isFormat(e.getKey())) {
                                 throw new IllegalArgumentException(e + " is a format and not a color!");
                             }
@@ -548,8 +548,8 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
-                Map<ChatColor, Boolean> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
-                for (Map.Entry<ChatColor, Boolean> e : parsed.entrySet()) {
+                List<Map.Entry<ChatColor, Boolean>> parsed = parseColor(definition, FORMAT_PREFIX, lenient(), backwardsCompatibility());
+                for (Map.Entry<ChatColor, Boolean> e : parsed) {
                     if (Util.isFormat(e.getKey())) {
                         formats.put(e.getKey(), e.getValue());
                     } else {
@@ -760,12 +760,12 @@ public class MineDownParser {
         return this.rainbowPhase;
     }
 
-    protected MineDownParser colors(Map<ChatColor, Boolean> colors) {
+    protected MineDownParser colors(List<Map.Entry<ChatColor, Boolean>> colors) {
         this.colors = colors;
         return this;
     }
 
-    protected Map<ChatColor, Boolean> colors() {
+    protected List<Map.Entry<ChatColor, Boolean>> colors() {
         return this.colors;
     }
 
@@ -820,14 +820,14 @@ public class MineDownParser {
         return null;
     }
 
-    private static Map<ChatColor, Boolean> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
-        Map<ChatColor, Boolean> colors = new LinkedHashMap<>();
+    private static List<Map.Entry<ChatColor, Boolean>> parseColor(String colorString, String prefix, boolean lenient, boolean backwardsCompatibility) {
+        List<Map.Entry<ChatColor, Boolean>> colors = new ArrayList<>();
         if (prefix.length() + 1 == colorString.length()) {
             ChatColor color = ChatColor.getByChar(colorString.charAt(prefix.length()));
             if (color == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
-            colors.put(color, true);
+            colors.add(new AbstractMap.SimpleEntry<>(color, true));
         } else {
             for (String part : colorString.substring(prefix.length()).split("[\\-,]")) {
                 if (part.isEmpty()) {
@@ -856,11 +856,11 @@ public class MineDownParser {
                         color = Util.getClosestLegacy(new Color(Integer.parseInt(part.substring(1), 16)));
                     }
                     if (color != null) {
-                        colors.put(color, !negated);
+                        colors.add(new AbstractMap.SimpleEntry<>(color, !negated));
                     }
                 } else {
                     try {
-                        colors.put(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)), !negated);
+                        colors.add(new AbstractMap.SimpleEntry<>(ChatColor.valueOf(part.toUpperCase(Locale.ROOT)), !negated));
                     } catch (IllegalArgumentException e) {
                         if (!lenient) throw e;
                     }
