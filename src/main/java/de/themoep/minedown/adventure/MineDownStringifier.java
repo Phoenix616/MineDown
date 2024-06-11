@@ -31,7 +31,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextFormat;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -51,9 +50,9 @@ import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
 public class MineDownStringifier {
 
     /**
-     * Whether or not to use legacy color codes (Default: true)
+     * Whether or not to use legacy color codes (Default: false)
      */
-    private boolean useLegacyColors = true;
+    private boolean useLegacyColors = false;
 
     /**
      * Whether or not to translate legacy formatting codes over Minedown ones (Default: false)

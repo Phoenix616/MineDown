@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
@@ -60,6 +61,7 @@ public class StringifyTest {
                         )
                         .append(Component.text(". Test Text."))
                         .build()),
+                () -> stringify(Component.text("test").color(TextColor.color(0x11FF00))),
                 () -> stringify(Component.text("Test insertion")
                         .insertion("Insert text"))
         );
