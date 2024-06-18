@@ -42,8 +42,8 @@
             <properties>
                 <avatar>https://phoenix616.dev/favicon.ico</avatar>
                 <github>Phoenix616</github>
-                <twitter>https://twitter.com/the_moep</twitter>
-                <mastodon>https://social.tchncs.de/@the_moep</mastodon>
+                <fediverse>https://crafter.social/@phoenix616</fediverse>
+                <mastodon>https://mastodon.de/@the_moep</mastodon>
                 <matrix>@Moep:matrix.org</matrix>
                 <donate>https://tip.phoenix616.dev</donate>
             </properties>
