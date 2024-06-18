@@ -7,25 +7,25 @@ It also includes a way to directly replace placeholders in the messages, both st
 
 This requires the [kyori-adventure](https://github.com/KyoriPowered/adventure) chat API so you need to provide one of 
 the [platform libraries](https://github.com/KyoriPowered/adventure-platform) in your project in order to use these
-messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/tree/kyori-adventure) for a simple implementation.
+messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/) for a simple implementation.
 
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax             | More Info                                                             | Preview
- --------------|--------------------|-----------------------------------------------------------------------|-------------------------------------------
- Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)  | ![](https://i.phoenix616.dev/gbJYVeql.png)
- Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)       | ![](https://i.phoenix616.dev/gfgApGrn.png)
- RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format                                               | ![](https://i.phoenix616.dev/glFV9zgw.png)
- RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)                                 | ![](https://i.phoenix616.dev/gojZlSaN.png)
- Gradient      |` &#f0f-#fff&Text  `| Inline gradients                                                      | ![](https://i.phoenix616.dev/giOQuXV6.png)
- Rainbow       |` &rainbow&Text    `| Inline Rainbow                                                        | ![](https://i.phoenix616.dev/ggYaEWZt.png)
- Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase                                           | ![](https://i.phoenix616.dev/gojDf1ZM.png)
- Bold          |` **Text**         `|                                                                       | ![](https://i.phoenix616.dev/fYDs0soW.png)
- Italic        |` ##Text##         `|                                                                       | ![](https://i.phoenix616.dev/gaLmjWZA.png)
- Underlined    |` __Text__         `|                                                                       | ![](https://i.phoenix616.dev/gk6lbR0B.png)
- Strikethrough |` ~~Text~~         `|                                                                       | ![](https://i.phoenix616.dev/gpc5zBr4.png)
- Obfuscated    |` ??Text??         `|                                                                       | ![](https://i.phoenix616.dev/giRU4C9u.gif)
+ Description   | Syntax             | More Info                                                     | Preview
+ --------------|--------------------|---------------------------------------------------------------|-------------------------------------------
+ Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.wiki/w/Formatting_codes) | ![](https://i.phoenix616.dev/gbJYVeql.png)
+ Color         |` &gold&Text       `| [Color names](https://minecraft.wiki/w/Formatting_codes)      | ![](https://i.phoenix616.dev/gfgApGrn.png)
+ RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format                                       | ![](https://i.phoenix616.dev/glFV9zgw.png)
+ RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)                         | ![](https://i.phoenix616.dev/gojZlSaN.png)
+ Gradient      |` &#f0f-#fff&Text  `| Inline gradients                                              | ![](https://i.phoenix616.dev/giOQuXV6.png)
+ Rainbow       |` &rainbow&Text    `| Inline Rainbow                                                | ![](https://i.phoenix616.dev/ggYaEWZt.png)
+ Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase                                   | ![](https://i.phoenix616.dev/gojDf1ZM.png)
+ Bold          |` **Text**         `|                                                               | ![](https://i.phoenix616.dev/fYDs0soW.png)
+ Italic        |` ##Text##         `|                                                               | ![](https://i.phoenix616.dev/gaLmjWZA.png)
+ Underlined    |` __Text__         `|                                                               | ![](https://i.phoenix616.dev/gk6lbR0B.png)
+ Strikethrough |` ~~Text~~         `|                                                               | ![](https://i.phoenix616.dev/gpc5zBr4.png)
+ Obfuscated    |` ??Text??         `|                                                               | ![](https://i.phoenix616.dev/giRU4C9u.gif)
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax
@@ -46,11 +46,11 @@ as well as specify formatting, font and colors that way.
 
  
 #### Advanced Syntax
- Description        | Syntax                                     | More Info
- -------------------|--------------------------------------------|----
- General syntax     |` [Text](action=value)                     `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
+ Description        | Syntax                                 | More Info
+ -------------------|----------------------------------------|----
+ General syntax     |` [Text](action=value)                 `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
  Link               |` [Text](open_url=https://example.com) `|
- Color              |` [Text](color=red)                    `|
+ Color              |` [Text](color=red)                    `| [Color names](https://minecraft.wiki/w/Formatting_codes)
  RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
  RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
  RGB Color Gradient |` [Text](color=#fff-#000)              `| Gradient of two colors. (Supports all color forms)
@@ -106,6 +106,19 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
+        <version>1.7.3-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+</dependencies>
+```
+
+##### Legacy BungeeCord-chat library
+The original BungeeCord-chat library is no longer maintained and has been replaced by this adventure implementation. If you need to still use the legacy version (found on the `legacy` branch), you can include it like this:
+```xml
+<dependencies>
+    <dependency>
+        <groupId>de.themoep</groupId>
+        <artifactId>minedown</artifactId>
         <version>1.7.1-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
@@ -149,7 +162,7 @@ instead of shading in this library! MineDownPlugin includes a non-relocated vers
 MineDown is licensed under the MIT open source license:
 
 ```
-Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
+Copyright (c) 2024 Max Lee (https://github.com/Phoenix616)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
