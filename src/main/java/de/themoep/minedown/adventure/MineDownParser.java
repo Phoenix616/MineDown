@@ -513,9 +513,8 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             String[] parts = definition.split("=", 2);
-            try {
+            if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.NAMES.value(parts[0].toLowerCase(Locale.ROOT));
-            } catch (IllegalArgumentException ignored) {
             }
             try {
                 clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
