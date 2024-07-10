@@ -62,8 +62,13 @@ public class StringifyTest {
                         .append(Component.text(". Test Text."))
                         .build()),
                 () -> stringify(Component.text("test").color(TextColor.color(0x11FF00))),
-                () -> stringify(Component.text("Test insertion")
-                        .insertion("Insert text"))
+                () -> stringify(Component.text("Test insertion").insertion("Insert text")),
+                () -> stringify(Component.translatable("test.translation")),
+                () -> stringify(Component.translatable("test.translation", "fallback text")),
+                () -> stringify(Component.translatable("test.translation", "fallback text",
+                        Component.text("replacement text 1").color(NamedTextColor.BLUE),
+                        Component.text("replacement text 2").color(NamedTextColor.YELLOW)
+                ))
         );
     }
 }
