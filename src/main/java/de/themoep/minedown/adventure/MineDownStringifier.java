@@ -314,14 +314,13 @@ public class MineDownStringifier {
      * @return This stringifier's instance
      */
     public MineDownStringifier copy(MineDownStringifier from) {
-        MineDownStringifier copy = new MineDownStringifier();
         useLegacyColors(from.useLegacyColors());
         useLegacyFormatting(from.useLegacyFormatting());
         preferSimpleEvents(from.preferSimpleEvents());
         formattingInEventDefinition(from.formattingInEventDefinition());
         colorInEventDefinition(from.colorInEventDefinition());
         colorChar(from.colorChar());
-        return copy;
+        return this;
     }
 
     /**
