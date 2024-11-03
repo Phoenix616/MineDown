@@ -782,23 +782,15 @@ public class MineDownParser {
                 if (negated) {
                     part = part.substring(1);
                 }
-                TextFormat format;
-                if (part.charAt(0) == '#') {
-                    format = TextColor.fromCSSHexString(part);
-                } else {
-                    format = NamedTextColor.NAMES.value(part.toLowerCase(Locale.ROOT));
-                    if (format == null) {
-                        try {
-                            format = TextDecoration.valueOf(part.toUpperCase(Locale.ROOT));
-                        } catch (IllegalArgumentException e2) {
-                            if (!lenient) {
-                                throw e2;
-                            }
-                        }
+                try {
+                    TextFormat format = Util.getFormatFromString(part);
+                    if (format != null) {
+                        formats.add(new AbstractMap.SimpleImmutableEntry<>(format, !negated));
                     }
-                }
-                if (format != null) {
-                    formats.add(new AbstractMap.SimpleImmutableEntry<>(format, !negated));
+                } catch (IllegalArgumentException e) {
+                    if (!lenient) {
+                        throw e;
+                    }
                 }
             }
         }

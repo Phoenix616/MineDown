@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -290,6 +291,38 @@ public class Util {
             return 0;
         }
         return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getGreen() - c2.getGreen(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2));
+    }
+
+    /**
+     * Get the text format from a string, either its name or hex code
+     * @param formatString The string to get the format from
+     * @return The TextFormat
+     * @throws IllegalArgumentException if the format could not be found from the string
+     */
+    public static TextFormat getFormatFromString(String formatString) throws IllegalArgumentException {
+        TextFormat format;
+        if (formatString.charAt(0) == '#') {
+            format = TextColor.fromCSSHexString(formatString);
+        } else {
+            format = NamedTextColor.NAMES.value(formatString.toLowerCase(Locale.ROOT));
+            if (format == null) {
+                format = TextDecoration.NAMES.value(formatString.toLowerCase(Locale.ROOT));
+            }
+            if (format == null) {
+                // Handle legacy formatting names
+                switch (formatString.toLowerCase(Locale.ROOT)) {
+                    case "underline":
+                        return TextDecoration.UNDERLINED;
+                    case "magic":
+                        return TextDecoration.OBFUSCATED;
+                }
+            }
+        }
+
+        if (format != null) {
+            return format;
+        }
+        throw new IllegalArgumentException("Unknown format: " + format);
     }
 
     /**
