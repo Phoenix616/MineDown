@@ -34,6 +34,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -95,7 +97,8 @@ public class Replacer {
      * @param replacements The replacements, nth element is the placeholder, n+1th the value
      * @return The string with all the placeholders replaced
      */
-    public static String replaceIn(String message, String... replacements) {
+    @Contract("null, _ -> null")
+    public static @Nullable String replaceIn(@Nullable String message, String... replacements) {
         return new Replacer().replace(replacements).replaceStrings(message);
     }
 
@@ -106,7 +109,8 @@ public class Replacer {
      * @param replacements The replacements, nth element is the placeholder, n+1th the value
      * @return A copy of the Component array with all the placeholders replaced
      */
-    public static Component replaceIn(Component message, String... replacements) {
+    @Contract("null, _ -> null")
+    public static @Nullable Component replaceIn(@Nullable Component message, String... replacements) {
         return new Replacer().replace(replacements).replaceIn(message);
     }
 
@@ -118,7 +122,8 @@ public class Replacer {
      * @param replacement The replacement components
      * @return A copy of the Component array with all the placeholders replaced
      */
-    public static Component replaceIn(Component message, String placeholder, Component replacement) {
+    @Contract("null, _, _ -> null")
+    public static @Nullable Component replaceIn(@Nullable Component message, String placeholder, Component replacement) {
         return new Replacer().replace(placeholder, replacement).replaceIn(message);
     }
 
@@ -185,7 +190,12 @@ public class Replacer {
      * @param components The Component list to replace in
      * @return A copy of the array with the placeholders replaced
      */
-    public List<Component> replaceIn(List<Component> components) {
+    @Contract("null -> null")
+    public @Nullable List<@Nullable Component> replaceIn(@Nullable List<@Nullable Component> components) {
+        if (components == null) {
+            return null;
+        }
+
         List<Component> replaced = new ArrayList<>();
         for (Component component : components) {
             replaced.add(replaceIn(component));
@@ -198,7 +208,12 @@ public class Replacer {
      * @param component The Component list to replace in
      * @return A copy of the array with the placeholders replaced
      */
-    public Component replaceIn(Component component) {
+    @Contract("null -> null")
+    public @Nullable Component replaceIn(@Nullable Component component) {
+        if (component == null) {
+            return null;
+        }
+
         TextComponent.Builder builder = Component.text();
 
         if (component instanceof KeybindComponent) {
@@ -321,7 +336,12 @@ public class Replacer {
      * @param string The String list to replace in
      * @return The string with the placeholders replaced
      */
-    public String replaceIn(String string) {
+    @Contract("null -> null")
+    public @Nullable String replaceIn(@Nullable String string) {
+        if (string == null) {
+            return null;
+        }
+
         Replacer replacer = copy();
         for (Map.Entry<String, Component> entry : replacer.componentReplacements().entrySet()) {
             replacer.replacements().putIfAbsent(entry.getKey(), LegacyComponentSerializer.legacySection().serialize(entry.getValue()));
