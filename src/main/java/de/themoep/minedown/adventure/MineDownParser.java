@@ -54,6 +54,8 @@ import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
 
 public class MineDownParser {
     private static final String RAINBOW = "rainbow";
@@ -108,6 +110,8 @@ public class MineDownParser {
 
     private ComponentBuilder<?, ?> builder;
     private StringBuilder value;
+    private String translationKey;
+    private List<Component> translationArgs = new ArrayList<>();
     private String font;
     private String insertion;
     private Integer rainbowPhase;
@@ -349,14 +353,27 @@ public class MineDownParser {
             applicableColors = new ArrayList<>();
         }
 
-        if (applicableColors.size() > 1) {
+        if (applicableColors.size() > 1 && translationKey() == null) {
             // Colors need to have a gradient/rainbow applied
             builder = Component.text();
         } else {
             // Single color mode
-            builder = Component.text(value().toString()).toBuilder();
-            if (applicableColors.size() == 1) {
-                builder.color(applicableColors.get(0));
+            if (translationKey() != null) {
+                try {
+                    builder = Component.translatable(translationKey(), value().toString(), translationArgs()).toBuilder();
+                } catch (NoSuchMethodError e) {
+                    // Adventure version without fallback
+                    builder = Component.translatable(translationKey(), translationArgs()).toBuilder();
+                }
+                if (!applicableColors.isEmpty()) {
+                    // translatable components can only have one color
+                    builder.color(applicableColors.get(0));
+                }
+            } else {
+                builder = Component.text(value().toString()).toBuilder();
+                if (applicableColors.size() == 1) {
+                    builder.color(applicableColors.get(0));
+                }
             }
         }
 
@@ -427,6 +444,8 @@ public class MineDownParser {
         }
         Integer rainbowPhase = null;
         List<Map.Entry<TextColor, Boolean>> colors = null;
+        String translationKey = null;
+        List<Component> translationArgs = new ArrayList<>();
         String font = null;
         String insertion = null;
         Map<TextDecoration, Boolean> formats = new HashMap<>();
@@ -457,6 +476,19 @@ public class MineDownParser {
                     formatEnd = i.get();
                     continue;
                 }
+            }
+
+            if (definition.toLowerCase(Locale.ROOT).startsWith(TRANSLATE_PREFIX)) {
+                translationKey = definition.substring(TRANSLATE_PREFIX.length());
+                continue;
+            }
+
+            if (definition.toLowerCase(Locale.ROOT).startsWith(WITH_PREFIX)) {
+                String[] args = getValue(i, definition.substring(WITH_PREFIX.length()), defParts, true).split("(?<!\\\\),");
+                for (String arg : args) {
+                    translationArgs.add(copy(false).urlDetection(false).parse(arg).build());
+                }
+                continue;
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FONT_PREFIX)) {
@@ -601,6 +633,8 @@ public class MineDownParser {
 
         return copy()
                 .urlDetection(false)
+                .translationKey(translationKey)
+                .translationArgs(translationArgs)
                 .rainbowPhase(rainbowPhase)
                 .colors(colors)
                 .font(font)
@@ -670,6 +704,24 @@ public class MineDownParser {
 
     protected StringBuilder value() {
         return this.value;
+    }
+
+    public MineDownParser translationKey(String translationKey) {
+        this.translationKey = translationKey;
+        return this;
+    }
+
+    public String translationKey() {
+        return translationKey;
+    }
+
+    public MineDownParser translationArgs(List<Component> translationArgs) {
+        this.translationArgs = translationArgs;
+        return this;
+    }
+
+    public List<Component> translationArgs() {
+        return translationArgs;
     }
 
     private MineDownParser font(String font) {
@@ -856,6 +908,8 @@ public class MineDownParser {
     public MineDownParser reset() {
         builder = null;
         value = new StringBuilder();
+        translationKey = null;
+        translationArgs.clear();
         font = null;
         insertion = null;
         rainbowPhase = null;

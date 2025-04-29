@@ -23,69 +23,23 @@ package de.themoep.minedown.adventure;
  */
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.Map;
 
 /**
  * <h2>MineDown-adventure</h2>
- * A MarkDown inspired markup for Minecraft chat components
+ * A MarkDown inspired markup for Minecraft chat components using the adventure component library.
  * <p>
  * This lets you convert string messages into chat components by using a custom mark up syntax
  * which is loosely based on MarkDown while still supporting legacy formatting codes.
- *
- * <table>
- * <caption><strong> Inline Formatting </strong></caption>
- * <tr><td> Color legacy  </td><td><code> &amp;6Text           </code></td><td> {@link TextColor} codes </td></tr>
- * <tr><td> Color         </td><td><code> &amp;gold&amp;Text   </code></td><td> {@link TextColor} codes </td></tr>
- * <tr><td> RGB Hex Color </td><td><code> &amp;ff00ff&amp;Text </code></td><td> Full hexadecimal format  </td></tr>
- * <tr><td> RGB Hex Color </td><td><code> &amp;f0f&amp;Text    </code></td><td> Short format (equivalent to long one)  </td></tr>
- * <tr><td> Bold          </td><td><code> **Text**             </code></td></tr>
- * <tr><td> Italic        </td><td><code> ##Text##             </code></td></tr>
- * <tr><td> Underlined    </td><td><code> __Text__             </code></td></tr>
- * <tr><td> Strikethrough </td><td><code> ~~Text~~             </code></td></tr>
- * <tr><td> Obfuscated    </td><td><code> ??Text??             </code></td></tr>
- * </table>
- *
- * <h3>Events</h3>
- * You can define click and hover events with the commonly used MarkDown link syntax.
- * <p>
- * <table>
- * <caption><strong> Simple Syntax </strong></caption>
- * <tr><td> General syntax                 </td><td><code> [Text](text-color text-formatting... link hover text) </code></td></tr>
- * <tr><td> Simple Link                    </td><td><code> [Text](https://example.com)                           </code></td></tr>
- * <tr><td> Simple Command                 </td><td><code> [Text](/command to run)                               </code></td></tr>
- * <tr><td> Link + Hover                   </td><td><code> [Text](https://example.com Hover Text)                </code></td></tr>
- * <tr><td> Text formatting + Link + Hover </td><td><code> [Text](blue underline https://example.com Hover Text) </code></td></tr>
- * </table>
- * <p>
- * <table>
- * <caption><strong> Advanced Syntax </strong></caption>
- * <tr><td> General syntax      </td><td><code> [Text](action=value)                 </code></td><td> {@link ClickEvent.Action}, {@link HoverEvent.Action} </td></tr>
- * <tr><td> Link                </td><td><code> [Text](open_url=https://example.com) </code></td></tr>
- * <tr><td> Color               </td><td><code> [Text](color=red)                    </code></td></tr>
- * <tr><td> RGB Hex Color       </td><td><code> [Text](color=#ff00ff)                </code></td><td> Full hexadecimal format </td></tr>
- * <tr><td> RGB Hex Color       </td><td><code> [Text](color=#f0f)                   </code></td><td> Short format (equivalent to long one) </td></tr>
- * <tr><td> Formatting          </td><td><code> [Text](format=underline,bold)        </code></td></tr>
- * <tr><td> Font                </td><td><code> [Text](format=underline,bold)        </code></td></tr>
- * <tr><td> Run Command         </td><td><code> [Text](run_command=/command string)  </code></td></tr>
- * <tr><td> Suggest Command     </td><td><code> [Text](suggest_command=/command)     </code></td></tr>
- * <tr><td> Simple Hover        </td><td><code> [Text](hover=Hover Text)             </code></td></tr>
- * <tr><td> Hover Text          </td><td><code> [Text](show_text=Hover Text)         </code></td></tr>
- * <tr><td> Hover Entity Info   </td><td><code> [Text](show_entity=uuid:pig Name)    </code></td></tr>
- * <tr><td> Hover Item Info     </td><td><code> [Text](show_item=stone*2 nbt...)     </code></td></tr>
- * </table>
- * <p>
- * All advanced settings can be chained/included in a event definition.
- * You can't however add multiple different colors or click and hover actions!
  */
 public class MineDown {
     public static final String FONT_PREFIX = "font=";
     public static final String COLOR_PREFIX = "color=";
     public static final String FORMAT_PREFIX = "format=";
+    public static final String TRANSLATE_PREFIX = "translate=";
+    public static final String WITH_PREFIX = "with=";
     public static final String HOVER_PREFIX = "hover=";
     public static final String INSERTION_PREFIX = "insert=";
 

@@ -46,27 +46,28 @@ as well as specify formatting, font and colors that way.
 
  
 #### Advanced Syntax
- Description        | Syntax                                 | More Info
- -------------------|----------------------------------------|----
- General syntax     |` [Text](action=value)                 `|[ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339)
- Link               |` [Text](open_url=https://example.com) `|
- Color              |` [Text](color=red)                    `| [Color names](https://minecraft.wiki/w/Formatting_codes)
- RGB Hex Color      |` [Text](color=#ff00ff)                `| Full hexadecimal format
- RGB Hex Color      |` [Text](color=#f0f)                   `| Short format (equivalent to long one)
- RGB Color Gradient |` [Text](color=#fff-#000)              `| Gradient of two colors. (Supports all color forms)
- RGB Color Gradient |` [Text](color=#fff-#333-#222)         `| Gradient of three colors.
- RGB Rainbow        |` [Text](color=rainbow)                `| An RGB rainbow.
- Phased RGB Rainbow |` [Text](color=rainbow:50)             `| An RGB rainbow with a specific phase.
- Formatting         |` [Text](format=underline,bold)        `| Specify formatting
- Disable Formatting |` [Text](format=!underline)            `| Disable the specific formatting with a ! prefix
- Font               |` [Text](font=custom_font)             `| Set a custom font from a resource pack
- Run Command        |` [Text](run_command=/command string)  `| Run command on click
- Suggest Command    |` [Text](suggest_command=/command)     `| Suggest a command on click
- Simple Hover       |` [Text](hover=Hover Text)             `| Show hover text
- Hover Text         |` [Text](show_text=Hover Text)         `| Show hover text
- Hover Entity Info  |` [Text](show_entity=uuid:pig Name)    `| Show entity information.
- Hover Item Info    |` [Text](show_item=stone*2 nbt...)     `| Show item information, additional information needs to be provided as a string of the nbt in json
- Insertion          |` [Text](insert=insert into input)     `| Insert into input on shift click, can be combined with other events
+ Description        | Syntax                                                          | More Info                                                                                                                                                                                                                                                                                                    
+ --------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ General syntax     | ` [Text](action=value) `                                        | [ClickEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/ClickEvent.java#L196-L222), [HoverEvent.Action](https://github.com/KyoriPowered/adventure/blob/master/api/src/main/java/net/kyori/adventure/text/event/HoverEvent.java#L311-L339) 
+ Link               | ` [Text](open_url=https://example.com) `                        |
+ Color              | ` [Text](color=red) `                                           | [Color names](https://minecraft.wiki/w/Formatting_codes)                                                                                                                                                                                                                                                     
+ RGB Hex Color      | ` [Text](color=#ff00ff) `                                       | Full hexadecimal format                                                                                                                                                                                                                                                                                      
+ RGB Hex Color      | ` [Text](color=#f0f) `                                          | Short format (equivalent to long one)                                                                                                                                                                                                                                                                        
+ RGB Color Gradient | ` [Text](color=#fff-#000) `                                     | Gradient of two colors. (Supports all color forms)                                                                                                                                                                                                                                                           
+ RGB Color Gradient | ` [Text](color=#fff-#333-#222) `                                | Gradient of three colors.                                                                                                                                                                                                                                                                                    
+ RGB Rainbow        | ` [Text](color=rainbow) `                                       | An RGB rainbow.                                                                                                                                                                                                                                                                                              
+ Phased RGB Rainbow | ` [Text](color=rainbow:50) `                                    | An RGB rainbow with a specific phase.                                                                                                                                                                                                                                                                        
+ Formatting         | ` [Text](format=underline,bold) `                               | Specify formatting                                                                                                                                                                                                                                                                                           
+ Disable Formatting | ` [Text](format=!underline) `                                   | Disable the specific formatting with a ! prefix                                                                                                                                                                                                                                                              
+ Font               | ` [Text](font=custom_font) `                                    | Set a custom font from a resource pack                                                                                                                                                                                                                                                                       
+ Translatable       | ` [fallback](translate=translation.key with={value1, value2}) ` | Translatable component with optional replacements                                                                                                                                                                                                                                                                     
+ Run Command        | ` [Text](run_command=/command string) `                         | Run command on click                                                                                                                                                                                                                                                                                         
+ Suggest Command    | ` [Text](suggest_command=/command) `                            | Suggest a command on click                                                                                                                                                                                                                                                                                   
+ Simple Hover       | ` [Text](hover=Hover Text) `                                    | Show hover text                                                                                                                                                                                                                                                                                              
+ Hover Text         | ` [Text](show_text=Hover Text) `                                | Show hover text                                                                                                                                                                                                                                                                                              
+ Hover Entity Info  | ` [Text](show_entity=uuid:pig Name) `                           | Show entity information.                                                                                                                                                                                                                                                                                     
+ Hover Item Info    | ` [Text](show_item=stone*2 nbt...) `                            | Show item information, additional information needs to be provided as a string of the nbt in json                                                                                                                                                                                                            
+ Insertion          | ` [Text](insert=insert into input) `                            | Insert into input on shift click, can be combined with other events                                                                                                                                                                                                                                          
  
 All advanced settings can be chained/included in a event definition.
 You can't however add multiple different colors or click and hover actions!
@@ -106,7 +107,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.7.3-SNAPSHOT</version>
+        <version>1.7.4-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>

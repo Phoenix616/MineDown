@@ -25,6 +25,7 @@ package de.themoep.minedown.adventure;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,6 +47,8 @@ import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
 
 public class MineDownStringifier {
 
@@ -110,7 +113,7 @@ public class MineDownStringifier {
             appendText(sb, component);
             return sb.toString();
         }
-        boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT)
+        boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT) || component instanceof TranslatableComponent
                 || component.insertion() != null  || component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent;
         if (hasEvent) {
             sb.append('[');
@@ -141,6 +144,18 @@ public class MineDownStringifier {
             }
             sb.append("](");
             List<String> definitions = new ArrayList<>();
+            if (component instanceof TranslatableComponent) {
+                TranslatableComponent translatable = (TranslatableComponent) component;
+                definitions.add(TRANSLATE_PREFIX + translatable.key());
+                if (!translatable.args().isEmpty()) {
+                    definitions.add(new StringBuilder()
+                            .append(WITH_PREFIX)
+                            .append("{")
+                            .append(translatable.args().stream().map(this::stringify)
+                                    .collect(Collectors.joining(",")))
+                            .append("}").toString());
+                }
+            }
             if (colorInEventDefinition() && component.color() != null) {
                 StringBuilder sbi = new StringBuilder();
                 if (!preferSimpleEvents()) {
@@ -228,6 +243,13 @@ public class MineDownStringifier {
     private void appendText(StringBuilder sb, Component component) {
         if (component instanceof TextComponent) {
             sb.append(((TextComponent) component).content());
+            return;
+        } else if (component instanceof TranslatableComponent) {
+            try {
+                sb.append(((TranslatableComponent) component).fallback());
+            } catch (NoSuchMethodError ignored) {
+                // version without fallback
+            }
         } else {
             throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
         }

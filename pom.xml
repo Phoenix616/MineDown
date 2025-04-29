@@ -6,11 +6,11 @@
 
     <groupId>de.themoep</groupId>
     <artifactId>minedown-adventure</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>1.7.4-SNAPSHOT</version>
 
     <name>MineDown</name>
 
-    <description>A MarkDown inspired markup library for Minecraft chat components</description>
+    <description>A MarkDown inspired markup library for Minecraft chat components using the adventure component API</description>
 
     <licenses>
         <license>
@@ -67,19 +67,19 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.9.1</version>
+            <version>4.20.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-gson</artifactId>
-            <version>4.9.1</version>
+            <version>4.20.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.9.1</version>
+            <version>4.20.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

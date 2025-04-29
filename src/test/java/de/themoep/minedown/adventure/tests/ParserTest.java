@@ -152,4 +152,14 @@ public class ParserTest {
                 () -> parse("[test]()")
         );
     }
+
+    @Test
+    public void testParseTranslatable() {
+        Assertions.assertAll(
+                () -> parse("[fallback text](translate=translatable.translation)"),
+                () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2})"),
+                () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2} hover=[hover text](red))"),
+                () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2} hover=[hover text](red) click=open_url=https://example.com)")
+        );
+    }
 }
