@@ -35,13 +35,16 @@ import java.util.Map;
  * which is loosely based on MarkDown while still supporting legacy formatting codes.
  */
 public class MineDown {
-    public static final String FONT_PREFIX = "font=";
-    public static final String COLOR_PREFIX = "color=";
-    public static final String FORMAT_PREFIX = "format=";
-    public static final String TRANSLATE_PREFIX = "translate=";
-    public static final String WITH_PREFIX = "with=";
-    public static final String HOVER_PREFIX = "hover=";
-    public static final String INSERTION_PREFIX = "insert=";
+    static final String FONT_PREFIX = "font=";
+    static final String COLOR_PREFIX = "color=";
+    static final String SHADOW_PREFIX = "shadow=";
+    static final String FORMAT_PREFIX = "format=";
+    static final String TRANSLATE_PREFIX = "translate=";
+    static final String WITH_PREFIX = "with=";
+    static final String HOVER_PREFIX = "hover=";
+    static final String INSERTION_PREFIX = "insert=";
+
+    static final int SHADOW_ALPHA = 100;
 
     private String message;
     private final Replacer replacer = new Replacer();

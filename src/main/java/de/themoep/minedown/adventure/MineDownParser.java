@@ -29,6 +29,7 @@ import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
@@ -54,8 +55,11 @@ import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.SHADOW_ALPHA;
+import static de.themoep.minedown.adventure.MineDown.SHADOW_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
+import static net.kyori.adventure.text.format.TextColor.HEX_PREFIX;
 
 public class MineDownParser {
     private static final String RAINBOW = "rainbow";
@@ -116,6 +120,7 @@ public class MineDownParser {
     private String insertion;
     private Integer rainbowPhase;
     private List<Map.Entry<TextColor, Boolean>> colors;
+    private ShadowColor shadow;
     private Map<TextDecoration, Boolean> format;
     private boolean formattingIsLegacy = false;
     private ClickEvent clickEvent;
@@ -377,6 +382,10 @@ public class MineDownParser {
             }
         }
 
+        if (shadow() != null) {
+            builder.shadowColor(shadow());
+        }
+
         if (font() != null) {
             builder.font(Key.key(font()));
         }
@@ -444,6 +453,7 @@ public class MineDownParser {
         }
         Integer rainbowPhase = null;
         List<Map.Entry<TextColor, Boolean>> colors = null;
+        ShadowColor shadowColor = null;
         String translationKey = null;
         List<Component> translationArgs = new ArrayList<>();
         String font = null;
@@ -513,6 +523,17 @@ public class MineDownParser {
                             throw new IllegalArgumentException(e + "  is a format and not a color!");
                         }
                     }
+                }
+                formatEnd = i.get();
+                continue;
+            }
+
+            if (definition.toLowerCase(Locale.ROOT).startsWith(SHADOW_PREFIX)) {
+                ShadowColor parsed = parseShadow(definition, SHADOW_PREFIX, lenient());
+                if (parsed != null) {
+                    shadowColor = parsed;
+                } else if (!lenient()) {
+                    throw new IllegalArgumentException("Invalid shadow definition: " + definition);
                 }
                 formatEnd = i.get();
                 continue;
@@ -637,6 +658,7 @@ public class MineDownParser {
                 .translationArgs(translationArgs)
                 .rainbowPhase(rainbowPhase)
                 .colors(colors)
+                .shadow(shadowColor)
                 .font(font)
                 .insertion(insertion)
                 .format(formats)
@@ -759,6 +781,15 @@ public class MineDownParser {
         return this.colors;
     }
 
+    protected MineDownParser shadow(ShadowColor shadow) {
+        this.shadow = shadow;
+        return this;
+    }
+
+    protected ShadowColor shadow() {
+        return this.shadow;
+    }
+
     protected MineDownParser format(Map<TextDecoration, Boolean> format) {
         this.format = format;
         return this;
@@ -817,7 +848,7 @@ public class MineDownParser {
      * @param lenient     Whether or not to accept malformed strings
      * @return The parsed color or <code>null</code> if lenient is true and no color was found
      */
-    public static List<Map.Entry<TextFormat, Boolean>> parseFormat(String colorString, String prefix, boolean lenient) {
+    private static List<Map.Entry<TextFormat, Boolean>> parseFormat(String colorString, String prefix, boolean lenient) {
         List<Map.Entry<TextFormat, Boolean>> formats = new ArrayList<>();
         if (prefix.length() + 1 == colorString.length()) {
             TextFormat format = Util.getFormatFromLegacy(colorString.charAt(prefix.length()));
@@ -847,6 +878,64 @@ public class MineDownParser {
             }
         }
         return formats;
+    }
+
+    /**
+     * Parse a color/format definition
+     * @param shadowString The string to parse
+     * @param prefix       The shadow prefix
+     * @param lenient      Whether to accept malformed strings
+     * @return The parsed shadow color or <code>null</code> if lenient is true and no color was found
+     */
+    private static ShadowColor parseShadow(String shadowString, String prefix, boolean lenient) {
+        if (prefix.length() + 1 == shadowString.length()) {
+            TextFormat format = Util.getFormatFromLegacy(shadowString.charAt(prefix.length()));
+            if (format == null && !lenient) {
+                throw new IllegalArgumentException(shadowString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
+            }
+            if (format instanceof TextColor) {
+                return ShadowColor.shadowColor((TextColor) format, SHADOW_ALPHA);
+            } else if (!lenient) {
+                throw new IllegalArgumentException(shadowString.charAt(prefix.length()) + " is not a valid shadow color!");
+            } else {
+                return null;
+            }
+        }
+        String shadowColor = shadowString.substring(prefix.length());
+        if (shadowColor.isEmpty()) {
+            if (!lenient) {
+                throw new IllegalArgumentException("No value for the shadow specified!");
+            } else {
+                return null;
+            }
+        }
+
+        try {
+            TextFormat format = Util.getFormatFromString(shadowColor);
+            if (format instanceof TextColor) {
+                return ShadowColor.shadowColor((TextColor) format, SHADOW_ALPHA);
+            } else if (format != null) {
+                if (!lenient) {
+                    throw new IllegalArgumentException(shadowColor + " is not a valid shadow color!");
+                }
+            }
+        } catch (IllegalArgumentException ignored) {}
+        String modShadowColor = shadowColor;
+        if (shadowColor.startsWith(HEX_PREFIX) && shadowColor.length() == 5) {
+            // support short form which only specifies a single hex for each channel
+            modShadowColor = HEX_PREFIX + shadowColor.charAt(1) + shadowColor.charAt(1)
+                    + shadowColor.charAt(2) + shadowColor.charAt(2)
+                    + shadowColor.charAt(3) + shadowColor.charAt(3)
+                    + shadowColor.charAt(4) + shadowColor.charAt(4);
+        }
+        ShadowColor shadow = ShadowColor.fromHexString(modShadowColor);
+        if (shadow != null) {
+            return shadow;
+        }
+        if (!lenient) {
+            throw new IllegalArgumentException(shadowColor + " is not a valid shadow color!");
+        }
+        return null;
     }
 
     /**
@@ -914,6 +1003,7 @@ public class MineDownParser {
         insertion = null;
         rainbowPhase = null;
         colors = null;
+        shadow = null;
         format = new HashMap<>();
         clickEvent = null;
         hoverEvent = null;

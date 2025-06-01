@@ -26,6 +26,7 @@ import de.themoep.minedown.adventure.MineDown;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 public class ParserTest {
@@ -81,6 +82,25 @@ public class ParserTest {
     }
 
     @Test
+    public void testParseShadowColors() {
+        System.out.println("testParseShadowColors");
+        Assertions.assertAll(
+                () -> parse("[Text with shadow](shadow=red)"),
+                () -> parse("[Text with shadow](shadow=c)"),
+                () -> parse("[Text with shadow](shadow=#f00)"),
+                () -> parse("[Text with shadow](shadow=#ff0000)"),
+                () -> parse("[Text with shadow](shadow=#f004)"),
+                () -> parse("[Text with shadow](shadow=#ff000044)")
+        );
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> MineDown.parse("[Text with shadow](shadow=bold)"));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> MineDown.parse("[Text with shadow](shadow=)"));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> MineDown.parse("[Text with shadow](shadow=#12345)"));
+    }
+
+    @Test
     public void testParseGradient() {
         System.out.println("testParseGradient");
         Assertions.assertAll(
@@ -101,6 +121,7 @@ public class ParserTest {
                 () -> parse("[Test Rainbow](rainbow)"),
                 () -> parse("[Test Rainbow](rainbow:25)"),
                 () -> parse("[Test Rainbow](rainbow:240)"),
+                () -> parse("[Test Rainbow with shadow](rainbow shadow=#00000044)"),
                 () -> parse("&Rainbow&Rainbow&7 Test")
         );
     }

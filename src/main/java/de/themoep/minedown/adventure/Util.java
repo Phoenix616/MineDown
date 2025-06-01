@@ -322,7 +322,7 @@ public class Util {
         if (format != null) {
             return format;
         }
-        throw new IllegalArgumentException("Unknown format: " + format);
+        throw new IllegalArgumentException("Unknown format: " + formatString);
     }
 
     /**

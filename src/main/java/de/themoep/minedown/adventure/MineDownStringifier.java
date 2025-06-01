@@ -47,6 +47,8 @@ import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.SHADOW_ALPHA;
+import static de.themoep.minedown.adventure.MineDown.SHADOW_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
 
@@ -113,8 +115,10 @@ public class MineDownStringifier {
             appendText(sb, component);
             return sb.toString();
         }
-        boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT) || component instanceof TranslatableComponent
-                || component.insertion() != null  || component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent;
+        boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT)
+                || (component.shadowColor() != null && component.shadowColor().alpha() != 0)
+                || component instanceof TranslatableComponent || component.insertion() != null
+                || component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent;
         if (hasEvent) {
             sb.append('[');
             if (!formattingInEventDefinition()) {
@@ -162,7 +166,7 @@ public class MineDownStringifier {
                     sbi.append(COLOR_PREFIX);
                 }
                 if (component.color() instanceof NamedTextColor) {
-                    sbi.append(((NamedTextColor) component.color()).toString().toLowerCase(Locale.ROOT));
+                    sbi.append(component.color());
                 } else {
                     sbi.append(component.color().asHexString().toLowerCase(Locale.ROOT));
                 }
@@ -178,6 +182,21 @@ public class MineDownStringifier {
                         .map(e -> e.getKey().name().toLowerCase(Locale.ROOT))
                         .collect(Collectors.joining(" ")));
                 definitions.add(sbi.toString());
+            }
+            if (component.shadowColor() != null && component.shadowColor().alpha() != 0) {
+                String hexString = component.shadowColor().asHexString().toLowerCase(Locale.ROOT);
+                if (component.shadowColor().alpha() == SHADOW_ALPHA) {
+                    String shortHex = hexString.substring(0, 7);
+                    TextColor color = TextColor.fromHexString(shortHex);
+                    NamedTextColor namedColor = NamedTextColor.namedColor(color.value());
+                    if (namedColor != null) {
+                        definitions.add(SHADOW_PREFIX + namedColor);
+                    } else {
+                        definitions.add(SHADOW_PREFIX + shortHex);
+                    }
+                } else {
+                    definitions.add(SHADOW_PREFIX + hexString);
+                }
             }
             if (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT) {
                 Key font = component.style().font();

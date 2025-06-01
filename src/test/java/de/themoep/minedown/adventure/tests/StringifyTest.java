@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -62,6 +63,9 @@ public class StringifyTest {
                         .append(Component.text(". Test Text."))
                         .build()),
                 () -> stringify(Component.text("test").color(TextColor.color(0x11FF00))),
+                () -> stringify(Component.text("Test shadow").shadowColor(ShadowColor.shadowColor(0x11FF0044))),
+                () -> stringify(Component.text("Test named shadow").shadowColor(ShadowColor.shadowColor(1694455125))),
+                () -> stringify(Component.text("Test short shadow").shadowColor(ShadowColor.shadowColor(1694433280))),
                 () -> stringify(Component.text("Test insertion").insertion("Insert text")),
                 () -> stringify(Component.translatable("test.translation")),
                 () -> stringify(Component.translatable("test.translation", "fallback text")),
