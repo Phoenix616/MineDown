@@ -468,7 +468,7 @@ public class MineDownParser {
             String definition = defParts.get(i.get());
             Integer parsedRainbowPhase = parseRainbow(definition, "", lenient());
             if (parsedRainbowPhase != null) {
-                rainbowPhase(parsedRainbowPhase);
+                rainbowPhase = parsedRainbowPhase;
                 continue;
             } else if (!definition.contains("=")) {
                 List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, "", true);
@@ -512,8 +512,8 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
-                rainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
-                if (rainbowPhase == null) {
+                Integer colorRainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
+                if (colorRainbowPhase == null) {
                     List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
                     colors = new ArrayList<>();
                     for (Map.Entry<TextFormat, Boolean> e : parsed) {
@@ -523,6 +523,8 @@ public class MineDownParser {
                             throw new IllegalArgumentException(e + "  is a format and not a color!");
                         }
                     }
+                } else {
+                    rainbowPhase = colorRainbowPhase;
                 }
                 formatEnd = i.get();
                 continue;
