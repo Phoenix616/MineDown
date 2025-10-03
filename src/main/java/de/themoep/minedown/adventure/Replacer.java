@@ -245,10 +245,16 @@ public class Replacer {
             component = component.insertion(replaceIn(component.insertion()));
         }
         if (component.clickEvent() != null) {
-            component = component.clickEvent(ClickEvent.clickEvent(
-                    component.clickEvent().action(),
-                    replaceIn(component.clickEvent().value())
-            ));
+            ClickEvent.Payload payload = component.clickEvent().payload();
+            if (payload instanceof ClickEvent.Payload.Text textPayload) {
+                payload = ClickEvent.Payload.string(replaceIn(textPayload.value()));
+            } else if (payload instanceof ClickEvent.Payload.Custom customPayload) {
+                payload = ClickEvent.Payload.custom(
+                        Key.key(replaceIn(customPayload.key().asString())),
+                        BinaryTagHolder.binaryTagHolder(replaceIn(customPayload.nbt().string()))
+                );
+            }
+            component = component.clickEvent(ClickEvent.clickEvent(component.clickEvent().action(), payload));
         }
         if (component.hoverEvent() != null) {
             if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT) {
@@ -258,7 +264,7 @@ public class Replacer {
             } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ENTITY) {
                 HoverEvent.ShowEntity showEntity = (HoverEvent.ShowEntity) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showEntity(
-                        HoverEvent.ShowEntity.of(
+                        HoverEvent.ShowEntity.showEntity(
                                 Key.key(replaceIn(showEntity.type().asString())),
                                 showEntity.id(),
                                 replaceIn(showEntity.name())
@@ -267,10 +273,10 @@ public class Replacer {
             } else if (component.hoverEvent().action() == HoverEvent.Action.SHOW_ITEM) {
                 HoverEvent.ShowItem showItem = (HoverEvent.ShowItem) component.hoverEvent().value();
                 component = component.hoverEvent(HoverEvent.showItem(
-                        HoverEvent.ShowItem.of(
+                        HoverEvent.ShowItem.showItem(
                                 Key.key(replaceIn(showItem.item().asString())),
                                 showItem.count(),
-                                showItem.nbt() != null ? BinaryTagHolder.of(replaceIn(showItem.nbt().string())) : null
+                                showItem.nbt() != null ? BinaryTagHolder.binaryTagHolder(replaceIn(showItem.nbt().string())) : null
                         )
                 ));
             }

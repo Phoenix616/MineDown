@@ -55,6 +55,7 @@ import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.PAYLOAD_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_ALPHA;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
@@ -398,7 +399,7 @@ public class MineDownParser {
             }
             builder.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, v));
             if (urlHoverText() != null && !urlHoverText().isEmpty()) {
-                builder.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                builder.hoverEvent(HoverEvent.showText(
                         new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
                 ));
             }
@@ -458,6 +459,7 @@ public class MineDownParser {
         List<Component> translationArgs = new ArrayList<>();
         String font = null;
         String insertion = null;
+        BinaryTagHolder payloadBinaryData = null;
         Map<TextDecoration, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
         HoverEvent hoverEvent = null;
@@ -511,6 +513,17 @@ public class MineDownParser {
                 continue;
             }
 
+            if (definition.toLowerCase(Locale.ROOT).startsWith(PAYLOAD_PREFIX)) {
+                payloadBinaryData = BinaryTagHolder.binaryTagHolder(getValue(i, definition.substring(PAYLOAD_PREFIX.length()), defParts, true));
+                if (clickEvent.payload() instanceof ClickEvent.Payload.Custom customPayload) {
+                    clickEvent = ClickEvent.clickEvent(
+                            clickEvent.action(),
+                            ClickEvent.Payload.custom(customPayload.key(), payloadBinaryData)
+                    );
+                }
+                continue;
+            }
+
             if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
                 Integer colorRainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
                 if (colorRainbowPhase == null) {
@@ -558,7 +571,7 @@ public class MineDownParser {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
                 }
-                clickEvent = ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, definition);
+                clickEvent = ClickEvent.openUrl(definition);
                 continue;
             }
 
@@ -582,13 +595,27 @@ public class MineDownParser {
                 if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
                     valueStr = "http://" + valueStr;
                 }
-                clickEvent = ClickEvent.clickEvent(clickAction, valueStr);
+                ClickEvent.Payload payload;
+                if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Text.class)) {
+                    payload = ClickEvent.Payload.string(valueStr);
+                } else if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Int.class)) {
+                    payload = ClickEvent.Payload.integer(Integer.parseInt(valueStr));
+                } else if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Custom.class)) {
+                    payload = ClickEvent.Payload.custom(Key.key(valueStr), payloadBinaryData != null ? payloadBinaryData : BinaryTagHolder.binaryTagHolder(""));
+                } else {
+                    throw new IllegalArgumentException("Payload type " + clickAction.payloadType().getSimpleName() + " of action " + clickAction + " is not supported yet!");
+                }
+                clickEvent = ClickEvent.clickEvent(clickAction, payload);
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             if (hoverAction != null) {
                 if (hoverAction == HoverEvent.Action.SHOW_TEXT) {
-                    hoverEvent = HoverEvent.hoverEvent(hoverAction, copy(false).urlDetection(false).parse(Util.wrap(valueStr, hoverTextWidth())).build());
+                    hoverEvent = HoverEvent.showText(copy(false)
+                            .urlDetection(false)
+                            .parse(Util.wrap(valueStr, hoverTextWidth()))
+                            .build()
+                    );
                 } else if (hoverAction == HoverEvent.Action.SHOW_ENTITY) {
                     String[] valueParts = valueStr.split(":", 2);
                     try {
@@ -596,7 +623,7 @@ public class MineDownParser {
                         if (!additionalParts[0].contains(":")) {
                             additionalParts[0] = "minecraft:" + additionalParts[0];
                         }
-                        hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.of(
+                        hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.showEntity(
                                 Key.key(additionalParts[0]), UUID.fromString(valueParts[0]),
                                 additionalParts.length > 1 && additionalParts[1] != null ?
                                         copy(false).urlDetection(false).parse(additionalParts[1]).build() : null
@@ -629,11 +656,11 @@ public class MineDownParser {
                     }
                     BinaryTagHolder tag = null;
                     if (valueParts.length > 1 && valueParts[1] != null) {
-                        tag = BinaryTagHolder.of(valueParts[1]);
+                        tag = BinaryTagHolder.binaryTagHolder(valueParts[1]);
                     }
 
                     try {
-                        hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.of(
+                        hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.showItem(
                                 Key.key(id), count, tag
                         ));
                     } catch (Exception e) {
@@ -646,12 +673,17 @@ public class MineDownParser {
         }
 
         if (clickEvent != null && hoverEvent == null) {
-            hoverEvent = HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Component.text()
-                            .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
-                            .color(NamedTextColor.BLUE)
-                            .append(Component.text(" " + clickEvent.value())).color(NamedTextColor.WHITE)
-                            .build());
+            String payloadDescription = switch (clickEvent.payload()) {
+                case ClickEvent.Payload.Text textPayload -> " " + textPayload.value();
+                case ClickEvent.Payload.Int intPayload -> " " + intPayload.integer();
+                default -> "";
+            };
+            hoverEvent = HoverEvent.showText(Component.text()
+                    .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
+                    .color(NamedTextColor.BLUE)
+                    .append(Component.text(payloadDescription)).color(NamedTextColor.WHITE)
+                    .build()
+            );
         }
 
         return copy()

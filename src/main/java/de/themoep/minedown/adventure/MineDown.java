@@ -41,6 +41,7 @@ public class MineDown {
     static final String FORMAT_PREFIX = "format=";
     static final String TRANSLATE_PREFIX = "translate=";
     static final String WITH_PREFIX = "with=";
+    static final String PAYLOAD_PREFIX = "payload=";
     static final String HOVER_PREFIX = "hover=";
     static final String INSERTION_PREFIX = "insert=";
 

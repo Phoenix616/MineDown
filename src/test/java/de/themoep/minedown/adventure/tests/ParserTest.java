@@ -26,7 +26,6 @@ import de.themoep.minedown.adventure.MineDown;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 public class ParserTest {
@@ -64,7 +63,9 @@ public class ParserTest {
                 () -> parse("&bTest \n&chttps://example.com &rstring!"),
                 () -> parse("&bTest &chttps://example.com/test?t=2&d002=da0s#d2q &rstring!"),
                 () -> parse("Test inner escaping [\\]](gray)"),
-                () -> parse("[Test insertion](insert={text to insert} color=red)")
+                () -> parse("[Test insertion](insert={text to insert} color=red)"),
+                //() -> parse("[Test dialog click](show_dialog=minedown:my/custom/dialog)"),
+                () -> parse("[Test custom payload click](custom=my-custom-payload payload={custom-payload-value})")
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> MineDown.parse("&bTest [this](color=green format=green,bold,italic https://example.com) shit!"));
     }

@@ -23,6 +23,8 @@ package de.themoep.minedown.adventure.tests;
  */
 
 import de.themoep.minedown.adventure.MineDown;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -39,8 +41,8 @@ public class StringifyTest {
     private void stringify(Component component) {
         String stringified = MineDown.stringify(component);
         System.out.print(GsonComponentSerializer.gson().serialize(component)
-                + "\n" + stringified
-                + "\n" + GsonComponentSerializer.gson().serialize(MineDown.parse(stringified))
+                + "\n" + stringified);
+        System.out.print("\n" + GsonComponentSerializer.gson().serialize(MineDown.parse(stringified))
                 + "\n\n");
     }
     
@@ -62,6 +64,8 @@ public class StringifyTest {
                         )
                         .append(Component.text(". Test Text."))
                         .build()),
+                () -> stringify(Component.text("Page Click").clickEvent(ClickEvent.changePage(42))),
+                () -> stringify(Component.text("Binary Click").clickEvent(ClickEvent.custom(Key.key("test"), BinaryTagHolder.binaryTagHolder("test data")))),
                 () -> stringify(Component.text("test").color(TextColor.color(0x11FF00))),
                 () -> stringify(Component.text("Test shadow").shadowColor(ShadowColor.shadowColor(0x11FF0044))),
                 () -> stringify(Component.text("Test named shadow").shadowColor(ShadowColor.shadowColor(1694455125))),

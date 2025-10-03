@@ -6,7 +6,7 @@
 
     <groupId>de.themoep</groupId>
     <artifactId>minedown-adventure</artifactId>
-    <version>1.7.5</version>
+    <version>1.7.6-SNAPSHOT</version>
 
     <name>MineDown</name>
 
@@ -61,6 +61,10 @@
             <id>sonatype-repo</id>
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
         </repository>
+        <repository>
+            <id>paper-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -69,7 +73,7 @@
                 <groupId>net.kyori</groupId>
                 <artifactId>adventure-bom</artifactId>
                 <type>pom</type>
-                <version>4.21.0</version>
+                <version>4.25.0-SNAPSHOT</version>
                 <scope>import</scope>
             </dependency>
         </dependencies>

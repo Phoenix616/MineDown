@@ -84,8 +84,6 @@ public class MineDownStringifier {
      */
     private char colorChar = '&';
 
-    private StringBuilder value = new StringBuilder();
-
     private TextColor color = null;
     private ClickEvent clickEvent = null;
     private HoverEvent hoverEvent = null;
@@ -213,34 +211,37 @@ public class MineDownStringifier {
                     definitions.add(INSERTION_PREFIX + component.insertion());
                 }
             }
-            if (component.clickEvent() != null) {
-                if (preferSimpleEvents() && component.clickEvent().action() == ClickEvent.Action.OPEN_URL) {
-                    definitions.add(component.clickEvent().value());
+            if (clickEvent != null) {
+                if (preferSimpleEvents() && clickEvent.action() == ClickEvent.Action.OPEN_URL) {
+                    definitions.add(((ClickEvent.Payload.Text) clickEvent.payload()).value());
                 } else {
-                    definitions.add(component.clickEvent().action().toString().toLowerCase(Locale.ROOT) + "=" + component.clickEvent().value());
+                    definitions.add(clickEvent.action().toString().toLowerCase(Locale.ROOT) + "=" + switch (clickEvent.payload()) {
+                        case ClickEvent.Payload.Text text -> text.value();
+                        case ClickEvent.Payload.Int integer -> String.valueOf(integer.integer());
+                        case ClickEvent.Payload.Custom custom -> custom.key().asMinimalString()
+                                + (custom.nbt().string().isEmpty() ? "" : " " + MineDown.PAYLOAD_PREFIX + custom.nbt().string());
+                        default -> "";
+                    });
                 }
             }
-            if (component.hoverEvent() != null) {
+            if (hoverEvent != null) {
                 StringBuilder sbi = new StringBuilder();
                 if (preferSimpleEvents()) {
-                    if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT &&
-                            (component.clickEvent() == null || component.clickEvent().action() != ClickEvent.Action.OPEN_URL)) {
+                    if (hoverEvent.action() == HoverEvent.Action.SHOW_TEXT &&
+                            (clickEvent == null || clickEvent.action() != ClickEvent.Action.OPEN_URL)) {
                         sbi.append(HOVER_PREFIX);
                     }
                 } else {
-                    sbi.append(component.hoverEvent().action().toString().toLowerCase(Locale.ROOT)).append('=');
+                    sbi.append(hoverEvent.action().toString().toLowerCase(Locale.ROOT)).append('=');
                 }
-                HoverEvent<?> hoverEvent = component.hoverEvent();
-                if (hoverEvent.value() instanceof Component) {
-                    sbi.append(copy().stringify((Component) hoverEvent.value()));
-                } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity) {
-                    HoverEvent.ShowEntity contentEntity = (HoverEvent.ShowEntity) hoverEvent.value();
+                if (hoverEvent.value() instanceof Component hoverComponent) {
+                    sbi.append(copy().stringify(hoverComponent));
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity contentEntity) {
                     sb.append(contentEntity.id()).append(":").append(contentEntity.type());
                     if (contentEntity.name() != null) {
                         sb.append(" ").append(stringify(contentEntity.name()));
                     }
-                } else if (hoverEvent.value() instanceof HoverEvent.ShowItem) {
-                    HoverEvent.ShowItem contentItem = (HoverEvent.ShowItem) hoverEvent.value();
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowItem contentItem) {
                     sb.append(contentItem.item());
                     if (contentItem.count() > 0) {
                         sb.append("*").append(contentItem.count());
