@@ -6,7 +6,7 @@
 
     <groupId>de.themoep</groupId>
     <artifactId>minedown-adventure</artifactId>
-    <version>1.7.5-SNAPSHOT</version>
+    <version>1.7.5</version>
 
     <name>MineDown</name>
 

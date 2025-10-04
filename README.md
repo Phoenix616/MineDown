@@ -110,7 +110,7 @@ Make sure to relocate it into your plugin's package!
     <dependency>
         <groupId>de.themoep</groupId>
         <artifactId>minedown-adventure</artifactId>
-        <version>1.7.4-SNAPSHOT</version>
+        <version>1.7.5</version>
         <scope>compile</scope>
     </dependency>
 </dependencies>
