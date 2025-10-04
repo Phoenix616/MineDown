@@ -32,9 +32,13 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.object.ObjectContents;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 public class StringifyTest {
     
@@ -70,13 +74,47 @@ public class StringifyTest {
                 () -> stringify(Component.text("Test shadow").shadowColor(ShadowColor.shadowColor(0x11FF0044))),
                 () -> stringify(Component.text("Test named shadow").shadowColor(ShadowColor.shadowColor(1694455125))),
                 () -> stringify(Component.text("Test short shadow").shadowColor(ShadowColor.shadowColor(1694433280))),
-                () -> stringify(Component.text("Test insertion").insertion("Insert text")),
+                () -> stringify(Component.text("Test insertion").insertion("Insert text"))
+        );
+    }
+
+
+    @Test
+    public void testTranslatableStringify() {
+        Assertions.assertAll(
                 () -> stringify(Component.translatable("test.translation")),
                 () -> stringify(Component.translatable("test.translation", "fallback text")),
                 () -> stringify(Component.translatable("test.translation", "fallback text",
                         Component.text("replacement text 1").color(NamedTextColor.BLUE),
                         Component.text("replacement text 2").color(NamedTextColor.YELLOW)
                 ))
+        );
+    }
+
+    @Test
+    public void testPlayerHeadStringify() {
+        Assertions.assertAll(
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(ObjectContents.playerHead(UUID.randomUUID())))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(ObjectContents.playerHead("TestName")))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(ObjectContents.playerHead().name("TestName").id(UUID.fromString("83688181-ce68-4136-918b-15e88ec2c705")).build()))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(ObjectContents.playerHead().name("TestName").id(UUID.fromString("83688181-ce68-4136-918b-15e88ec2c705")).hat(false).build()))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(
+                        ObjectContents.playerHead().name("TestName").texture(Key.key("entity/player/wide/alex")).build()))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(
+                        ObjectContents.playerHead().profileProperty(PlayerHeadObjectContents.property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=")).build()))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(
+                        ObjectContents.playerHead().name("TestName").profileProperty(PlayerHeadObjectContents.property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=")).build()))),
+                () -> stringify(Component.text("Object player head test").append(Component.object().contents(
+                        ObjectContents.playerHead().name("TestName").profileProperty(PlayerHeadObjectContents.property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=", "thisisarandomsignature")).build())))
+        );
+    }
+
+    @Test
+    public void testSpriteStringify() {
+        Assertions.assertAll(
+                () -> stringify(Component.text("Object block test").append(Component.object().contents(ObjectContents.sprite(Key.key("stone"))))),
+                () -> stringify(Component.text("Object item test").append(Component.object().contents(ObjectContents.sprite(Key.key("blocks"), Key.key("diamond"))))),
+                () -> stringify(Component.text("Object item test").append(Component.object().contents(ObjectContents.sprite(Key.key("gui"), Key.key("inventory")))))
         );
     }
 }

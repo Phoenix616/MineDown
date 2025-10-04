@@ -22,6 +22,7 @@ package de.themoep.minedown.adventure;
  * SOFTWARE.
  */
 
+import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
@@ -33,8 +34,11 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
+import net.kyori.adventure.text.object.ObjectContents;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -50,14 +54,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static de.themoep.minedown.adventure.MineDown.ATLAS_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.HAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.PAYLOAD_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.PLAYER_HEAD_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.PROFILE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_ALPHA;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.SPRITE_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.TEXTURE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
 import static net.kyori.adventure.text.format.TextColor.HEX_PREFIX;
@@ -118,6 +128,9 @@ public class MineDownParser {
     private String translationKey;
     private List<Component> translationArgs = new ArrayList<>();
     private String font;
+    private Key sprite;
+    private Key atlas;
+    private PlayerHeadObjectContents.Builder playerHead;
     private String insertion;
     private Integer rainbowPhase;
     private List<Map.Entry<TextColor, Boolean>> colors;
@@ -338,7 +351,7 @@ public class MineDownParser {
         List<TextColor> applicableColors;
         long valueCodepointLength = value().length();
         // If the value is empty don't add anything
-        if (valueCodepointLength == 0) {
+        if (valueCodepointLength == 0 && translationKey() == null && sprite() == null && playerHead() == null) {
             return;
         }
         if (rainbowPhase() != null) {
@@ -359,7 +372,7 @@ public class MineDownParser {
             applicableColors = new ArrayList<>();
         }
 
-        if (applicableColors.size() > 1 && translationKey() == null) {
+        if (applicableColors.size() > 1 && translationKey() == null && sprite() == null && playerHead() == null) {
             // Colors need to have a gradient/rainbow applied
             builder = Component.text();
         } else {
@@ -373,6 +386,18 @@ public class MineDownParser {
                 }
                 if (!applicableColors.isEmpty()) {
                     // translatable components can only have one color
+                    builder.color(applicableColors.get(0));
+                }
+            } else if (playerHead() != null) {
+                builder = Component.object(playerHead().build()).toBuilder();
+            } else if (sprite() != null) {
+                if (atlas() == null) {
+                    builder = Component.object(ObjectContents.sprite(sprite())).toBuilder();
+                } else {
+                    builder = Component.object(ObjectContents.sprite(sprite(), atlas())).toBuilder();
+                }
+                if (!applicableColors.isEmpty()) {
+                    // object components can only have one color
                     builder.color(applicableColors.get(0));
                 }
             } else {
@@ -458,6 +483,9 @@ public class MineDownParser {
         String translationKey = null;
         List<Component> translationArgs = new ArrayList<>();
         String font = null;
+        Key sprite = null;
+        Key atlas = null;
+        PlayerHeadObjectContents.Builder playerHead = null;
         String insertion = null;
         BinaryTagHolder payloadBinaryData = null;
         Map<TextDecoration, Boolean> formats = new HashMap<>();
@@ -468,6 +496,7 @@ public class MineDownParser {
 
         for (AtomicInteger i = new AtomicInteger(); i.get() < defParts.size(); i.incrementAndGet()) {
             String definition = defParts.get(i.get());
+            String defLowerCase = definition.toLowerCase(Locale.ROOT);
             Integer parsedRainbowPhase = parseRainbow(definition, "", lenient());
             if (parsedRainbowPhase != null) {
                 rainbowPhase = parsedRainbowPhase;
@@ -490,12 +519,12 @@ public class MineDownParser {
                 }
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(TRANSLATE_PREFIX)) {
+            if (defLowerCase.startsWith(TRANSLATE_PREFIX)) {
                 translationKey = definition.substring(TRANSLATE_PREFIX.length());
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(WITH_PREFIX)) {
+            if (defLowerCase.startsWith(WITH_PREFIX)) {
                 String[] args = getValue(i, definition.substring(WITH_PREFIX.length()), defParts, true).split("(?<!\\\\),");
                 for (String arg : args) {
                     translationArgs.add(copy(false).urlDetection(false).parse(arg).build());
@@ -503,17 +532,121 @@ public class MineDownParser {
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(FONT_PREFIX)) {
+            if (defLowerCase.startsWith(FONT_PREFIX)) {
                 font = definition.substring(FONT_PREFIX.length());
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(INSERTION_PREFIX)) {
+            if (defLowerCase.startsWith(SPRITE_PREFIX)) {
+                try {
+                    sprite = Key.key(definition.substring(SPRITE_PREFIX.length()));
+                } catch (InvalidKeyException e) {
+                     if (!lenient()) {
+                        throw new IllegalArgumentException("Invalid key " + definition.substring(SPRITE_PREFIX.length()) + " for sprite!", e);
+                    }
+                }
+                continue;
+            }
+
+            if (defLowerCase.startsWith(ATLAS_PREFIX)) {
+                try {
+                    atlas = Key.key(definition.substring(ATLAS_PREFIX.length()));
+                } catch (InvalidKeyException e) {
+                    if (!lenient()) {
+                        throw new IllegalArgumentException("Invalid key " + definition.substring(ATLAS_PREFIX.length()) + " for atlas!", e);
+                    }
+                }
+                continue;
+            }
+
+            if (defLowerCase.startsWith(PLAYER_HEAD_PREFIX)) {
+                String playerHeadPart = definition.substring(PLAYER_HEAD_PREFIX.length());
+                if (playerHead == null) {
+                    playerHead = ObjectContents.playerHead();
+                }
+                if (playerHeadPart.length() == 36) {
+                    playerHead.id(UUID.fromString(playerHeadPart));
+                } else if (playerHeadPart.contains(":") || playerHeadPart.contains("/")) {
+                    playerHead.texture(Key.key(playerHeadPart));
+                } else if (playerHeadPart.length() <= 16) {
+                    playerHead.name(playerHeadPart);
+                } else {
+                    String decoded = new String(Base64.getDecoder().decode(playerHeadPart));
+                    if (decoded.startsWith("{\"textures\"") && decoded.endsWith("}")) {
+                        playerHead.profileProperty(PlayerHeadObjectContents.property("textures", playerHeadPart));
+                    } else if (!lenient()) {
+                        throw new IllegalArgumentException("Provided an invalid value for a player head in " + definition.substring(PLAYER_HEAD_PREFIX.length()));
+                    }
+                }
+                continue;
+            }
+
+            if (defLowerCase.startsWith(TEXTURE_PREFIX)) {
+                if (playerHead == null) {
+                    playerHead = ObjectContents.playerHead();
+                }
+                playerHead.texture(Key.key(definition.substring(TEXTURE_PREFIX.length())));
+                continue;
+            }
+
+            if (defLowerCase.startsWith(HAT_PREFIX)) {
+                if (playerHead == null) {
+                    playerHead = ObjectContents.playerHead();
+                }
+                playerHead.hat(Boolean.parseBoolean(definition.substring(HAT_PREFIX.length())));
+                continue;
+            }
+
+            if (defLowerCase.startsWith(PROFILE_PREFIX) && playerHead != null) {
+                String valuePart = definition.substring(PROFILE_PREFIX.length());
+                if (!valuePart.startsWith("{") || !valuePart.endsWith("}")) {
+                    if (!lenient()) {
+                        throw new IllegalArgumentException("Profile information need to be wrapped in curly braces. '" + definition.substring(PROFILE_PREFIX.length()) + "' was not!");
+                    }
+                    continue;
+                }
+
+                if (playerHead == null) {
+                    playerHead = ObjectContents.playerHead();
+                }
+
+                if (valuePart.startsWith("{{") && valuePart.endsWith("}}")) {
+                    valuePart = valuePart.substring(1, valuePart.length() - 1);
+                }
+
+                String[] args = valuePart.substring(1, valuePart.length() - 1).split("},\\{");
+
+                for (String arg : args) {
+                    String name = null;
+                    String value = null;
+                    String signature = null;
+                    String[] argParts = arg.split(",");
+                    for (String part : argParts) {
+                        String[] keyValue = part.split("=");
+                        if (keyValue[0].equals("signature")) {
+                            signature = keyValue[1];
+                        } else {
+                            name = keyValue[0];
+                            value = keyValue[1];
+                        }
+                    }
+                    if (name != null && value != null) {
+                        if (signature != null) {
+                            playerHead.profileProperty(PlayerHeadObjectContents.property(name, value, signature));
+                        } else {
+                            playerHead.profileProperty(PlayerHeadObjectContents.property(name, value));
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (defLowerCase.startsWith(INSERTION_PREFIX)) {
                 insertion = getValue(i, definition.substring(INSERTION_PREFIX.length()), defParts, true);
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(PAYLOAD_PREFIX)) {
+            if (defLowerCase.startsWith(PAYLOAD_PREFIX)) {
                 payloadBinaryData = BinaryTagHolder.binaryTagHolder(getValue(i, definition.substring(PAYLOAD_PREFIX.length()), defParts, true));
                 if (clickEvent.payload() instanceof ClickEvent.Payload.Custom customPayload) {
                     clickEvent = ClickEvent.clickEvent(
@@ -524,7 +657,7 @@ public class MineDownParser {
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(COLOR_PREFIX)) {
+            if (defLowerCase.startsWith(COLOR_PREFIX)) {
                 Integer colorRainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
                 if (colorRainbowPhase == null) {
                     List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
@@ -543,7 +676,7 @@ public class MineDownParser {
                 continue;
             }
 
-            if (definition.toLowerCase(Locale.ROOT).startsWith(SHADOW_PREFIX)) {
+            if (defLowerCase.startsWith(SHADOW_PREFIX)) {
                 ShadowColor parsed = parseShadow(definition, SHADOW_PREFIX, lenient());
                 if (parsed != null) {
                     shadowColor = parsed;
@@ -694,6 +827,9 @@ public class MineDownParser {
                 .colors(colors)
                 .shadow(shadowColor)
                 .font(font)
+                .sprite(sprite)
+                .atlas(atlas)
+                .playerHead(playerHead)
                 .insertion(insertion)
                 .format(formats)
                 .clickEvent(clickEvent)
@@ -786,6 +922,33 @@ public class MineDownParser {
     }
     protected String font() {
         return this.font;
+    }
+
+    private MineDownParser sprite(Key sprite) {
+        this.sprite = sprite;
+        return this;
+    }
+
+    protected Key sprite() {
+        return this.sprite;
+    }
+
+    private MineDownParser atlas(Key atlas) {
+        this.atlas = atlas;
+        return this;
+    }
+
+    protected Key atlas() {
+        return this.atlas;
+    }
+
+    private MineDownParser playerHead(PlayerHeadObjectContents.Builder playerHead) {
+        this.playerHead = playerHead;
+        return this;
+    }
+
+    protected PlayerHeadObjectContents.Builder playerHead() {
+        return this.playerHead;
     }
 
     private MineDownParser insertion(String insertion) {

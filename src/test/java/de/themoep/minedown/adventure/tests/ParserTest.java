@@ -31,18 +31,18 @@ import org.junit.jupiter.api.Test;
 public class ParserTest {
     
     private void parse(String mineDownString, String... replacements) {
-        System.out.print(mineDownString + "\n" + GsonComponentSerializer.gson().serialize(MineDown.parse(mineDownString, replacements)) + "\n");
+        System.out.print(mineDownString + "\n" + GsonComponentSerializer.gson().serialize(MineDown.parse(mineDownString, replacements)) + "\n\n");
     }
 
     private void parse(String mineDownString, String placeholder, Component replacement) {
-        System.out.print(mineDownString + "\n" + GsonComponentSerializer.gson().serialize(new MineDown(mineDownString).replace(placeholder, replacement).toComponent()) + "\n");
+        System.out.print(mineDownString + "\n" + GsonComponentSerializer.gson().serialize(new MineDown(mineDownString).replace(placeholder, replacement).toComponent()) + "\n\n");
     }
 
     private void parse(String mineDownString, String placeholder1, Component replacement1, String placeholder2, Component replacement2) {
         System.out.print(mineDownString + "\n" + GsonComponentSerializer.gson().serialize(new MineDown(mineDownString)
                 .replace(placeholder1, replacement1)
                 .replace(placeholder2, replacement2)
-                .toComponent()) + "\n");
+                .toComponent()) + "\n\n");
     }
     
     @Test
@@ -182,6 +182,31 @@ public class ParserTest {
                 () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2})"),
                 () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2} hover=[hover text](red))"),
                 () -> parse("[fallback text](translate=translatable.translation with={Argument 1,Argument 2} hover=[hover text](red) click=open_url=https://example.com)")
+        );
+    }
+
+    @Test
+    public void testParsePlayerHead() {
+        Assertions.assertAll(
+                () -> parse("Object player head test[](player_head=89d139ff-d454-4488-adfd-127665407cf9)"),
+                () -> parse("Object player head test[](player_head=TestName)"),
+                () -> parse("Object player head test[](player_head=83688181-ce68-4136-918b-15e88ec2c705)"),
+                () -> parse("Object player head test[](player_head=83688181-ce68-4136-918b-15e88ec2c705 hat=false)"),
+                () -> parse("Object player head test[](player_head=entity/player/wide/alex)"),
+                () -> parse("Object player head test[](player_head=minecraft:entity/player/wide/alex)"),
+                () -> parse("Object player head test[](player_head=TestName texture=minecraft:entity/player/wide/alex)"),
+                () -> parse("Object player head test[](player_head=eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=)"),
+                () -> parse("Object player head test[](player_head=TestName profile={textures=eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=})"),
+                () -> parse("Object player head test[](player_head=TestName profile={textures=eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViNmU0MWY2NmExNzBlYTIzZTg1YjI3NDk2OTRlMjUyNTA2MTgyMTY4NmNiYjFmNjE1Y2VhODEwMmRiYTRmYyJ9fX0=,signature=thisisarandomsignature})")
+        );
+    }
+
+    @Test
+    public void testParseSprite() {
+        Assertions.assertAll(
+                () -> parse("Object block test[](sprite=stone)"),
+                () -> parse("Object item test[](sprite=diamond)"),
+                () -> parse("Object item test[](sprite=inventory atlas=gui)")
         );
     }
 }

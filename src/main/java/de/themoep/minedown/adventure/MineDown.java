@@ -41,6 +41,12 @@ public class MineDown {
     static final String FORMAT_PREFIX = "format=";
     static final String TRANSLATE_PREFIX = "translate=";
     static final String WITH_PREFIX = "with=";
+    static final String PLAYER_HEAD_PREFIX = "player_head=";
+    static final String HAT_PREFIX = "hat=";
+    static final String TEXTURE_PREFIX = "texture=";
+    static final String PROFILE_PREFIX = "profile=";
+    static final String SPRITE_PREFIX = "sprite=";
+    static final String ATLAS_PREFIX = "atlas=";
     static final String PAYLOAD_PREFIX = "payload=";
     static final String HOVER_PREFIX = "hover=";
     static final String INSERTION_PREFIX = "insert=";

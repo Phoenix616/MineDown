@@ -24,6 +24,7 @@ package de.themoep.minedown.adventure;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ObjectComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -32,23 +33,34 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
+import net.kyori.adventure.text.object.SpriteObjectContents;
+import net.kyori.examination.Examiner;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static de.themoep.minedown.adventure.MineDown.ATLAS_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.HAT_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.PLAYER_HEAD_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.PROFILE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_ALPHA;
 import static de.themoep.minedown.adventure.MineDown.SHADOW_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.SPRITE_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.TEXTURE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.TRANSLATE_PREFIX;
 import static de.themoep.minedown.adventure.MineDown.WITH_PREFIX;
 
@@ -116,6 +128,7 @@ public class MineDownStringifier {
         boolean hasEvent = (component.style().font() != null && component.style().font() != Style.DEFAULT_FONT)
                 || (component.shadowColor() != null && component.shadowColor().alpha() != 0)
                 || component instanceof TranslatableComponent || component.insertion() != null
+                || component instanceof ObjectComponent
                 || component.clickEvent() != clickEvent || component.hoverEvent() != hoverEvent;
         if (hasEvent) {
             sb.append('[');
@@ -146,8 +159,7 @@ public class MineDownStringifier {
             }
             sb.append("](");
             List<String> definitions = new ArrayList<>();
-            if (component instanceof TranslatableComponent) {
-                TranslatableComponent translatable = (TranslatableComponent) component;
+            if (component instanceof TranslatableComponent translatable) {
                 definitions.add(TRANSLATE_PREFIX + translatable.key());
                 if (!translatable.args().isEmpty()) {
                     definitions.add(new StringBuilder()
@@ -156,6 +168,67 @@ public class MineDownStringifier {
                             .append(translatable.args().stream().map(this::stringify)
                                     .collect(Collectors.joining(",")))
                             .append("}").toString());
+                }
+            } else if (component instanceof ObjectComponent objectComponent) {
+                if (objectComponent.contents() instanceof PlayerHeadObjectContents playerHeadContents) {
+                    String defValue = null;
+                    if (playerHeadContents.id() != null) {
+                        defValue = playerHeadContents.id().toString();
+                    } else if (playerHeadContents.name() != null) {
+                        defValue = playerHeadContents.name();
+                    } else if (playerHeadContents.texture() != null) {
+                        defValue = playerHeadContents.texture().asMinimalString();
+                    } else if (!playerHeadContents.profileProperties().isEmpty()) {
+                        for (PlayerHeadObjectContents.ProfileProperty property : playerHeadContents.profileProperties()) {
+                            if ("textures".equals(property.name()) && property.signature() == null) {
+                                String decoded = new String(Base64.getDecoder().decode(property.value()));
+                                if (decoded.startsWith("{\"textures\"") && decoded.endsWith("}")) {
+                                    defValue = property.value();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (defValue == null) {
+                        defValue = "Unknown";
+                    }
+                    definitions.add(PLAYER_HEAD_PREFIX + defValue);
+
+                    if (!playerHeadContents.hat()) {
+                        definitions.add(HAT_PREFIX + "false");
+                    }
+
+                    if (playerHeadContents.texture() != null) {
+                        definitions.add(TEXTURE_PREFIX + playerHeadContents.texture());
+                    }
+
+                    if (!playerHeadContents.profileProperties().isEmpty()) {
+                        List<String> profileValues = new ArrayList<>();
+                        for (PlayerHeadObjectContents.ProfileProperty property : playerHeadContents.profileProperties()) {
+                            if (defValue.equals(property.value())) {
+                                continue;
+                            }
+                            String profileValue = property.name() + "=" + property.value();
+                            if (property.signature() != null) {
+                                profileValue += ",signature=" + property.signature();
+                            }
+                            profileValues.add(profileValue);
+                        }
+                        if (!profileValues.isEmpty()) {
+                            definitions.add(PROFILE_PREFIX + "{" + profileValues.stream().map(s -> {
+                                if (profileValues.size() == 1) {
+                                    return s;
+                                } else {
+                                    return "{" + s + "}";
+                                }
+                            }).collect(Collectors.joining(",")) + "}");
+                        }
+                    }
+                } else if (objectComponent.contents() instanceof SpriteObjectContents spriteContents) {
+                    definitions.add(SPRITE_PREFIX + spriteContents.sprite().asMinimalString());
+                    if (!spriteContents.atlas().equals(SpriteObjectContents.DEFAULT_ATLAS)) {
+                        definitions.add(ATLAS_PREFIX + spriteContents.atlas().asMinimalString());
+                    }
                 }
             }
             if (colorInEventDefinition() && component.color() != null) {
@@ -261,17 +334,15 @@ public class MineDownStringifier {
     }
 
     private void appendText(StringBuilder sb, Component component) {
-        if (component instanceof TextComponent) {
-            sb.append(((TextComponent) component).content());
-            return;
-        } else if (component instanceof TranslatableComponent) {
-            try {
-                sb.append(((TranslatableComponent) component).fallback());
-            } catch (NoSuchMethodError ignored) {
-                // version without fallback
+        switch (component) {
+            case TextComponent textComponent -> sb.append(textComponent.content());
+            case TranslatableComponent translatableComponent -> {
+                if (translatableComponent.fallback() != null) {
+                    sb.append(translatableComponent.fallback());
+                }
             }
-        } else {
-            throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
+            case ObjectComponent objectComponent -> {/* we don't add any text */}
+            default -> throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
         }
     }
 
