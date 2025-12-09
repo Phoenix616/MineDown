@@ -35,7 +35,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import net.kyori.adventure.text.object.SpriteObjectContents;
-import net.kyori.examination.Examiner;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,7 +44,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static de.themoep.minedown.adventure.MineDown.ATLAS_PREFIX;
@@ -245,7 +243,7 @@ public class MineDownStringifier {
             }
             if (formattingInEventDefinition()) {
                 StringBuilder sbi = new StringBuilder();
-                if (!preferSimpleEvents) {
+                if (!preferSimpleEvents()) {
                     sbi.append(FORMAT_PREFIX);
                 }
                 sbi.append(component.decorations().entrySet().stream()
@@ -299,28 +297,26 @@ public class MineDownStringifier {
             }
             if (hoverEvent != null) {
                 StringBuilder sbi = new StringBuilder();
-                if (preferSimpleEvents()) {
-                    if (hoverEvent.action() == HoverEvent.Action.SHOW_TEXT &&
-                            (clickEvent == null || clickEvent.action() != ClickEvent.Action.OPEN_URL)) {
-                        sbi.append(HOVER_PREFIX);
-                    }
+                if (preferSimpleEvents() && hoverEvent.action() == HoverEvent.Action.SHOW_TEXT &&
+                        (clickEvent == null || clickEvent.action() != ClickEvent.Action.OPEN_URL)) {
+                    sbi.append(HOVER_PREFIX);
                 } else {
                     sbi.append(hoverEvent.action().toString().toLowerCase(Locale.ROOT)).append('=');
                 }
                 if (hoverEvent.value() instanceof Component hoverComponent) {
                     sbi.append(copy().stringify(hoverComponent));
                 } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity contentEntity) {
-                    sb.append(contentEntity.id()).append(":").append(contentEntity.type());
+                    sbi.append(contentEntity.id()).append(":").append(contentEntity.type());
                     if (contentEntity.name() != null) {
-                        sb.append(" ").append(stringify(contentEntity.name()));
+                        sbi.append(" ").append(stringify(contentEntity.name()));
                     }
                 } else if (hoverEvent.value() instanceof HoverEvent.ShowItem contentItem) {
-                    sb.append(contentItem.item());
+                    sbi.append(contentItem.item());
                     if (contentItem.count() > 0) {
-                        sb.append("*").append(contentItem.count());
+                        sbi.append("*").append(contentItem.count());
                     }
                     if (contentItem.nbt() != null) {
-                        sb.append(" ").append(contentItem.nbt().string());
+                        sbi.append(" ").append(contentItem.nbt().string());
                     }
                 }
                 definitions.add(sbi.toString());

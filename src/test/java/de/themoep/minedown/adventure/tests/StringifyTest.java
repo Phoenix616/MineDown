@@ -83,11 +83,20 @@ public class StringifyTest {
     public void testTranslatableStringify() {
         Assertions.assertAll(
                 () -> stringify(Component.translatable("test.translation")),
+                () -> stringify(Component.translatable("test.translation").color(NamedTextColor.AQUA)),
                 () -> stringify(Component.translatable("test.translation", "fallback text")),
+                () -> stringify(Component.translatable("test.translation", "fallback text").color(NamedTextColor.RED)),
                 () -> stringify(Component.translatable("test.translation", "fallback text",
                         Component.text("replacement text 1").color(NamedTextColor.BLUE),
                         Component.text("replacement text 2").color(NamedTextColor.YELLOW)
                 ))
+        );
+    }
+
+    @Test
+    public void testItemHoverStringify() {
+        Assertions.assertAll(
+                () -> stringify(Component.text("item hover").hoverEvent(HoverEvent.showItem(Key.key("diamond"), 42)))
         );
     }
 
@@ -114,6 +123,7 @@ public class StringifyTest {
         Assertions.assertAll(
                 () -> stringify(Component.text("Object block test").append(Component.object().contents(ObjectContents.sprite(Key.key("stone"))))),
                 () -> stringify(Component.text("Object item test").append(Component.object().contents(ObjectContents.sprite(Key.key("blocks"), Key.key("diamond"))))),
+                () -> stringify(Component.text("Object item test").append(Component.object().contents(ObjectContents.sprite(Key.key("blocks"), Key.key("diamond"))).hoverEvent(HoverEvent.showItem(Key.key("diamond"), 1)))),
                 () -> stringify(Component.text("Object item test").append(Component.object().contents(ObjectContents.sprite(Key.key("gui"), Key.key("inventory")))))
         );
     }
