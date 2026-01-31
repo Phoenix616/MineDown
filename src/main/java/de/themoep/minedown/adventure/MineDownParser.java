@@ -806,11 +806,12 @@ public class MineDownParser {
         }
 
         if (clickEvent != null && hoverEvent == null) {
-            String payloadDescription = switch (clickEvent.payload()) {
-                case ClickEvent.Payload.Text textPayload -> " " + textPayload.value();
-                case ClickEvent.Payload.Int intPayload -> " " + intPayload.integer();
-                default -> "";
-            };
+            String payloadDescription = "";
+            if (clickEvent.payload() instanceof ClickEvent.Payload.Text textPayload) {
+                payloadDescription = " " + textPayload.value();
+            } else if (clickEvent.payload() instanceof ClickEvent.Payload.Int intPayload) {
+                payloadDescription = " " + intPayload.integer();
+            }
             hoverEvent = HoverEvent.showText(Component.text()
                     .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
                     .color(NamedTextColor.BLUE)

@@ -286,13 +286,16 @@ public class MineDownStringifier {
                 if (preferSimpleEvents() && clickEvent.action() == ClickEvent.Action.OPEN_URL) {
                     definitions.add(((ClickEvent.Payload.Text) clickEvent.payload()).value());
                 } else {
-                    definitions.add(clickEvent.action().toString().toLowerCase(Locale.ROOT) + "=" + switch (clickEvent.payload()) {
-                        case ClickEvent.Payload.Text text -> text.value();
-                        case ClickEvent.Payload.Int integer -> String.valueOf(integer.integer());
-                        case ClickEvent.Payload.Custom custom -> custom.key().asMinimalString()
+                    String payloadDef = clickEvent.action().toString().toLowerCase(Locale.ROOT);
+                    if (clickEvent.payload() instanceof ClickEvent.Payload.Text text) {
+                        payloadDef += "=" + text.value();
+                    } else if (clickEvent.payload() instanceof ClickEvent.Payload.Int integer) {
+                        payloadDef += "=" + integer.integer();
+                    } else if (clickEvent.payload() instanceof ClickEvent.Payload.Custom custom) {
+                        payloadDef += "=" + custom.key().asMinimalString()
                                 + (custom.nbt().string().isEmpty() ? "" : " " + MineDown.PAYLOAD_PREFIX + custom.nbt().string());
-                        default -> "";
-                    });
+                    }
+                    definitions.add(payloadDef);
                 }
             }
             if (hoverEvent != null) {
@@ -330,15 +333,16 @@ public class MineDownStringifier {
     }
 
     private void appendText(StringBuilder sb, Component component) {
-        switch (component) {
-            case TextComponent textComponent -> sb.append(textComponent.content());
-            case TranslatableComponent translatableComponent -> {
-                if (translatableComponent.fallback() != null) {
-                    sb.append(translatableComponent.fallback());
-                }
+        if (component instanceof TextComponent textComponent) {
+            sb.append(textComponent.content());
+        } else if (component instanceof TranslatableComponent translatableComponent) {
+            if (translatableComponent.fallback() != null) {
+                sb.append(translatableComponent.fallback());
             }
-            case ObjectComponent objectComponent -> {/* we don't add any text */}
-            default -> throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents are supported right now. Sorry. :(");
+        } else if (component instanceof ObjectComponent) {
+            // we don't add any text
+        } else {
+            throw new UnsupportedOperationException("Cannot stringify " + component.getClass().getTypeName() + " yet! Only TextComponents, TranslatableComponent and ObjectComponents are supported right now. Sorry. :(");
         }
     }
 
