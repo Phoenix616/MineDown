@@ -33,6 +33,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import net.kyori.adventure.text.object.SpriteObjectContents;
 
@@ -157,7 +158,8 @@ public class MineDownStringifier {
             }
             sb.append("](");
             List<String> definitions = new ArrayList<>();
-            if (component instanceof TranslatableComponent translatable) {
+            if (component instanceof TranslatableComponent) {
+                TranslatableComponent translatable = (TranslatableComponent) component;
                 definitions.add(TRANSLATE_PREFIX + translatable.key());
                 if (!translatable.args().isEmpty()) {
                     definitions.add(new StringBuilder()
@@ -167,8 +169,9 @@ public class MineDownStringifier {
                                     .collect(Collectors.joining(",")))
                             .append("}").toString());
                 }
-            } else if (component instanceof ObjectComponent objectComponent) {
-                if (objectComponent.contents() instanceof PlayerHeadObjectContents playerHeadContents) {
+            } else if (component instanceof ObjectComponent) {
+                if (((ObjectComponent) component).contents() instanceof PlayerHeadObjectContents) {
+                    PlayerHeadObjectContents playerHeadContents = (PlayerHeadObjectContents) ((ObjectComponent) component).contents();
                     String defValue = null;
                     if (playerHeadContents.id() != null) {
                         defValue = playerHeadContents.id().toString();
@@ -222,7 +225,8 @@ public class MineDownStringifier {
                             }).collect(Collectors.joining(",")) + "}");
                         }
                     }
-                } else if (objectComponent.contents() instanceof SpriteObjectContents spriteContents) {
+                } else if (((ObjectComponent) component).contents() instanceof SpriteObjectContents) {
+                    SpriteObjectContents spriteContents = (SpriteObjectContents) ((ObjectComponent) component).contents();
                     definitions.add(SPRITE_PREFIX + spriteContents.sprite().asMinimalString());
                     if (!spriteContents.atlas().equals(SpriteObjectContents.DEFAULT_ATLAS)) {
                         definitions.add(ATLAS_PREFIX + spriteContents.atlas().asMinimalString());
@@ -287,11 +291,13 @@ public class MineDownStringifier {
                     definitions.add(((ClickEvent.Payload.Text) clickEvent.payload()).value());
                 } else {
                     String payloadDef = clickEvent.action().toString().toLowerCase(Locale.ROOT);
-                    if (clickEvent.payload() instanceof ClickEvent.Payload.Text text) {
-                        payloadDef += "=" + text.value();
-                    } else if (clickEvent.payload() instanceof ClickEvent.Payload.Int integer) {
-                        payloadDef += "=" + integer.integer();
-                    } else if (clickEvent.payload() instanceof ClickEvent.Payload.Custom custom) {
+                    ClickEvent.Payload payload = clickEvent.payload();
+                    if (payload instanceof ClickEvent.Payload.Text) {
+                        payloadDef += "=" + ((ClickEvent.Payload.Text) payload).value();
+                    } else if (payload instanceof ClickEvent.Payload.Int) {
+                        payloadDef += "=" + ((ClickEvent.Payload.Int) payload).integer();
+                    } else if (payload instanceof ClickEvent.Payload.Custom) {
+                        ClickEvent.Payload.Custom custom = (ClickEvent.Payload.Custom) payload;
                         payloadDef += "=" + custom.key().asMinimalString()
                                 + (custom.nbt().string().isEmpty() ? "" : " " + MineDown.PAYLOAD_PREFIX + custom.nbt().string());
                     }
@@ -306,14 +312,16 @@ public class MineDownStringifier {
                 } else {
                     sbi.append(hoverEvent.action().toString().toLowerCase(Locale.ROOT)).append('=');
                 }
-                if (hoverEvent.value() instanceof Component hoverComponent) {
-                    sbi.append(copy().stringify(hoverComponent));
-                } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity contentEntity) {
+                if (hoverEvent.value() instanceof Component) {
+                    sbi.append(copy().stringify((Component) hoverEvent.value()));
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowEntity) {
+                    HoverEvent.ShowEntity contentEntity = (HoverEvent.ShowEntity) hoverEvent.value();
                     sbi.append(contentEntity.id()).append(":").append(contentEntity.type());
                     if (contentEntity.name() != null) {
                         sbi.append(" ").append(stringify(contentEntity.name()));
                     }
-                } else if (hoverEvent.value() instanceof HoverEvent.ShowItem contentItem) {
+                } else if (hoverEvent.value() instanceof HoverEvent.ShowItem) {
+                    HoverEvent.ShowItem contentItem = (HoverEvent.ShowItem) hoverEvent.value();
                     sbi.append(contentItem.item());
                     if (contentItem.count() > 0) {
                         sbi.append("*").append(contentItem.count());
@@ -333,11 +341,11 @@ public class MineDownStringifier {
     }
 
     private void appendText(StringBuilder sb, Component component) {
-        if (component instanceof TextComponent textComponent) {
-            sb.append(textComponent.content());
-        } else if (component instanceof TranslatableComponent translatableComponent) {
-            if (translatableComponent.fallback() != null) {
-                sb.append(translatableComponent.fallback());
+        if (component instanceof TextComponent) {
+            sb.append(((TextComponent) component).content());
+        } else if (component instanceof TranslatableComponent) {
+            if (((TranslatableComponent) component).fallback() != null) {
+                sb.append(((TranslatableComponent) component).fallback());
             }
         } else if (component instanceof ObjectComponent) {
             // we don't add any text

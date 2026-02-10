@@ -246,9 +246,10 @@ public class Replacer {
         }
         if (component.clickEvent() != null) {
             ClickEvent.Payload payload = component.clickEvent().payload();
-            if (payload instanceof ClickEvent.Payload.Text textPayload) {
-                payload = ClickEvent.Payload.string(replaceIn(textPayload.value()));
-            } else if (payload instanceof ClickEvent.Payload.Custom customPayload) {
+            if (payload instanceof ClickEvent.Payload.Text) {
+                payload = ClickEvent.Payload.string(replaceIn(((ClickEvent.Payload.Text) payload).value()));
+            } else if (payload instanceof ClickEvent.Payload.Custom) {
+                ClickEvent.Payload.Custom customPayload = (ClickEvent.Payload.Custom) payload;
                 payload = ClickEvent.Payload.custom(
                         Key.key(replaceIn(customPayload.key().asString())),
                         BinaryTagHolder.binaryTagHolder(replaceIn(customPayload.nbt().string()))

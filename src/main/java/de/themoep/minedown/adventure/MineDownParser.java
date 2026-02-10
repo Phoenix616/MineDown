@@ -648,10 +648,10 @@ public class MineDownParser {
 
             if (defLowerCase.startsWith(PAYLOAD_PREFIX)) {
                 payloadBinaryData = BinaryTagHolder.binaryTagHolder(getValue(i, definition.substring(PAYLOAD_PREFIX.length()), defParts, true));
-                if (clickEvent.payload() instanceof ClickEvent.Payload.Custom customPayload) {
+                if (clickEvent.payload() instanceof ClickEvent.Payload.Custom) {
                     clickEvent = ClickEvent.clickEvent(
                             clickEvent.action(),
-                            ClickEvent.Payload.custom(customPayload.key(), payloadBinaryData)
+                            ClickEvent.Payload.custom(((ClickEvent.Payload.Custom) clickEvent.payload()).key(), payloadBinaryData)
                     );
                 }
                 continue;
@@ -807,10 +807,10 @@ public class MineDownParser {
 
         if (clickEvent != null && hoverEvent == null) {
             String payloadDescription = "";
-            if (clickEvent.payload() instanceof ClickEvent.Payload.Text textPayload) {
-                payloadDescription = " " + textPayload.value();
-            } else if (clickEvent.payload() instanceof ClickEvent.Payload.Int intPayload) {
-                payloadDescription = " " + intPayload.integer();
+            if (clickEvent.payload() instanceof ClickEvent.Payload.Text) {
+                payloadDescription = " " + ((ClickEvent.Payload.Text) clickEvent.payload()).value();
+            } else if (clickEvent.payload() instanceof ClickEvent.Payload.Int) {
+                payloadDescription = " " + ((ClickEvent.Payload.Int) clickEvent.payload()).integer();
             }
             hoverEvent = HoverEvent.showText(Component.text()
                     .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
