@@ -394,7 +394,7 @@ public class MineDownParser {
                 if (atlas() == null) {
                     builder = Component.object(ObjectContents.sprite(sprite())).toBuilder();
                 } else {
-                    builder = Component.object(ObjectContents.sprite(sprite(), atlas())).toBuilder();
+                    builder = Component.object(ObjectContents.sprite(atlas(), sprite())).toBuilder();
                 }
                 if (!applicableColors.isEmpty()) {
                     // object components can only have one color
