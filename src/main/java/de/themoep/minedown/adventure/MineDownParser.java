@@ -392,7 +392,11 @@ public class MineDownParser {
                 builder = Component.object(playerHead().build()).toBuilder();
             } else if (sprite() != null) {
                 if (atlas() == null) {
-                    builder = Component.object(ObjectContents.sprite(sprite())).toBuilder();
+                    if (sprite().value().startsWith("item/")) {
+                        builder = Component.object(ObjectContents.sprite(Key.key(sprite().namespace(), "items"), sprite())).toBuilder();
+                    } else{
+                        builder = Component.object(ObjectContents.sprite(sprite())).toBuilder();
+                    }
                 } else {
                     builder = Component.object(ObjectContents.sprite(atlas(), sprite())).toBuilder();
                 }
