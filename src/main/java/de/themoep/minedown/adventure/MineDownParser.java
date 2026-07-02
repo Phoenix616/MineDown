@@ -652,11 +652,15 @@ public class MineDownParser {
 
             if (defLowerCase.startsWith(PAYLOAD_PREFIX)) {
                 payloadBinaryData = BinaryTagHolder.binaryTagHolder(getValue(i, definition.substring(PAYLOAD_PREFIX.length()), defParts, true));
-                if (clickEvent.payload() instanceof ClickEvent.Payload.Custom) {
-                    clickEvent = ClickEvent.clickEvent(
-                            clickEvent.action(),
-                            ClickEvent.Payload.custom(((ClickEvent.Payload.Custom) clickEvent.payload()).key(), payloadBinaryData)
-                    );
+                if (clickEvent != null) {
+                    if (clickEvent.payload() instanceof ClickEvent.Payload.Custom) {
+                        clickEvent = ClickEvent.clickEvent(
+                                clickEvent.action(),
+                                ClickEvent.Payload.custom(((ClickEvent.Payload.Custom) clickEvent.payload()).key(), payloadBinaryData)
+                        );
+                    }
+                } else if (!lenient()) {
+                    throw new IllegalArgumentException("custom=<key> click event needs to be specified before the payload tag! " + definition);
                 }
                 continue;
             }
@@ -722,7 +726,7 @@ public class MineDownParser {
                 hoverAction = HoverEvent.Action.NAMES.value(parts[0].toLowerCase(Locale.ROOT));
             }
             try {
-                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
+                clickAction = ClickEvent.Action.NAMES.value(parts[0].toLowerCase(Locale.ROOT));
             } catch (IllegalArgumentException ignored) {
             }
 
