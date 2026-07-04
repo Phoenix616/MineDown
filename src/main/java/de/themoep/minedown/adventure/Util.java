@@ -25,12 +25,14 @@ package de.themoep.minedown.adventure;
 import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
 
 import java.awt.Color;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -550,5 +552,34 @@ public class Util {
         public char getChar() {
             return c;
         }
+    }
+
+    static Field payloadTypeField;
+    static {
+        try {
+            payloadTypeField = ClickEvent.Action.class.getDeclaredField("payloadType");
+            payloadTypeField.setAccessible(true);
+        } catch (NoSuchFieldException ignored) {
+        }
+    }
+
+    /**
+     * Adventure 5 removed the ClickEvent.Action#payloadType method. We need to fall back on reflections for that.
+     * @param action The action to get the payload type for
+     * @return The class of the payload that action uses
+     */
+    static Class<? extends ClickEvent.Payload> getPayloadType(ClickEvent.Action action) {
+        try {
+            return action.payloadType();
+        } catch (NoSuchMethodError e) {
+            if (payloadTypeField != null && payloadTypeField.isAccessible()) {
+                try {
+                    return (Class<? extends ClickEvent.Payload>) payloadTypeField.get(action);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Setting payload of a " + action.name() + " click event like that is unfortunately not supported!");
     }
 }

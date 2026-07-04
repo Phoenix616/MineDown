@@ -286,10 +286,10 @@ public class MineDownStringifier {
                 }
             }
             if (clickEvent != null) {
-                if (preferSimpleEvents() && clickEvent.action() == ClickEvent.Action.OPEN_URL) {
+                if (preferSimpleEvents() && clickEvent.action().name().equalsIgnoreCase("open_url")) {
                     definitions.add(((ClickEvent.Payload.Text) clickEvent.payload()).value());
                 } else {
-                    String payloadDef = clickEvent.action().toString().toLowerCase(Locale.ROOT);
+                    String payloadDef = clickEvent.action().name().toLowerCase(Locale.ROOT);
                     ClickEvent.Payload payload = clickEvent.payload();
                     if (payload instanceof ClickEvent.Payload.Text) {
                         payloadDef += "=" + ((ClickEvent.Payload.Text) payload).value();
@@ -306,7 +306,7 @@ public class MineDownStringifier {
             if (hoverEvent != null) {
                 StringBuilder sbi = new StringBuilder();
                 if (preferSimpleEvents() && hoverEvent.action() == HoverEvent.Action.SHOW_TEXT &&
-                        (clickEvent == null || clickEvent.action() != ClickEvent.Action.OPEN_URL)) {
+                        (clickEvent == null || !clickEvent.action().name().equalsIgnoreCase("open_url"))) {
                     sbi.append(HOVER_PREFIX);
                 } else {
                     sbi.append(hoverEvent.action().toString().toLowerCase(Locale.ROOT)).append('=');

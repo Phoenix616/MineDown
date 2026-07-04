@@ -716,7 +716,7 @@ public class MineDownParser {
                 continue;
             }
 
-            ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.RUN_COMMAND : null;
+            ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.NAMES.value("run_command") : null;
             HoverEvent.Action hoverAction = null;
             if (definition.toLowerCase(Locale.ROOT).startsWith(HOVER_PREFIX)) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
@@ -733,18 +733,19 @@ public class MineDownParser {
             String valueStr = getValue(i, parts.length > 1 ? parts[1] : "", defParts, clickAction != null || hoverAction != null);
 
             if (clickAction != null) {
-                if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
+                if (autoAddUrlPrefix() && clickAction.name().equalsIgnoreCase("open_url") && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
                     valueStr = "http://" + valueStr;
                 }
+                Class<? extends ClickEvent.Payload> payloadType = Util.getPayloadType(clickAction);
                 ClickEvent.Payload payload;
-                if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Text.class)) {
+                if (payloadType.isAssignableFrom(ClickEvent.Payload.Text.class)) {
                     payload = ClickEvent.Payload.string(valueStr);
-                } else if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Int.class)) {
+                } else if (payloadType.isAssignableFrom(ClickEvent.Payload.Int.class)) {
                     payload = ClickEvent.Payload.integer(Integer.parseInt(valueStr));
-                } else if (clickAction.payloadType().isAssignableFrom(ClickEvent.Payload.Custom.class)) {
+                } else if (payloadType.isAssignableFrom(ClickEvent.Payload.Custom.class)) {
                     payload = ClickEvent.Payload.custom(Key.key(valueStr), payloadBinaryData != null ? payloadBinaryData : BinaryTagHolder.binaryTagHolder(""));
                 } else {
-                    throw new IllegalArgumentException("Payload type " + clickAction.payloadType().getSimpleName() + " of action " + clickAction + " is not supported yet!");
+                    throw new IllegalArgumentException("Payload type " + payloadType.getSimpleName() + " of action " + clickAction + " is not supported yet!");
                 }
                 clickEvent = ClickEvent.clickEvent(clickAction, payload);
             } else if (hoverAction == null) {
