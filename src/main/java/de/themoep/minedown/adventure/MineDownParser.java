@@ -426,7 +426,7 @@ public class MineDownParser {
             if (!v.startsWith("http://") && !v.startsWith("https://")) {
                 v = "http://" + v;
             }
-            builder.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, v));
+            builder.clickEvent(ClickEvent.openUrl(v));
             if (urlHoverText() != null && !urlHoverText().isEmpty()) {
                 builder.hoverEvent(HoverEvent.showText(
                         new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
