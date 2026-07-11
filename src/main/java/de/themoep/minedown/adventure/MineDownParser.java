@@ -190,7 +190,7 @@ public class MineDownParser {
                     code += 32;
                 }
                 Integer rainbowPhase = null;
-                List<Map.Entry<TextFormat, Boolean>> encoded = null;
+                List<Map.Entry<Object, Boolean>> encoded = null;
                 Option filterOption = null;
                 StringBuilder colorString = new StringBuilder();
                 for (int j = i; j < message.length(); j++) {
@@ -219,7 +219,7 @@ public class MineDownParser {
                     colorString.append(c1);
                 }
                 if (rainbowPhase == null && encoded == null) {
-                    TextFormat format = Util.getFormatFromLegacy(code);
+                    Object format = Util.getFormatFromLegacy(code);
                     if (format != null) {
                         filterOption = Option.LEGACY_COLORS;
                         encoded = new ArrayList<>();
@@ -230,7 +230,7 @@ public class MineDownParser {
                 if (rainbowPhase != null || encoded != null) {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
-                            Map.Entry<TextFormat, Boolean> single = encoded.iterator().next();
+                            Map.Entry<Object, Boolean> single = encoded.iterator().next();
                             if (single.getKey() == Util.TextControl.RESET) {
                                 if (builder() == null && ((format() != null && !format().isEmpty()) || (colors() != null && !colors().isEmpty()))) {
                                     builder(Component.text());
@@ -266,7 +266,7 @@ public class MineDownParser {
                             rainbowPhase(rainbowPhase);
                             if (encoded != null) {
                                 List<Map.Entry<TextColor, Boolean>> colors = new ArrayList<>();
-                                for (Map.Entry<TextFormat, Boolean> e : encoded) {
+                                for (Map.Entry<Object, Boolean> e : encoded) {
                                     if (e.getKey() instanceof TextColor) {
                                         colors.add(new AbstractMap.SimpleImmutableEntry<>((TextColor) e.getKey(), e.getValue()));
                                     }
@@ -506,9 +506,9 @@ public class MineDownParser {
                 rainbowPhase = parsedRainbowPhase;
                 continue;
             } else if (!definition.contains("=")) {
-                List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, "", true);
+                List<Map.Entry<Object, Boolean>> parsed = parseFormat(definition, "", true);
                 if (parsed != null && !parsed.isEmpty()) {
-                    for (Map.Entry<TextFormat, Boolean> e : parsed) {
+                    for (Map.Entry<Object, Boolean> e : parsed) {
                         if (e.getKey() instanceof TextColor) {
                             if (colors == null) {
                                 colors = new ArrayList<>();
@@ -668,9 +668,9 @@ public class MineDownParser {
             if (defLowerCase.startsWith(COLOR_PREFIX)) {
                 Integer colorRainbowPhase = parseRainbow(definition, COLOR_PREFIX, lenient());
                 if (colorRainbowPhase == null) {
-                    List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
+                    List<Map.Entry<Object, Boolean>> parsed = parseFormat(definition, COLOR_PREFIX, lenient());
                     colors = new ArrayList<>();
-                    for (Map.Entry<TextFormat, Boolean> e : parsed) {
+                    for (Map.Entry<Object, Boolean> e : parsed) {
                         if (e.getKey() instanceof TextColor) {
                             colors.add(new AbstractMap.SimpleImmutableEntry<>((TextColor) e.getKey(), e.getValue()));
                         } else if (!lenient()) {
@@ -696,8 +696,8 @@ public class MineDownParser {
             }
 
             if (definition.toLowerCase(Locale.ROOT).startsWith(FORMAT_PREFIX)) {
-                List<Map.Entry<TextFormat, Boolean>> parsed = parseFormat(definition, FORMAT_PREFIX, lenient());
-                for (Map.Entry<TextFormat, Boolean> e : parsed) {
+                List<Map.Entry<Object, Boolean>> parsed = parseFormat(definition, FORMAT_PREFIX, lenient());
+                for (Map.Entry<Object, Boolean> e : parsed) {
                     if (e.getKey() instanceof TextDecoration) {
                         formats.put((TextDecoration) e.getKey(), e.getValue());
                     } else if (!lenient()) {
@@ -1050,15 +1050,16 @@ public class MineDownParser {
 
     /**
      * Parse a color/format definition
+     *
      * @param colorString The string to parse
      * @param prefix      The color prefix e.g. ampersand (&amp;)
      * @param lenient     Whether or not to accept malformed strings
      * @return The parsed color or <code>null</code> if lenient is true and no color was found
      */
-    private static List<Map.Entry<TextFormat, Boolean>> parseFormat(String colorString, String prefix, boolean lenient) {
-        List<Map.Entry<TextFormat, Boolean>> formats = new ArrayList<>();
+    private static List<Map.Entry<Object, Boolean>> parseFormat(String colorString, String prefix, boolean lenient) {
+        List<Map.Entry<Object, Boolean>> formats = new ArrayList<>();
         if (prefix.length() + 1 == colorString.length()) {
-            TextFormat format = Util.getFormatFromLegacy(colorString.charAt(prefix.length()));
+            Object format = Util.getFormatFromLegacy(colorString.charAt(prefix.length()));
             if (format == null && !lenient) {
                 throw new IllegalArgumentException(colorString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }
@@ -1096,7 +1097,7 @@ public class MineDownParser {
      */
     private static ShadowColor parseShadow(String shadowString, String prefix, boolean lenient) {
         if (prefix.length() + 1 == shadowString.length()) {
-            TextFormat format = Util.getFormatFromLegacy(shadowString.charAt(prefix.length()));
+            Object format = Util.getFormatFromLegacy(shadowString.charAt(prefix.length()));
             if (format == null && !lenient) {
                 throw new IllegalArgumentException(shadowString.charAt(prefix.length()) + " is not a valid " + prefix + " char!");
             }

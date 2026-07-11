@@ -160,11 +160,11 @@ public class MineDownStringifier {
             if (component instanceof TranslatableComponent) {
                 TranslatableComponent translatable = (TranslatableComponent) component;
                 definitions.add(TRANSLATE_PREFIX + translatable.key());
-                if (!translatable.args().isEmpty()) {
+                if (!translatable.arguments().isEmpty()) {
                     definitions.add(new StringBuilder()
                             .append(WITH_PREFIX)
                             .append("{")
-                            .append(translatable.args().stream().map(this::stringify)
+                            .append(translatable.arguments().stream().map(arg -> stringify(arg.asComponent()))
                                     .collect(Collectors.joining(",")))
                             .append("}").toString());
                 }

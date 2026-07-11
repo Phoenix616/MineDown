@@ -79,6 +79,26 @@
         </dependencies>
     </dependencyManagement>
 
+    <profiles>
+        <profile>
+            <id>adventure_version_latest</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.kyori</groupId>
+                        <artifactId>adventure-bom</artifactId>
+                        <type>pom</type>
+                        <version>5.2.0</version>
+                        <scope>import</scope>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>net.kyori</groupId>

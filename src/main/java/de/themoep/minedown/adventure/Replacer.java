@@ -30,6 +30,7 @@ import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslationArgumentLike;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
@@ -47,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class offers the ability to replace placeholders with values in strings and components.
@@ -239,7 +241,8 @@ public class Replacer {
         }
         if (component instanceof TranslatableComponent) {
             component = ((TranslatableComponent) component).key(replaceIn(((TranslatableComponent) component).key()));
-            component = ((TranslatableComponent) component).args(replaceIn(((TranslatableComponent) component).args()));
+            component = ((TranslatableComponent) component).arguments(replaceIn(((TranslatableComponent) component).arguments().stream()
+                    .map(TranslationArgumentLike::asComponent).collect(Collectors.toList())));
         }
         if (component.insertion() != null) {
             component = component.insertion(replaceIn(component.insertion()));
@@ -248,14 +251,15 @@ public class Replacer {
             ClickEvent.Payload payload = component.clickEvent().payload();
             if (payload instanceof ClickEvent.Payload.Text) {
                 payload = ClickEvent.Payload.string(replaceIn(((ClickEvent.Payload.Text) payload).value()));
+                component = component.clickEvent(Util.createClickEvent(component.clickEvent().action(), payload));
             } else if (payload instanceof ClickEvent.Payload.Custom) {
                 ClickEvent.Payload.Custom customPayload = (ClickEvent.Payload.Custom) payload;
                 payload = ClickEvent.Payload.custom(
                         Key.key(replaceIn(customPayload.key().asString())),
                         BinaryTagHolder.binaryTagHolder(replaceIn(customPayload.nbt().string()))
                 );
+                component = component.clickEvent(Util.createClickEvent(component.clickEvent().action(), payload));
             }
-            component = component.clickEvent(ClickEvent.clickEvent(component.clickEvent().action(), payload));
         }
         if (component.hoverEvent() != null) {
             if (component.hoverEvent().action() == HoverEvent.Action.SHOW_TEXT) {

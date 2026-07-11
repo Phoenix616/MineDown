@@ -148,7 +148,9 @@ public class ParserTest {
                 () -> parse("&6Test __%placeholder1%__&r %placeholder2%=D",
                         "PlaceHolder1", new MineDown("[replacement1](https://example.com)").toComponent(),
                         "placeholder2", new MineDown("[replacement2](https://example.com)").toComponent()
-                )
+                ),
+                () -> parse("[Test URL](%placeholder%)", "placeholder", new MineDown("https://example.com").toComponent()),
+                () -> parse("[Test custom payload](custom=my-custom-payload payload={custom-%placeholder%-value})", "placeholder", new MineDown("replaced").toComponent())
         );
     }
 

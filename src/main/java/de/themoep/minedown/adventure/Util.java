@@ -32,6 +32,10 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
 
 import java.awt.Color;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -331,7 +335,7 @@ public class Util {
      * @param code  The legacy char
      * @return      The TextFormat or null if none found with that char
      */
-    public static TextFormat getFormatFromLegacy(char code) {
+    public static Object getFormatFromLegacy(char code) {
         switch (code) {
             case '0': return NamedTextColor.BLACK;
             case '1': return NamedTextColor.DARK_BLUE;
@@ -364,7 +368,7 @@ public class Util {
      * @param format    The format
      * @return          The legacy color code or null if none found with that char
      */
-    public static char getLegacyFormatChar(TextFormat format) {
+    public static char getLegacyFormatChar(Object format) {
         if (format == TextControl.RESET) {
             return 'r';
         } else if (format instanceof NamedTextColor) {
@@ -540,7 +544,7 @@ public class Util {
         return colors;
     }
 
-    public enum TextControl implements TextFormat {
+    public enum TextControl {
         RESET('r');
 
         private char c;
@@ -554,8 +558,20 @@ public class Util {
         }
     }
 
+    static Constructor clickEventConstructor;
+    static MethodHandle payloadTypeMethod;
     static Field payloadTypeField;
     static {
+        try {
+            clickEventConstructor = ClickEvent.class.getDeclaredConstructor(ClickEvent.Action.class, ClickEvent.Payload.class);
+            clickEventConstructor.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            payloadTypeMethod = MethodHandles.publicLookup().findVirtual(ClickEvent.Action.class, "payloadType", MethodType.methodType(Class.class));
+        } catch (NoSuchMethodException | IllegalAccessException ignored) {
+        }
         try {
             payloadTypeField = ClickEvent.Action.class.getDeclaredField("payloadType");
             payloadTypeField.setAccessible(true);
@@ -569,17 +585,39 @@ public class Util {
      * @return The class of the payload that action uses
      */
     static Class<? extends ClickEvent.Payload> getPayloadType(ClickEvent.Action action) {
-        try {
-            return action.payloadType();
-        } catch (NoSuchMethodError e) {
-            if (payloadTypeField != null && payloadTypeField.isAccessible()) {
-                try {
-                    return (Class<? extends ClickEvent.Payload>) payloadTypeField.get(action);
-                } catch (IllegalAccessException ex) {
-                    throw new RuntimeException(ex);
-                }
+        if (payloadTypeMethod != null) {
+            try {
+                return (Class<? extends ClickEvent.Payload>) payloadTypeMethod.invoke(action);
+            } catch (Throwable ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        if (payloadTypeField != null && payloadTypeField.isAccessible()) {
+            try {
+                return (Class<? extends ClickEvent.Payload>) payloadTypeField.get(action);
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
             }
         }
         throw new IllegalArgumentException("Setting payload of a " + action.name() + " click event like that is unfortunately not supported!");
+    }
+
+    /**
+     * Adventure 5 requires a generic for the payload type on ClickEvent#clickEvent. This is incompatible with
+     * Adventure 4 hence we need to work around that with this method.
+     * @param action The action to create the click event for
+     * @param payload The payload that action should have
+     * @return The ClickEvent with the provided action and click event
+     */
+    public static ClickEvent createClickEvent(ClickEvent.Action action, ClickEvent.Payload payload) {
+        try {
+            if (action.supports(payload)) {
+                return (ClickEvent) clickEventConstructor.newInstance(action, payload);
+            } else {
+                throw new IllegalArgumentException("Cannot create ClickEvent with payload " + payload.getClass().getSimpleName() + " for action " + action.name() + " (requires payload of type " + getPayloadType(action).getSimpleName() + ")");
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 }
